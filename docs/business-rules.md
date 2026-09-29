@@ -143,3 +143,5 @@ Ask the user; do not assume answers.
 16. Which of finance, trade-in, warranty, delivery, export are actually offered (for later phases)?
 17. Exact wording and scope of the "Didn't find what you need?" path (no sourcing promise unless
     confirmed).
+18. Should a sold car's page or sold section show its last listed price? (Default until decided:
+    no price on sold cars.)
