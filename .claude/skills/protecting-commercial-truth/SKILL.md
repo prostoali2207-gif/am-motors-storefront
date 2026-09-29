@@ -1,6 +1,6 @@
 ---
 name: protecting-commercial-truth
-description: Enforces commercial truth for AM Motors vehicle data and blocks fabricated, stale or internal facts. Use whenever work touches inventory, price, availability or status (Available, Reserved, Sold), mileage, specs, condition, accident or service history, discounts, finance, warranty, trade-in, the Google Sheet "AM Motors — Справочник машин", Google Drive vehicle photos/video, the public Vehicle data model or allowlist, data adapters and mapping, fixtures or seed data, customer-facing vehicle copy, SEO titles and meta, structured data, ad landing pages or WhatsApp message templates that mention a car.
+description: Enforces commercial truth for AM Motors vehicle data and blocks fabricated, stale or internal facts. Use whenever work touches inventory, price, availability or status (available, sold), mileage, specs, condition, accident or service history, discounts, finance, warranty, trade-in, the Google Sheet "AM Motors — Справочник машин", Google Drive vehicle photos/video, the public Vehicle data model or allowlist, data adapters and mapping, fixtures or seed data, customer-facing vehicle copy, SEO titles and meta, structured data, ad landing pages or WhatsApp message templates that mention a car.
 ---
 
 # Protecting commercial truth

@@ -38,14 +38,19 @@ disable rules, skip tests or add `@ts-ignore` to get green.
 With the app running locally, check each route returns the expected status and content:
 
 - `/`, `/cars` — `ok` (with test adapter), `empty`, `unavailable` render distinct, truthful states.
-- `/cars/[id]` — available, reserved (if supported), sold, unknown-status → 404, missing ID → 404.
+- `/cars/[id]` — available (`В наличии`), sold (`Продана`), unknown/other status → 404,
+  unknown `ID` → 404.
 - Sold vehicles never appear in the available list or with test-drive/viewing CTAs.
+- CTA labels say "Request…", not "Book…"; "Didn't find what you need?" → WhatsApp is present
+  where the design places it.
 - The production adapter configuration without credentials renders `unavailable`, not fixtures.
 
 ## 4. Data leaks and commercial truth
 
 - Search the build output and rendered HTML/RSC payloads for private field names and sample
-  private values used in tests (e.g. `cost`, `supplier`, `notes`, `vin`, `phone` of sellers).
+  private values used in tests: private/pending/server-only columns from `field-policy.md`
+  (`VIN`, `Мин. цена, AED`, `Заметки`, `Банковский залог`, `Мулькия до`, `Состояние`,
+  `Ссылка на фото/видео`, `Дата обновления`, etc.) and their mapped keys.
 - Confirm no fixture IDs/makes (e.g. `test-`, `Testmake`) appear in production build output.
 - Confirm no secrets or `NEXT_PUBLIC_` credentials in client bundles:
   search `.next/static` for key-like strings and env var names.

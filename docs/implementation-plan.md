@@ -31,10 +31,14 @@ default adapters; no vehicle data in production code.
 
 Skills: `protecting-commercial-truth`, `building-nextjs-storefront`, `verifying-storefront`.
 
-- Read the Sheet header; classify every column in `docs/business-rules.md` with the business.
-- Server-only adapter (service account via env vars) reading "AM Motors — Справочник машин".
+- Verify the live Sheet header against the confirmed schema snapshot in `docs/business-rules.md`;
+  stop and reconcile with the user if it differs.
+- Choose the server-side auth method for Google Sheets/Drive (service account is a candidate,
+  not a decision) and record it.
+- Server-only adapter (credentials via env vars) reading "AM Motors — Справочник машин".
 - Runtime validation per row; explicit field-by-field mapping; unknown columns ignored.
-- Explicit status mapping; unknown status → not public.
+- Explicit status mapping (`В наличии` → available, `Продана` → sold); anything else → not public.
+- `ID` (`AM-xxx`) as the public route ID; malformed/duplicate IDs → row not public.
 - Caching with an agreed revalidation window and tags for future on-demand revalidation.
 - Tests with synthetic rows for mapping, invalid data, private-field exclusion, status mapping.
 
@@ -62,7 +66,9 @@ Skills: `designing-automotive-storefront`, `protecting-commercial-truth`,
 Skills: `designing-automotive-storefront`, `protecting-commercial-truth`,
 `building-nextjs-storefront`, `verifying-storefront`.
 
-- WhatsApp CTA with car-specific prefill; viewing and test-drive request flows as confirmed.
+- WhatsApp CTA with car-specific prefill; "Request a viewing" / "Request a test drive" flows as
+  confirmed ("Book" only once a real scheduling system exists).
+- General-request path: "Didn't find what you need?" → WhatsApp.
 - UTM / ad-click attribution carried into leads; analytics and ad pixels only as confirmed,
   with consent handling as required.
 - Lead destination (e.g. WhatsApp only, email, CRM) confirmed with the business.

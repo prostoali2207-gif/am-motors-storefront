@@ -23,7 +23,7 @@ Design task progress:
 - [ ] 3. Gather benchmark evidence (benchmark-protocol.md) for material decisions
 - [ ] 4. Propose the design with rationale tied to evidence and our constraints
 - [ ] 5. Run the anti-pattern review below
-- [ ] 6. Specify every state: loading, empty, data-unavailable, missing fields, sold/reserved
+- [ ] 6. Specify every state: loading, empty, data-unavailable, missing fields, sold
 - [ ] 7. Hand vehicle facts/copy to protecting-commercial-truth; code to building-nextjs-storefront
 ```
 
@@ -56,24 +56,32 @@ separate, clearly labelled section below available stock.
 defined and justified (e.g. newest listed). No filter panel until inventory size and evidence
 justify it; the first justified step is usually a small set of chips (e.g. body type or make),
 not a sidebar. Always design the empty and data-unavailable states — they are real production
-states, not edge cases.
+states, not edge cases. Include a "Didn't find what you need?" → WhatsApp entry point for
+customers looking for a car not in the catalog (general-request lead).
 
 **Vehicle card** — one primary image, title (year make model trim as available), price or an
-explicit "price on request" state *only if the business confirms that wording*, status badge
-when not plainly Available, 2–4 key facts that exist in data. No invented badges ("Great deal",
+explicit "price on request" state *only if the business confirms that wording*, a Sold badge
+where sold cars are shown, 2–4 key facts that exist in the public model (field-policy.md).
+Reserved is not a confirmed status — no Reserved badge. No invented badges ("Great deal",
 "Low mileage", "Certified") unless the business defines them and data supports them.
 
 **VDP** — primary conversion page. See [vdp-anatomy.md](vdp-anatomy.md) for the section order,
 mobile sticky CTA and state matrix.
 
-**Sold cars** — may be social proof, never look Available: distinct badge, no "Book test drive"
-CTA, excluded from the Available inventory list and from ad landing flows by default.
+**Sold cars** — may be social proof, never look Available: distinct badge, no "Request a test drive"
+or "Request a viewing" CTA, excluded from the Available inventory list and from ad landing flows by default.
 
 ## CTAs and conversion
 
-- Primary actions: WhatsApp, request viewing, book test drive. Labels are concrete verbs.
-- A WhatsApp message must be prefilled with the specific car (title + public ID/URL) so the lead
-  arrives qualified. Attribution details belong to Phase 5.
+- Vehicle actions: WhatsApp, "Request a viewing", "Request a test drive". Labels are concrete
+  verbs. Never "Book", "Confirm" or "Reserve" until a real scheduling system is confirmed in
+  `docs/business-rules.md` — the wording must not imply a confirmed appointment.
+- A vehicle WhatsApp message is prefilled with the specific car (title + public ID/URL) so the
+  lead arrives qualified.
+- General-request path: "Didn't find what you need?" → WhatsApp, for customers looking for a car
+  not in the catalog. Place it where browsing ends (end of /cars, empty state, homepage). Do not
+  promise sourcing, import or availability unless confirmed.
+- Attribution details belong to Phase 5.
 - On mobile, the primary CTA stays reachable (sticky bottom bar) without covering content or
   system UI; respect safe-area insets.
 - Do not add finance calculators, monthly payment, trade-in, warranty, delivery or "reserve

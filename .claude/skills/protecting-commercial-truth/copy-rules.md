@@ -4,9 +4,11 @@ Applies to page text, card text, SEO titles/meta, Open Graph, JSON-LD, ads and W
 
 ## Allowed
 
-- Templated facts from public fields: "2021 Toyota Land Cruiser GXR" (only parts that exist).
-- Neutral calls to action: "Chat on WhatsApp", "Request a viewing", "Book a test drive".
-- Approved states: "Sold", "Reserved", and the approved wording for missing price (open question).
+- Templated facts from public fields: year + make + model + trim (only parts that exist).
+- Neutral calls to action: "Chat on WhatsApp", "Request a viewing", "Request a test drive",
+  "Didn't find what you need?" (general request via WhatsApp).
+- Approved states: "Sold", and the approved wording for missing price (open question).
+  No "Reserved" — not a confirmed status.
 
 ## Blocked unless an approved Sheet field or business rule supports it
 
@@ -17,9 +19,12 @@ Applies to page text, card text, SEO titles/meta, Open Graph, JSON-LD, ads and W
 | Finance | from AED X/month, 0% down, easy finance, bank approval |
 | Warranty/after-sales | warranty included, certified, inspected (N-point), free service |
 | Logistics | free delivery, delivery across UAE, export available |
+| Confirmed-appointment wording | Book a test drive, booking confirmed, reserve your slot (until a scheduling system is confirmed) |
+| Sourcing promises | we'll find any car, we import to order (general-request path must stay neutral) |
+| Placeholder promises | photos coming soon, more photos soon |
 | Trade-in | we accept trade-ins, part exchange |
 | Urgency/social proof | only 1 left, X people viewing, selling fast, 1000+ happy customers |
-| Technical specs not in the Sheet | horsepower, 0–100 time, fuel economy from general knowledge |
+| Specs not in the Sheet | body type, interior color, options, horsepower, 0–100 time, fuel economy from general knowledge |
 
 ## Structured data
 

@@ -1,73 +1,137 @@
 # Field policy
 
-Defines how Sheet columns become public fields. The actual Sheet column names are **not yet
-mapped**; Phase 2 reads the header row and fills the mapping table in the adapter and in
-`docs/business-rules.md`. Until then, field names below are candidates, not facts about the Sheet.
+Defines how columns of the Google Sheet "AM Motors — Справочник машин" become public fields.
+Based on the authoritative snapshot of the Sheet header recorded in `docs/business-rules.md`.
+If the live Sheet header differs from that snapshot, stop and update this file and
+`docs/business-rules.md` with the user before changing code.
 
 ## Contents
 - Classification
-- Candidate public fields
-- Always-private categories
+- V1 public candidate fields
+- Pending business decision
+- Private by default
+- Server/source-only
 - Status mapping
+- Public route ID
+- Fields that do not exist
 - Media policy
-- Adding a field
+- Adding or changing a field
 
 ## Classification
 
 Every Sheet column is exactly one of:
 
-- **public** — may be rendered and sent to the client, after validation.
-- **server-only** — used for logic (e.g. publish flag, Drive folder ID) but never serialized.
-- **private** — never read into the public pipeline at all.
+- **public candidate** — may be rendered and sent to the client, after validation.
+- **pending decision** — exists in the Sheet but needs an explicit business decision before any
+  public display. Treated as private until decided.
+- **private** — never read into the public pipeline, never serialized, never logged.
+- **server/source-only** — used server-side (media resolution, freshness) but never serialized
+  to the client or rendered.
 
-Default for any column not listed: **private**.
+Default for any column not listed here (including newly added columns): **private**.
 
-## Candidate public fields (to confirm against the Sheet)
+## V1 public candidate fields
 
-| Public field | Type | Notes |
+Mapped field-by-field from existing Sheet columns only.
+
+| Sheet column | Public field | Type | Notes |
+| - | - | - | - |
+| `ID` | `id` | string | Format `AM-xxx`; V1 public route ID (see below) |
+| `Марка` | `make` | string | Whitespace-normalized only |
+| `Модель` | `model` | string | Whitespace-normalized only |
+| `Комплектация` | `trim` | string \| null | Empty → omitted |
+| `Год` | `year` | integer | Validated range; invalid → row not public |
+| `Цена, AED` | `priceAed` | number \| null | Displayed as provided; empty → approved missing-price wording (open question) |
+| `Статус` | `status` | enum | See status mapping; fail closed |
+| `Пробег, км` | `mileageKm` | integer \| null | Empty/invalid → omitted |
+| `Региональная спецификация` | `regionalSpec` | string \| null | As written in Sheet |
+| `Цвет` | `color` | string \| null | Single color column; no exterior/interior split |
+| `Двигатель` | `engine` | string \| null | As written in Sheet; no derived power/displacement |
+| `Топливо` | `fuel` | string \| null | As written in Sheet |
+| `Коробка` | `transmission` | string \| null | As written in Sheet |
+| `Привод` | `drivetrain` | string \| null | As written in Sheet |
+
+Display labels and value normalization (e.g. Russian source values → English UI labels) must
+be an explicit, reviewed mapping table; unknown values are shown as written or omitted, never
+guessed.
+
+## Pending business decision
+
+| Sheet column | Default until decided |
+| - | - |
+| `Состояние` | Private. Not rendered, not in copy, meta or structured data until the business decides whether and how condition is shown publicly. |
+
+## Private by default
+
+Never public, never serialized to the client, never logged with values:
+
+| Sheet column | Reason |
+| - | - |
+| `VIN` | Identifier; public only with explicit business approval |
+| `Аварии / крашеные детали` | History/condition claim; legal and commercial risk |
+| `Сервисная история` | History claim; needs verification policy |
+| `Владельцев` | History claim |
+| `Мулькия до` | Registration document data |
+| `Банковский залог` | Financial encumbrance; internal |
+| `Мин. цена, AED` | Negotiation floor; strictly internal |
+| `Заметки` | Internal notes |
+
+Changing any of these to public requires a recorded business decision in
+`docs/business-rules.md` and a new review of copy rules.
+
+## Server/source-only
+
+| Sheet column | Server-side use | Never |
 | - | - | - |
-| `id` | string | Stable public identifier used in `/cars/[id]`; must not be an internal row number that shifts |
-| `slug` | string | Optional, derived only from public fields |
-| `status` | enum | Mapped from Sheet status; see below |
-| `make`, `model`, `trim` | string | As written in Sheet; normalize whitespace only |
-| `year` | integer | Validated range |
-| `price` | { amount: number, currency: "AED" } \| null | Null → approved "on request" state or hidden, per business rule |
-| `mileageKm` | integer \| null | Unit confirmed with business |
-| `bodyType`, `transmission`, `fuelType`, `exteriorColor`, `interiorColor` | string \| null | Only if the Sheet has them |
-| `regionalSpec` | string \| null | e.g. GCC spec — only if the Sheet states it |
-| `description` | string \| null | Only if the Sheet has an approved public-description column |
-| `media` | ordered list | From Drive pipeline (Phase 3) |
-
-## Always-private categories
-
-Never public, whatever the column is called: purchase/cost price, margins, supplier or seller
-identity and contacts, customer/lead data, internal notes/comments, negotiation floor, payment
-status, documents (Mulkiya, customs, invoices), full VIN/chassis number (unless the business
-explicitly approves), internal staff names, Drive folder IDs/URLs, sync timestamps.
+| `Ссылка на фото/видео` | Resolve the vehicle's Drive media folder (Phase 3) | Rendered, linked, or sent to the client |
+| `Ссылка на пост` | Source reference (e.g. social post) for internal use/attribution design | Rendered or linked publicly unless the business decides otherwise |
+| `Дата обновления` | Freshness checks, cache decisions, diagnostics | Shown as a public "updated" claim unless the business decides otherwise |
 
 ## Status mapping
 
-Explicit table, maintained in code and in `docs/business-rules.md`:
+Confirmed values of `Статус`:
 
 | Sheet value | Public status | Listed in /cars | VDP |
 | - | - | - | - |
-| (to confirm) | `available` | yes | full |
-| (to confirm) | `reserved` | business decision | enquiry only |
-| (to confirm) | `sold` | no (separate sold section only) | sold state |
-| anything else / empty | — | no | 404 |
+| `В наличии` | `available` | yes | full, all CTAs |
+| `Продана` | `sold` | no (separate sold section only) | sold state, no viewing/test-drive CTAs |
+| anything else / empty | — (not public) | no | 404 |
 
-Matching is exact after trimming and case-normalization; no fuzzy matching.
+- Matching is exact after trimming whitespace; no fuzzy matching, no case-folding tricks
+  beyond what is recorded here.
+- **Reserved is not confirmed.** Do not create a `reserved` status, mapping, badge or wording.
+  If a new status value appears in the Sheet, it stays non-public until the business confirms
+  its meaning and the mapping is added here and in `docs/business-rules.md`.
+
+## Public route ID
+
+- `ID` (format `AM-xxx`) is the V1 public identifier: `/cars/AM-xxx` (exact URL casing and
+  encoding decided in Phase 1/2 and applied consistently).
+- Validate the format; rows with an empty, malformed or duplicate `ID` are not public and are
+  reported server-side (by row identifier only).
+- Keep using `ID` until the real source shows a stability problem (IDs reused or changed).
+  If that happens, stop and raise it with the user; ad links depend on stable URLs.
+
+## Fields that do not exist
+
+The Sheet has no columns for body type, interior color, exterior/interior split, public
+description, options/features, horsepower, torque, seats, doors, fuel economy, or similar.
+These fields are **not part of the V1 schema** and must not be derived from knowledge of the
+car model, VIN decoding, other listings, or photos. If the business wants any of them, a
+Sheet column must be added and classified first.
 
 ## Media policy
 
-- Only files in the vehicle's linked Drive folder; order and cover image rules defined in Phase 3.
+- Only files in the Drive folder referenced by `Ссылка на фото/видео`; order and cover rules
+  defined in Phase 3.
 - Strip EXIF/GPS metadata from published images.
-- Exclude files that show documents, plates (business decision), people or interior paperwork.
+- Exclude files that show documents, plates (business decision), people or paperwork.
 - No stock, AI-generated or other-vehicle images as fallbacks.
 
-## Adding a field
+## Adding or changing a field
 
-1. Confirm the column exists and what it means with the business.
-2. Classify it (public / server-only / private) and record it in `docs/business-rules.md`.
-3. Add explicit mapping + validation in the adapter and a test for missing/invalid values.
+1. Confirm the column exists in the Sheet and what it means with the business.
+2. Classify it (public candidate / pending / private / server-only) here and in
+   `docs/business-rules.md`.
+3. Add explicit mapping + validation in the adapter and tests for missing/invalid values.
 4. Run the data-leak checks in `verifying-storefront`.

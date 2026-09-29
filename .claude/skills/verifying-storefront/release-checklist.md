@@ -9,7 +9,7 @@ Preview release:
 - [ ] Preview is access-protected or noindex (no public indexing of previews)
 - [ ] Real Sheet data on preview reviewed with the business: prices, statuses, sold cars
 - [ ] Every Available car on preview is actually available per the Sheet today
-- [ ] Sold cars only in the sold section, never with booking CTAs
+- [ ] Sold cars only in the sold section, never with viewing/test-drive CTAs
 - [ ] VDP ad landing URLs resolve to the correct car (spot-check each active ad URL)
 - [ ] WhatsApp CTA opens the correct number with the correct car prefilled
 - [ ] Drive media: correct car, correct order, no documents/plates/people per policy, EXIF stripped

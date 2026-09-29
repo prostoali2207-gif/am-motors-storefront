@@ -47,20 +47,29 @@ tests/
 ## Domain types (shape, not final)
 
 ```ts
-export type VehicleStatus = "available" | "reserved" | "sold";
+// Confirmed Sheet values: "В наличии" → available, "Продана" → sold.
+// No "reserved": not confirmed. Any other value → row is not public.
+export type VehicleStatus = "available" | "sold";
 
+// Mirrors the V1 public candidates in protecting-commercial-truth/field-policy.md.
 export interface Vehicle {
-  id: string;
-  status: VehicleStatus;
-  make: string;
-  model: string;
-  trim: string | null;
-  year: number;
-  price: { amount: number; currency: "AED" } | null;
-  mileageKm: number | null;
-  // further allowlisted fields added only via field-policy.md process
-  media: VehicleMedia[];
+  id: string;                 // ID, format AM-xxx, V1 route ID
+  status: VehicleStatus;      // Статус
+  make: string;               // Марка
+  model: string;              // Модель
+  trim: string | null;        // Комплектация
+  year: number;               // Год
+  priceAed: number | null;    // Цена, AED
+  mileageKm: number | null;   // Пробег, км
+  regionalSpec: string | null;// Региональная спецификация
+  color: string | null;       // Цвет
+  engine: string | null;      // Двигатель
+  fuel: string | null;        // Топливо
+  transmission: string | null;// Коробка
+  drivetrain: string | null;  // Привод
+  media: VehicleMedia[];      // resolved server-side from Ссылка на фото/видео (Phase 3)
 }
+// Not in V1: condition (pending decision), bodyType, interiorColor, description, options.
 ```
 
 ## Repository interface
@@ -85,8 +94,11 @@ unavailable" state with contact options — it is never rendered as "no cars".
 
 - Phase 1 ships only the `unavailable` adapter in production code; tests inject an in-memory
   adapter built from synthetic fixtures.
-- Google adapters authenticate with a service account (credentials in env), read only needed
-  ranges, validate each row, map field-by-field to `Vehicle`, and drop invalid/non-public rows.
+- Google adapters authenticate server-side with credentials from env. The concrete auth method
+  (service account is one candidate) is chosen in Phase 2 when designing the live Sheets/Drive
+  integration — it is not decided yet.
+- Adapters read only needed ranges, validate each row, map field-by-field to `Vehicle`, and
+  drop invalid/non-public rows.
 - Adapters never log full rows; log row identifiers and validation error codes only.
 
 ## Caching and freshness

@@ -4,8 +4,9 @@ Inventory-first dealership storefront for a UAE car dealer: storefront + small c
 one detail page (VDP) per vehicle. Not a marketplace (not a Dubizzle clone), not a corporate
 landing page, not an e-commerce checkout (no cart, no online payment).
 
-Core funnel: ad/traffic → `/cars` or a specific `/cars/[id]` → VDP → WhatsApp / viewing /
-test drive → qualified lead → appointment → sale.
+Core funnel: ad/traffic → `/cars` or a specific `/cars/[id]` → VDP → WhatsApp / request a
+viewing / request a test drive → qualified lead → appointment → sale. Second lead path for cars
+not in stock: "Didn't find what you need?" → WhatsApp.
 
 Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchmark.md`,
 `docs/implementation-plan.md`.
@@ -46,8 +47,12 @@ Commercial truth
 - The public vehicle model is an explicit allowlist. Internal Sheet fields (cost, supplier,
   owner/seller contacts, VIN/chassis unless approved, notes, margins, etc.) are never
   published, serialized to the client, or logged in public output.
-- Unknown or unmapped status is not public (fail closed). Sold cars never look Available;
-  they may appear only in a clearly separate "Sold" / social-proof context.
+- Sheet schema snapshot and column classification: `docs/business-rules.md` and
+  `.claude/skills/protecting-commercial-truth/field-policy.md`. Never derive fields that the
+  Sheet does not have (body type, description, options…) from knowledge of the car model.
+- Status: `В наличии` → available, `Продана` → sold. Anything else is not public (fail
+  closed); Reserved is not confirmed. Sold cars never look Available; they may appear only in
+  a clearly separate "Sold" / social-proof context.
 
 Scope
 - Do not add finance/monthly payments, trade-in, warranty, delivery, insurance,
@@ -59,6 +64,8 @@ Scope
 
 Product and design
 - Mobile-first. The VDP is a primary conversion page.
+- CTAs say "Request a viewing" / "Request a test drive" — never "Book" until a real scheduling
+  system is confirmed.
 - Homepage is inventory-first: cars visible quickly, no oversized decorative hero.
 - No generic AI aesthetic: no SaaS hero templates, purple gradients, decorative
   glassmorphism, fake dashboards, generic black-and-gold "luxury". Material design
