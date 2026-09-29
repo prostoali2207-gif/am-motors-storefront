@@ -11,6 +11,7 @@ If the live Sheet header differs from that snapshot, stop and update this file a
 - Pending business decision
 - Private by default
 - Server/source-only
+- Numeric fields
 - Status mapping
 - Public route ID
 - Fields that do not exist
@@ -36,14 +37,14 @@ Mapped field-by-field from existing Sheet columns only.
 
 | Sheet column | Public field | Type | Notes |
 | - | - | - | - |
-| `ID` | `id` | string | Format `AM-xxx`; V1 public route ID (see below) |
+| `ID` | `id` | string | Non-empty, unique; V1 public route ID used verbatim (see below) |
 | `Марка` | `make` | string | Whitespace-normalized only |
 | `Модель` | `model` | string | Whitespace-normalized only |
 | `Комплектация` | `trim` | string \| null | Empty → omitted |
 | `Год` | `year` | integer | Validated range; invalid → row not public |
-| `Цена, AED` | `priceAed` | number \| null | Displayed as provided; empty → approved missing-price wording (open question) |
+| `Цена, AED` | `priceAed` | number \| null | Numeric effective value in the Sheet (AED is number formatting); empty → approved missing-price wording (open question) |
 | `Статус` | `status` | enum | See status mapping; fail closed |
-| `Пробег, км` | `mileageKm` | integer \| null | Empty/invalid → omitted |
+| `Пробег, км` | `mileageKm` | number \| null | Numeric effective value in the Sheet (km is number formatting); empty/invalid → omitted |
 | `Региональная спецификация` | `regionalSpec` | string \| null | As written in Sheet |
 | `Цвет` | `color` | string \| null | Single color column; no exterior/interior split |
 | `Двигатель` | `engine` | string \| null | As written in Sheet; no derived power/displacement |
@@ -87,6 +88,13 @@ Changing any of these to public requires a recorded business decision in
 | `Ссылка на пост` | Source reference (e.g. social post) for internal use/attribution design | Rendered or linked publicly unless the business decides otherwise |
 | `Дата обновления` | Freshness checks, cache decisions, diagnostics | Shown as a public "updated" claim unless the business decides otherwise |
 
+## Numeric fields
+
+`Цена, AED` and `Пробег, км` hold numeric effective values; "AED" and "km" are Sheet number
+formatting. The adapter reads effective (unformatted) values into `priceAed` / `mileageKm` and
+never parses formatted display strings. A non-numeric value is invalid → field omitted and
+reported server-side.
+
 ## Status mapping
 
 Confirmed values of `Статус`:
@@ -105,10 +113,14 @@ Confirmed values of `Статус`:
 
 ## Public route ID
 
-- `ID` (format `AM-xxx`) is the V1 public identifier: `/cars/AM-xxx` (exact URL casing and
-  encoding decided in Phase 1/2 and applied consistently).
-- Validate the format; rows with an empty, malformed or duplicate `ID` are not public and are
-  reported server-side (by row identifier only).
+- `ID` is the V1 public identifier. The URL uses the exact authoritative value, `/cars/<ID>`
+  (URL-encoded only where required); lookups match that exact value. No slug or case transform.
+- Currently observed pattern: `AM-###` (`AM-001`, `AM-002`, …). It is an observation, not a
+  confirmed rule: do not enforce a strict regex or a fixed digit count. A future `AM-1000` must
+  not be blocked.
+- V1 validation: `ID` must be non-empty and unique. Rows with an empty or duplicate `ID` are
+  not public and are reported server-side (by row number only). A stricter format check needs
+  explicit business confirmation first.
 - Keep using `ID` until the real source shows a stability problem (IDs reused or changed).
   If that happens, stop and raise it with the user; ad links depend on stable URLs.
 

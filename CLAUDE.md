@@ -5,8 +5,12 @@ one detail page (VDP) per vehicle. Not a marketplace (not a Dubizzle clone), not
 landing page, not an e-commerce checkout (no cart, no online payment).
 
 Core funnel: ad/traffic → `/cars` or a specific `/cars/[id]` → VDP → WhatsApp / request a
-viewing / request a test drive → qualified lead → appointment → sale. Second lead path for cars
-not in stock: "Didn't find what you need?" → WhatsApp.
+viewing / request a test drive → inquiry (lead candidate) → Sales / Lead Conversion
+qualification → qualified lead → appointment / viewing / test drive → sale. Second inquiry path
+for cars not in stock: "Didn't find what you need?" → WhatsApp.
+
+The storefront produces **inquiries**, never qualified leads. Qualification criteria belong to
+Sales / Lead Conversion (auto-sales-growth-system); do not define or implement them here.
 
 Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchmark.md`,
 `docs/implementation-plan.md`.

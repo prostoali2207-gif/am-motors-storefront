@@ -79,17 +79,38 @@ the business confirms a real Sheet value and its public meaning.
 
 ## Public route ID — Confirmed for V1
 
-- The existing `ID` column (format `AM-xxx`) is the V1 public route ID: `/cars/AM-xxx`.
+- The existing `ID` column is the V1 public route ID. The URL uses the exact authoritative
+  value: `/cars/<ID>`.
+- Currently observed pattern: `AM-###` (e.g. `AM-001`, `AM-002`). This is an observation, not a
+  confirmed format rule — the business has not confirmed a fixed digit count.
+- V1 requirements: `ID` is non-empty and unique. No strict regex; a future value such as
+  `AM-1000` must not be blocked for not matching the three-digit pattern.
 - Keep it unless the real source shows a stability problem (IDs reused, changed or duplicated);
   then raise it with the user before changing URLs.
 
-## Leads — Confirmed
+## Inquiries and lead qualification — Confirmed
 
-A qualified lead is one of:
+Project chain:
 
-1. **Vehicle-specific lead** — started from a VDP or card (WhatsApp, request a viewing, request
-   a test drive); the message references the specific car (ID, title, URL).
-2. **General request lead** — a customer looking for a car that is not in the catalog now:
+```
+site action / WhatsApp inquiry
+  → inquiry / lead candidate
+  → Sales / Lead Conversion qualification
+  → qualified lead
+  → appointment / viewing / test drive
+  → sale
+```
+
+- The storefront produces **inquiries (lead candidates)**. It never marks, labels or reports an
+  inquiry as a qualified lead.
+- Qualification criteria belong to Sales / Lead Conversion in auto-sales-growth-system. They are
+  not defined, duplicated or implemented in this repository.
+
+Two types of inbound inquiry (neither is automatically a qualified lead):
+
+1. **Vehicle-specific inquiry** — started from a VDP or card (WhatsApp, request a viewing,
+   request a test drive); the message references the specific car (ID, title, URL).
+2. **General-request inquiry** — a customer looking for a car that is not in the catalog now:
    "Didn't find what you need?" → WhatsApp. This path must not promise sourcing, import or
    availability that the business has not confirmed.
 

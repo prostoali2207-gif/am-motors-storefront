@@ -18,18 +18,33 @@ traffic / ad
   → /cars (inventory) or /cars/[id] (specific car)
   → vehicle detail page (VDP)
   → WhatsApp / request a viewing / request a test drive
-  → qualified lead → appointment → sale
+  → inquiry (lead candidate)
 
 traffic → / or /cars → "Didn't find what you need?" → WhatsApp
-  → qualified lead (general request)
+  → inquiry (lead candidate, general request)
 ```
 
-The website's job ends at a **qualified lead**. Appointment and sale happen offline.
-A qualified lead is either:
+Full project chain (the storefront covers only the first two steps):
 
-- **Vehicle-specific** — started from a VDP or card; the message references that car.
-- **General request** — a customer looking for a car that is not in the catalog now, via
-  "Didn't find what you need?" → WhatsApp. No sourcing or availability promise unless the
+```
+site action / WhatsApp inquiry
+  → inquiry / lead candidate
+  → Sales / Lead Conversion qualification
+  → qualified lead
+  → appointment / viewing / test drive
+  → sale
+```
+
+The website's job ends at an **inquiry / lead candidate**. Qualification is done by
+Sales / Lead Conversion in auto-sales-growth-system, which owns the qualification criteria;
+the storefront does not decide that a lead is qualified and does not define those criteria.
+Appointment and sale happen offline.
+
+Two types of inbound inquiry (neither is automatically a qualified lead):
+
+- **Vehicle-specific inquiry** — started from a VDP or card; the message references that car.
+- **General-request inquiry** — a customer looking for a car that is not in the catalog now,
+  via "Didn't find what you need?" → WhatsApp. No sourcing or availability promise unless the
   business confirms one.
 
 Until a real scheduling system is confirmed, CTAs say "Request a viewing" / "Request a test
@@ -56,7 +71,7 @@ drive", never "Book", so nothing implies a confirmed appointment.
 - **Ad visitor** — clicked an ad for one car; wants price, photos, key facts, and a fast way to
   ask or request a viewing/test drive.
 - **Browser** — found the dealer (search, social, referral); wants to see what's in stock now.
-- **Returning lead** — re-checks a car before a viewing; needs a stable URL.
+- **Returning customer** — re-checks a car before a viewing; needs a stable URL.
 - **Searcher for a car not in stock** — doesn't find a match; needs a low-friction way to tell
   the dealer what they want ("Didn't find what you need?" → WhatsApp).
 
@@ -77,5 +92,6 @@ insurance, car comparison, saved searches, user accounts, multi-language, Arabic
 
 - Share of ad sessions landing on the correct VDP.
 - VDP → WhatsApp / viewing / test-drive conversion rate.
-- Vehicle-specific leads that reference a car, and general-request leads, counted separately.
+- Vehicle-specific inquiries (referencing a car) and general-request inquiries, counted separately.
+- Qualification outcomes are measured by Sales / Lead Conversion, not by the storefront.
 - Zero incidents of wrong price/status or leaked internal data.

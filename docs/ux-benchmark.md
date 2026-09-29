@@ -57,7 +57,7 @@ visuals, copy, assets or photos.
 ## Hypotheses (unverified)
 
 - H1: UAE buyers expect WhatsApp as a primary contact method on VDPs.
-- H2: A sticky mobile CTA bar on the VDP increases lead actions versus in-page CTAs only.
+- H2: A sticky mobile CTA bar on the VDP increases inquiry actions versus in-page CTAs only.
 - H3: For a small stock, a simple list without filters performs as well as a filtered grid.
 - H4: Single-dealer references show sold cars in a separate archive rather than mixed into stock.
 - H5: Regional spec (e.g. GCC) is a key card fact for UAE used cars.

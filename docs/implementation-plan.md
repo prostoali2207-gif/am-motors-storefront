@@ -38,7 +38,11 @@ Skills: `protecting-commercial-truth`, `building-nextjs-storefront`, `verifying-
 - Server-only adapter (credentials via env vars) reading "AM Motors — Справочник машин".
 - Runtime validation per row; explicit field-by-field mapping; unknown columns ignored.
 - Explicit status mapping (`В наличии` → available, `Продана` → sold); anything else → not public.
-- `ID` (`AM-xxx`) as the public route ID; malformed/duplicate IDs → row not public.
+- `ID` as the public route ID, used verbatim in the URL; empty or duplicate IDs → row not public.
+  No strict format regex (observed `AM-###` is not a confirmed rule).
+- `Цена, AED` and `Пробег, км` have numeric effective values in the Sheet (AED/km come from
+  number formatting): read effective (unformatted) values into numeric `priceAed` /
+  `mileageKm`; never parse formatted display strings.
 - Caching with an agreed revalidation window and tags for future on-demand revalidation.
 - Tests with synthetic rows for mapping, invalid data, private-field exclusion, status mapping.
 
@@ -69,9 +73,10 @@ Skills: `designing-automotive-storefront`, `protecting-commercial-truth`,
 - WhatsApp CTA with car-specific prefill; "Request a viewing" / "Request a test drive" flows as
   confirmed ("Book" only once a real scheduling system exists).
 - General-request path: "Didn't find what you need?" → WhatsApp.
-- UTM / ad-click attribution carried into leads; analytics and ad pixels only as confirmed,
+- UTM / ad-click attribution carried into inquiries; analytics and ad pixels only as confirmed,
   with consent handling as required.
-- Lead destination (e.g. WhatsApp only, email, CRM) confirmed with the business.
+- Inquiry handoff destination (e.g. WhatsApp only, email, CRM) confirmed with the business;
+  qualification happens downstream in Sales / Lead Conversion, not in the storefront.
 
 ## Phase 6 — Vercel preview and real-browser verification
 

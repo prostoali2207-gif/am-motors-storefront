@@ -53,14 +53,14 @@ export type VehicleStatus = "available" | "sold";
 
 // Mirrors the V1 public candidates in protecting-commercial-truth/field-policy.md.
 export interface Vehicle {
-  id: string;                 // ID, format AM-xxx, V1 route ID
+  id: string;                 // ID, non-empty + unique, used verbatim in URL (observed AM-###)
   status: VehicleStatus;      // Статус
   make: string;               // Марка
   model: string;              // Модель
   trim: string | null;        // Комплектация
   year: number;               // Год
-  priceAed: number | null;    // Цена, AED
-  mileageKm: number | null;   // Пробег, км
+  priceAed: number | null;    // Цена, AED — numeric effective value
+  mileageKm: number | null;   // Пробег, км — numeric effective value
   regionalSpec: string | null;// Региональная спецификация
   color: string | null;       // Цвет
   engine: string | null;      // Двигатель

@@ -8,7 +8,9 @@ description: Guides UX, product architecture and visual direction for the AM Mot
 The product is an inventory-first dealership storefront: storefront + small catalog + one VDP per
 car. Every design decision serves the funnel:
 
-ad/traffic → `/cars` or `/cars/[id]` → VDP → WhatsApp / viewing / test drive → lead → appointment.
+ad/traffic → `/cars` or `/cars/[id]` → VDP → WhatsApp / request a viewing / request a test drive
+→ inquiry (lead candidate). Qualification happens downstream in Sales / Lead Conversion; the
+storefront never labels an inquiry as a qualified lead.
 
 Read `docs/product-brief.md` and `docs/business-rules.md` before the first design task in a session.
 
@@ -57,7 +59,7 @@ defined and justified (e.g. newest listed). No filter panel until inventory size
 justify it; the first justified step is usually a small set of chips (e.g. body type or make),
 not a sidebar. Always design the empty and data-unavailable states — they are real production
 states, not edge cases. Include a "Didn't find what you need?" → WhatsApp entry point for
-customers looking for a car not in the catalog (general-request lead).
+customers looking for a car not in the catalog (general-request inquiry).
 
 **Vehicle card** — one primary image, title (year make model trim as available), price or an
 explicit "price on request" state *only if the business confirms that wording*, a Sold badge
@@ -77,7 +79,7 @@ or "Request a viewing" CTA, excluded from the Available inventory list and from 
   verbs. Never "Book", "Confirm" or "Reserve" until a real scheduling system is confirmed in
   `docs/business-rules.md` — the wording must not imply a confirmed appointment.
 - A vehicle WhatsApp message is prefilled with the specific car (title + public ID/URL) so the
-  lead arrives qualified.
+  inquiry arrives with the car context Sales needs.
 - General-request path: "Didn't find what you need?" → WhatsApp, for customers looking for a car
   not in the catalog. Place it where browsing ends (end of /cars, empty state, homepage). Do not
   promise sourcing, import or availability unless confirmed.

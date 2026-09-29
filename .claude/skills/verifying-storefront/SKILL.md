@@ -43,6 +43,8 @@ With the app running locally, check each route returns the expected status and c
 - Sold vehicles never appear in the available list or with test-drive/viewing CTAs.
 - CTA labels say "Request…", not "Book…"; "Didn't find what you need?" → WhatsApp is present
   where the design places it.
+- Nothing in UI, events or copy labels a site action as a "qualified lead"; site actions are
+  inquiries (vehicle-specific or general-request).
 - The production adapter configuration without credentials renders `unavailable`, not fixtures.
 
 ## 4. Data leaks and commercial truth
