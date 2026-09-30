@@ -48,8 +48,10 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   `git.deploymentEnabled.main = false`). Preview-only env vars; `MEDIA_SOURCE` unset.
   Google Workload Identity Federation set up by the user in Google Cloud (2026-09-30; pool and
   provider IDs `vercel` per `docs/google-sheets-setup.md`); all seven Preview-only env vars set,
-  Preview redeployed. Live read on the preview not yet verified (the preview is behind Vercel
-  Authentication and must be checked by a signed-in human or a re-authorized Vercel connection).
+  Preview redeployed. Live read verified on preview `689a914` (2026-09-30): OIDC works, 18
+  available + 2 sold, no adapter issues; browser checks (routes, prefills, UTM first-touch,
+  sticky bar, 320/390/1440, axe, keyboard, leak scan) passed. Still open: business review of
+  the real data, real iOS/Android devices, data-unavailable path, revalidation window.
   Security issue flagged, not changed: the Sheet is shared "Anyone with the link → Editor".
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
