@@ -29,7 +29,7 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   publishing rules wait for final photos (`docs/business-rules.md` → "Website photos").
   Only `getById`/the media route resolve media; listings make 0 Drive calls. Photo cache
   policy (~1 h worst case): `src/lib/media-cache-policy.ts`.
-- Phase 4A (live visual benchmark + one proposed design direction, "Showroom ledger") recorded
+- Phase 4A (live visual benchmark, accepted; revised design direction "Coachwork" with Archivo) recorded
   in `docs/ux-benchmark.md` on 2026-09-30 — **pending review**; no Phase 4 code yet.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
