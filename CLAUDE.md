@@ -56,7 +56,7 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   review accepted the current visual direction for this phase. Sheet link sharing is
   Restricted (owner, named staff, service account as Viewer). Not run: real iOS Safari and
   Android Chrome devices; live cache propagation after a genuine Sheet status change.
-- Phase 7 (multilingual) **implemented, PR #8 draft**: English (default, original unprefixed
+- Phase 7 (multilingual) **implemented, PR #8 ready for review** (not merged): English (default, original unprefixed
   URLs), Arabic (RTL, `/ar…`), Russian (`/ru…`); no browser-language redirect; header switcher
   EN · العربية · RU keeps the same page / vehicle ID. Per-language root layouts `src/app/(en)`,
   `src/app/ar`, `src/app/ru` (one-line route files) share `src/app/_site` (route bodies,
