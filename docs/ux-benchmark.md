@@ -3,9 +3,9 @@
 Working document for automotive e-commerce and dealership benchmarking. The protocol lives in
 `.claude/skills/designing-automotive-storefront/benchmark-protocol.md`.
 
-**Status:** Phase 4A live visual benchmark recorded **2026-09-30** and accepted as the evidence
-base. Typography sub-benchmark and the revised design direction "Coachwork" (end of this file)
-are **pending review**. No Phase 4 code has been written.
+**Status:** Phase 4A benchmark accepted as the evidence base (2026-09-30). Design direction
+"Coachwork" (end of this file) accepted as the Phase 4 basis with the final review edits;
+Phase 4 implementation follows it.
 
 Rule for this file: **Observed** = seen in a screenshot or read from the rendered DOM during the
 session below. **Inference** = our interpretation of what we saw. **Hypothesis** = not verified.
@@ -364,216 +364,212 @@ Candidate fonts checked from their OFL source files (fontTools):
 
 | Family (OFL) | Axes | Default digits | `tnum` | Cyrillic | Verdict |
 | - | - | - | - | - | - |
-| **Archivo** | wght 100–900, **wdth 62–125** | proportional | **yes** | no | **Chosen** |
+| Archivo | wght 100–900, wdth 62–125 | proportional | yes | **no** | Strongest Latin voice; **deferred** — no Cyrillic (see decision below) |
 | Instrument Sans | wght 400–700, wdth 75–100 | proportional | yes | no | Close second; narrower range, less voice |
 | Mona Sans | wght 200–900, wdth 75–125 | proportional | yes | no | Strong, but reads as GitHub's brand face |
 | Schibsted Grotesk | wght 400–900 | proportional | yes | no | Tabular comma leaves gaps in prices (specimen: "209 , 999") |
 | IBM Plex Sans | wght 100–700, wdth 75–100 | tabular | — | yes | Corporate/technical voice; previous pick withdrawn |
 | Inter | wght, opsz | proportional | yes | yes | Generic product-UI voice (also Alba) |
 | Roboto Flex | many incl. wdth 25–151 | tabular | — | yes | Generic platform voice |
-| Onest, Golos Text, Geologica, Commissioner | wght only | — | mixed | yes | No width axis |
+| Onest, Golos Text, Geologica, Commissioner | wght only | — | mixed | yes | No width axis (Geologica chosen later for Cyrillic, see below) |
 
 Specimens (390 px card, 1100 px titles) were rendered locally in the scratchpad and are not committed.
 
-## Typography decision (proposed)
 
-**Archivo (OFL 1.1), one variable family, self-hosted; the width axis is the typographic voice.**
+### Cyrillic requirement (review 2026-09-30)
 
-- **Titles** (car model and trim, page titles): width 100, weight 600, tracking −1.5 to −2.5 %,
-  **mixed case**, line-height 1.05–1.15. Large on VDP (editorial scale, mechanic 2).
-- **Labels** (make · year eyebrow, spec labels, status chip, gallery counter): width 118–125,
-  weight 600, **uppercase**, 11–12 px, tracking +0.12 em. This is where the "automotive" voice
-  lives — tracked wide caps, as on badging and instrument faces — confined to small text (mechanic 3).
-- **Figures** (price, km, year, counts, reference): `font-variant-numeric: tabular-nums
-  lining-nums` set explicitly everywhere a number appears (mechanic 1), weight 600 for price.
-- **Body**: width 100, weight 400, 16/26, measure ≤ 68 ch (BaT/Hartley reading comfort).
-- Currency is written `AED 209,999` in text (the font has no dirham sign; no icon fonts).
+Sheet values may stay in Russian until open question 6 confirms an English display mapping; the
+site must not translate them itself. The production font must therefore render real Cyrillic
+values (e.g. `Автомат`, `Бензин`, `Полный`, `Ё`, `№`) in the same face as the Latin UI.
+Candidates re-checked from OFL source files, then rendered in the same card/spec specimen with
+Cyrillic values (scratchpad, not committed):
 
-Why Archivo: excellent Latin with a real grotesque character, a 62–125 width range that gives
-titles and labels two distinct voices from one file (fewer bytes, one licence), `tnum` for
-figures, and OFL licensing (no paid licence). Checked against the constraints:
-- **Arabic later:** Archivo has no Arabic. If Arabic is confirmed (open q 13), an OFL Arabic
-  family is benchmarked then and paired by weight and x-height through the font stack. Not
-  chosen now, and the choice of Archivo does not depend on it.
-- **Cyrillic:** Archivo has none. The UI is English; Sheet values in Russian (Коробка, Топливо,
-  Привод…) must get English display labels (open q 6) before Phase 4 ships polished fact
-  rows. Until then any verbatim Cyrillic value falls back to the system sans (truthful, visibly
-  mixed). No candidate combined width axis + `tnum` + Cyrillic + editorial voice except
-  Roboto Flex, which fails on voice.
-- **Performance:** one variable WOFF2, Latin subset only, `font-display: swap` with metric
-  fallback; axis ranges may be trimmed to what the scale uses. Measure in Phase 4.
+| Family (OFL) | Weights | Full Cyrillic incl. Ё, № | `tnum` | Specimen verdict |
+| - | - | - | - | - |
+| **Geologica** | 100–900 variable | yes | yes | **Chosen** — precise, slightly technical grotesque; firm figures; not a default UI face |
+| Golos Text | 400–900 | yes | yes | Clean but neutral civic-UI voice; no light weights |
+| Onest | 100–900 | yes | yes | Pleasant, generic geometric-grotesque voice |
+| Fira Sans | static files | yes | yes | Good figures; strong Mozilla/code association; many static files |
+| Montserrat | 100–900 | yes | yes | The Elite Cars' face (observed) and wide; rejected |
+| Manrope | 200–800 | yes | yes | SaaS product-UI voice; rejected |
+| Rubik, Tektur | — | yes | yes | Rounded / techno display voices; off-direction |
+| Jost | 100–900 | missing `№` | — | Rejected on coverage |
+| Commissioner, Wix Madefor, Raleway | — | yes | **no** | No tabular figures |
+| Archivo | 100–900, wdth 62–125 | **no** | yes | Deferred: best Latin voice, fails the Cyrillic requirement |
 
-## Proposed design direction — "Coachwork" (revised, pending review)
+## Typography decision
 
-Replaces "Showroom ledger" (2026-09-30 first draft). Kept from it: inventory in the first mobile
-viewport, no hero or promo, small-stock simplicity, price-first cards, mileage + regional spec +
-transmission, ruled fact treatment, no marketplace clutter, no badges/urgency/EMI/promo, VDP as
-the primary product page, no fake image placeholders.
+**Geologica (SIL OFL 1.1), one variable family (weights 100–900), self-hosted via `next/font`,
+subsets `latin` + `cyrillic`.** Arabic is not required now; if an Arabic launch is confirmed
+(q 13), an Arabic companion is chosen separately.
 
-### Revised visual direction
+Roles (mechanics from the sub-benchmark above):
+- **Titles** (car model + trim, page titles): weight 600, tracking −0.02 em, **mixed case**,
+  line-height 1.05–1.15; large on the VDP (editorial scale, mechanic 2).
+- **Labels** (make · year eyebrow, spec section heading, status chip): weight 600, **uppercase**,
+  11–12 px, tracking +0.12 em, muted — tracked caps confined to small text (mechanic 3).
+- **Figures** (price, km, year, counts): `font-variant-numeric: tabular-nums` set explicitly
+  wherever a number appears (mechanic 1); price weight 600.
+- **Body**: weight 400, 16/26, measure ≤ 68 ch.
+- Currency written as text: `AED 209,999`.
+- Sheet values are shown verbatim (Latin or Cyrillic) until q 6 is decided.
+
+## Design direction — "Coachwork" (accepted as the Phase 4 basis, 2026-09-30)
+
+Replaces "Showroom ledger" (first draft). Kept: inventory in the first mobile viewport, no hero
+or promo, small-stock simplicity, price-first cards, mileage + regional spec + transmission,
+ruled fact treatment, no marketplace clutter, no badges/urgency/EMI/promo, VDP as the primary
+product page, no fake image placeholders.
+
+### Visual direction
 
 **Editorial automotive, restrained but authored.** Premium comes from proportion, rhythm and
-type — large mixed-case titles, tight price/title pairing, tracked wide-caps labels, hairline
-rules, generous vertical space — and later from photography placed in fixed, generous frames.
-The information system of the first draft stays underneath (ruled facts, fixed fact order), but
-the surface is a magazine page about cars, not a stock sheet: no table chrome, no zebra rows,
-no boxed cards, no dashboard density.
+type — large mixed-case titles, tight title/price pairing, tracked caps labels, hairline rules,
+generous vertical space — and later from approved photography in fixed frames. The information
+system stays underneath (ruled facts, fixed fact order) but the surface is not a stock sheet:
+no table chrome, zebra rows, boxed shadow cards or dashboard density.
 
 - Neutral light palette; **no accent colour in Phase 4.** Final accent = **pending brand
-  decision** (open q 14). WhatsApp green is not part of AM Motors' identity; WhatsApp styling
-  is a Phase 5 matter.
-- Interaction is expressed in ink: underlined links, ink focus ring; future action buttons
-  (Phase 5) are specified as solid ink / outlined ink until a brand accent exists.
-- Composition: left-aligned, strong left edge; title and price as one typographic unit;
-  hairlines separate, whitespace groups; one large element per screen (title in state A,
-  photo in state B).
+  decision** (q 14). WhatsApp styling is Phase 5 and not part of AM Motors' identity.
+- Interaction is expressed in ink: underlined links, ink focus ring.
+- Composition: strong left edge; title and price as one typographic unit; hairlines separate,
+  whitespace groups; one large element per screen (title now, photo later).
+
+### Inventory order
+
+Phase 4 does **not** change the authoritative inventory order: lists render in the current
+repository/source order. There is no confirmed "listed on website" field and no sorting rule;
+any new sort needs its own rule and evidence.
 
 ### Mobile structure (390 px, 16 px gutters)
 
-**Header (all pages), 56 px:** provisional text wordmark "AM Motors" (label style, wide caps)
-left; "Cars" link right; hairline below. No other actions in Phase 4.
+**Header (all pages), 56 px:** provisional text wordmark "AM Motors" (label style) linking to
+`/`; "Cars" link right; hairline below. No other actions.
 
 **Homepage `/`:**
-1. Header (0–56).
-2. Intro, padding 24 top / 20 bottom: H1 "Cars in stock" 32/34 title style; count line
-   "12 cars available" 15 px muted, from data (singular handled). Ends ≈ y 166.
-3. Available-car list, one column, cards separated by hairlines; **first card starts ≈ y 166;
-   state A shows ~3 cars in the first viewport, state B shows the first car's photo, title and
-   price.**
-4. Reserved IA slot: general-request inquiry (Phase 5, q 17) — renders nothing in Phase 4.
-5. Reserved IA slot: sold section (q 9/10/18) — renders nothing in Phase 4.
-6. Footer: hairline, provisional wordmark. No address/hours until q 7.
-
-**`/cars`:** same list and card; H1 "Cars in stock", count line; same reserved slot after the
-list. Default sort newest listed. No filters.
-
-**Card (state A — no approved photos), ≈ 180 px tall:**
-1. Eyebrow (label style, muted): `BMW · 2021` (make · year).
-2. Title: `840i M Sport Convertible` (model + trim) 22/26, width 100, weight 600; wraps, never
-   truncated. The link's accessible name is the full `2021 BMW 840i M Sport Convertible`.
-3. Price: `AED 209,999` 22/28, weight 600, tabular — directly under the title (price-first
-   emphasis: largest figure on the card). No price line if the Sheet price is empty (q 2).
-4. Fact line, 14/20: `48,000 km  ·  GCC  ·  Automatic` — only values that exist, in that order.
-5. Whole card is one tap target (title link stretched over the card), ≥ 44 px; ink focus ring.
-
-**Card (state B — approved photography, future):** a **3:2 frame** (358 × 239 px) goes above
-the eyebrow, edge to the gutter, radius 0; the body below is identical. 3:2 is the native ratio
-of most camera sensors, so approved photos crop least. Card ≈ 400 px.
-
-**VDP `/cars/[id]` (state A):**
 1. Header.
-2. Back link "All cars" (14 px) — "See cars in stock" on sold cars.
-3. Title block: eyebrow `BMW · 2021`; H1 model + trim 32/34; price 28/32 tabular. Sold:
-   price replaced by a neutral **Sold** chip (label style, 1 px ink outline) + "This car has
-   been sold." (existing truthful state).
-4. Fact line (same as card).
-5. "Photos unavailable" — one muted 14 px line (existing state). No image box.
-6. Reserved action zone (Phase 5): full-width, stacked; specified below. Phase 4 renders nothing.
-7. "Specification" (label-style heading): ruled rows, label left (muted) / value right (ink,
-   tabular), min row 48 px, fixed order: Mileage, Regional spec, Transmission, Fuel, Engine,
-   Drivetrain, Year, Colour, Reference (public ID). Empty values omitted — no "NA".
-8. Footer.
+2. Intro: H1 "Cars in stock" 32/34; count line "N cars available" (from data). List starts
+   ≈ y 166, so about three state-A cards are visible in the first viewport.
+3. Available-car list, one column, hairline-separated.
+4. Footer: hairline + provisional wordmark. No address/hours until q 7.
 
-**VDP (state B):** a **full-bleed 3:2 gallery (390 × 260 px)** is inserted between the back
-link and the title block: horizontal swipe with snap, counter `1 / N` (label style) bottom
-right, tap opens full-screen. H1 steps to 28/30. Title, price and the Phase 5 action zone still
-fit in the first viewport (≈ 56 + 44 + 260 + ~150 = 510 px). Everything else is unchanged.
+Insertion points recorded for later (no UI, no empty space in Phase 4): general-request block
+after the list (Phase 5, q 17); sold section below it (q 9/10/18).
 
-**Phase 5 geometry, reserved now (not built in Phase 4):**
-- In-page action zone: primary 52 px full-width + two secondary 48 px (outlined) — labels
-  "Request a viewing", "Request a test drive" plus the WhatsApp action; order decided in Phase 5.
-- Sticky bar: appears when the in-page zone leaves the viewport; 64 px + safe-area inset,
-  canvas background, top hairline, **max 2 actions** (48 px, 8 px gap); page gets matching
-  bottom padding; never on sold cars.
+**`/cars`:** H1 "All cars", count line, same list and card. No filters, no search, no sorting.
+
+**Card (no media — the only listing state in Phase 4), ≈ 180 px:**
+1. Eyebrow (label style): `BMW · 2021` (make · year).
+2. Title: `840i M Sport Convertible` (model + trim) 22/26, weight 600; wraps, never truncated.
+   The link's accessible name is the full `2021 BMW 840i M Sport Convertible`.
+3. Price `AED 209,999` 22/28, weight 600, tabular — largest figure on the card. No price line
+   when the Sheet price is empty (q 2).
+4. Fact line 14/20: `48,000 km · GCC · Автомат` — mileage, regional spec, transmission, only
+   values that exist, in that order.
+5. The whole card is one tap target (title link stretched over the card); ink focus ring.
+
+**Card with media (future, when listing media is approved):** a media frame above the eyebrow;
+the body is unchanged. Frame ratio is a single **provisional** token (starting value 3:2 — a
+common camera ratio, not a business standard); it changes in one place when the real photo
+convention (q 12) is known.
+
+**VDP `/cars/[id]`, no photos (production state now):**
+1. Header.
+2. Back link "All cars" (sold: "See cars in stock").
+3. Title block: eyebrow `BMW · 2021`; H1 model + trim 32/34; price 28/32 tabular. Sold: a
+   neutral **Sold** chip instead of the price and "This car has been sold." (existing state).
+4. Fact line (as on the card).
+5. "Photos unavailable" — one muted line. No image box, no placeholder.
+6. "Specification" (label heading): ruled rows, label left / value right (tabular), fixed order
+   Mileage, Regional spec, Transmission, Fuel, Engine, Drivetrain, Year, Colour, Reference
+   (public ID); empty values omitted, never "NA".
+7. Footer.
+
+**VDP with media (synthetic-tested only in Phase 4):** the existing media component renders
+the approved images in the provisional-ratio frame above the title block (first image eager,
+rest lazy), as a simple sequence. **No lightbox, full-screen viewer or swipe system in Phase 4**;
+gallery interaction is designed and tested when real approved photos exist.
+
+**Phase 5 insertion points (spec only — no reserved empty space in Phase 4 UI):**
+- In-page action group goes directly after the fact line (mobile) / above the specification
+  (desktop): primary 52 px full-width + two 48 px secondary; WhatsApp, "Request a viewing",
+  "Request a test drive"; order decided in Phase 5.
+- Sticky bar: appears when the in-page group leaves the viewport; 64 px + safe-area inset,
+  canvas background, top hairline, max 2 actions; matching page bottom padding; never on sold.
 
 ### Desktop structure (1440 × 900)
 
 Container max 1280 px, side margins ≥ 48 px, 12 columns, 24 px gaps.
 
 - **Header 72 px:** wordmark left, "Cars" right, hairline.
-- **Homepage / `/cars`:** intro row — H1 "Cars in stock" 56/56 across cols 1–8, count line
-  baseline-aligned in cols 9–12; padding 48 top / 32 bottom. List: **3-column grid** (4 cols
-  each ≈ 411 px), column gap 24, row gap 48. State A card: eyebrow, title 24/28, price 24/28,
-  fact line (≈ 200 px) — first two rows visible above the fold. State B: 3:2 frame
-  (411 × 274) above the same body.
-- **VDP state A:** back link; **cols 1–7:** eyebrow, H1 56/58 (max ~2 lines), price 40/44
-  tabular, fact line, "Photos unavailable" line; **cols 8–12:** "Specification" ruled list.
-  Reserved Phase 5 action zone = top of cols 8–12, above the specification.
-- **VDP state B:** **cols 1–8:** gallery — main 3:2 frame (≈ 836 × 557) + a row of 3:2
-  thumbnails; **cols 9–12:** sticky panel (top 96 px): eyebrow, H1 36/40, price 32, fact
-  line, [Phase 5 action zone], specification.
-- The right column carries the same order in both states (identity → price → facts →
-  actions → specification); only the left column switches between the typographic hero (A)
-  and the gallery (B).
-- Sold VDP: as above with the Sold chip in place of price, no action zone.
+- **Homepage / `/cars`:** H1 56/56 (cols 1–8) with the count line baseline-aligned right;
+  3-column card grid (≈ 411 px each), column gap 24, row gap 48; first two rows above the fold.
+- **VDP, no photos:** back link; **cols 1–7:** eyebrow, H1 56/58, price 40/44 tabular, fact line,
+  "Photos unavailable" line; **cols 8–12:** "Specification" ruled list.
+- **VDP with media (synthetic):** media sequence in cols 1–7 above the title block; the
+  specification stays in cols 8–12. A sticky gallery/panel layout is deferred with the gallery
+  interaction work.
+- Sold VDP: Sold chip in place of price; no actions.
 
 ### No-photo vs future-photo behaviour
 
-| Element | A: no approved photos (now) | B: approved photography (later) |
+| Element | No approved photos (now) | Approved photography (later) |
 | - | - | - |
-| Card | Typographic card, no media box | 3:2 frame on top, same body |
-| Mixed stock (some cars without photos) | n/a | **Conditional (decide with q 12):** either enable listing photos only when every available car has approved photos, or show a same-size typographic plate (make/model in label style on the canvas, no car imagery). No empty boxes, no stock/AI images. |
-| VDP mobile | Title block leads; "Photos unavailable" line | Full-bleed 3:2 gallery leads; H1 28 |
-| VDP desktop | Large typographic hero left, specification right | Gallery left (cols 1–8), sticky panel right |
-| Image framing | — | Fixed 3:2 everywhere (card, VDP main, thumbs); `object-fit: cover` for approved set photos; consistent-setup photography recommended to the business (synthesis 8) |
+| Card | Typographic card, no media box | Media frame on top (provisional ratio token), same body |
+| Mixed stock | n/a | **Conditional (q 12):** enable listing photos only when every available car has approved photos, or a same-size typographic plate (no car imagery). Never empty boxes or stock/AI images. |
+| VDP | Title block leads; "Photos unavailable" line | Media above the title block; interaction designed with real photos |
+| Framing | — | One provisional ratio token; `object-fit: contain` in the existing component until the photo convention is known |
 
-Listings keep making 0 Drive calls until listing media is explicitly approved; that is a
-separate decision from this layout.
+Listings keep making 0 Drive calls until listing media is explicitly approved.
 
 ### Tokens — confirmed vs provisional
 
 | Token | Value | Status |
 | - | - | - |
-| Figures | `tabular-nums lining-nums` on every number | Confirmed (rule + evidence) |
+| Figures | `tabular-nums` on every number | Confirmed (rule + evidence) |
 | Rules | 1 px hairlines; no card shadows; radius 0 (chips ≤ 2 px) | Confirmed for Phase 4 |
-| Spacing | 4 px base; 8/12/16/20/24/32/48/64 scale | Confirmed for Phase 4 |
-| Gutters / grid | 16 mobile, 24 tablet, 12-col 1280 max desktop, 24 gap | Confirmed for Phase 4 |
-| Media geometry | 3:2 for cards, VDP main and thumbs | Confirmed for layout; revisit only if the photo convention (q 12) requires |
-| Type roles | title / label / figure / body as above | Confirmed structure; sizes tunable in Phase 4 |
-| Font | Archivo variable, OFL | **Provisional** — pending this review and brand assets (q 14) |
+| Spacing | 4 px base; 8/12/16/20/24/32/48/64 | Confirmed for Phase 4 |
+| Grid | 16 px mobile gutters; 12-col, 1280 max, 24 gap desktop | Confirmed for Phase 4 |
+| Type roles | title / label / figure / body | Confirmed structure; sizes tunable |
+| Font | Geologica variable (OFL), latin + cyrillic | **Provisional** until brand assets (q 14) |
+| Media ratio | 3:2 starting value, single token | **Provisional** — not a business standard; set by q 12 |
 | `--canvas` | `#F6F5F1` | Provisional |
 | `--ink` | `#161616` (16.6:1 on canvas) | Provisional |
 | `--muted` | `#66645E` (5.4:1 on canvas) | Provisional |
 | `--rule` | `#D9D6CE` (decorative) | Provisional |
-| `--interactive` | = `--ink`; links underlined; focus ring 2 px ink, 2 px offset | Provisional neutral interaction token |
-| Accent colour | — | **Pending brand decision (q 14)**; not WhatsApp green |
-| Wordmark | Text "AM Motors" in label style | Provisional until brand assets (q 14) |
-| Sold chip | Ink outline on canvas, label style | Confirmed neutral (never green/red) |
+| `--interactive` | = ink; underline links; 2 px ink focus ring, 2 px offset | Provisional neutral |
+| Accent | — | **Pending brand decision (q 14)** |
+| Wordmark | Text "AM Motors", label style | Provisional (q 14) |
+| Sold chip | Ink outline, label style | Confirmed neutral (never green/red) |
 
-### Phase 4 now vs later
+### Phase 4 scope
 
-**Phase 4 implements (after this review):**
-- Tokens and type roles above; Archivo self-hosted (Latin subset).
-- Header/footer with the provisional wordmark and "Cars" link only.
-- Homepage and `/cars`: intro + available list with **state A cards**; empty and
-  data-unavailable states restyled with existing truthful copy.
-- VDP state A **and** state B (the gallery component already exists for `getById` media;
-  it gets the 3:2 geometry, counter and full-screen view; tested with synthetic fixtures;
-  production media stays off).
-- Existing sold VDP state restyled (Sold chip, no price, link to cars in stock); not-found/error pages.
-- Accessibility (focus, headings, tap targets), no layout shift, performance check.
+**Implements:** tokens; Geologica self-hosted (latin + cyrillic); header/footer; inventory-first
+homepage; `/cars`; vehicle cards (no media); VDP no-photo state; the existing media component
+restyled for a truthful synthetic media state (no new gallery infrastructure); existing Sold VDP
+styling; empty / unavailable / 404 / error states; responsive mobile + desktop; accessibility;
+performance.
 
-**Waits for Phase 5:** WhatsApp link and prefill, "Request a viewing", "Request a test drive"
-actions and flows, the sticky action bar, the "Didn't find what you need?" block, attribution.
-Phase 4 adds **no** live links, fake or disabled buttons, or inquiry flows.
+**Does not implement:** WhatsApp; viewing/test-drive flows; sticky action bar; "Didn't find"
+block; sold archive / recently-sold section; filters, search or sorting; production media
+enablement; listing media; lightbox/swipe; any Phase 5 work; deployment.
 
-**Waits for business decisions:** accent, wordmark, font confirmation (q 14); English labels for
-Russian values (q 6 — needed before fact rows are polished); empty-price wording and VAT (q 2);
-sold section / archive / sold VDP lifetime / sold price (q 9, 10, 18); listing photos and the
-mixed-stock rule (q 12); Arabic (q 13); contact details (q 7); viewing vs test drive (q 8);
-general-request wording (q 17). Card media (state B) is built only when listing media is approved.
+**Waits for business decisions:** accent, wordmark, final font (q 14); English labels for
+Russian values (q 6); empty-price wording and VAT (q 2); sold section/archive/lifetime/price
+(q 9, 10, 18); photo convention and ratio (q 12); Arabic (q 13); contacts (q 7); viewing vs test
+drive (q 8); general-request wording (q 17).
 
 ### Explicitly excluded
 
 Hero sliders, promo tiles, EMI figures, deal/urgency badges, review counts without a source,
 ad creatives in galleries, first-visit modals, floating chat bubbles, all-caps titles,
 black-and-gold, gradients, glassmorphism, placeholder or rendered car images, table/spreadsheet
-styling, boxed shadow cards.
+styling, boxed shadow cards, empty "reserved" UI areas.
 
 ## Decisions log
 
 | Date | Decision | Evidence | Notes |
 | - | - | - | - |
 | 2026-09-30 | Proposed "Showroom ledger" direction | Synthesis 1–10 | Superseded same day after review |
-| 2026-09-30 | Review: benchmark accepted as evidence base; direction to be revised (neutral palette, no WhatsApp-green identity, typography evidence, photo-ready geometry, Phase 4/5 split, sold and "Didn't find" deferred, more editorial character) | User review | — |
-| 2026-09-30 | Proposed "Coachwork" direction with Archivo typography | Typography sub-benchmark, synthesis 1–10 | **Pending user review**; not implemented |
+| 2026-09-30 | Review: benchmark accepted; direction revised (neutral palette, typography evidence, photo-ready geometry, Phase 4/5 split, more editorial) | User review | — |
+| 2026-09-30 | "Coachwork" accepted as the Phase 4 basis with four edits: Cyrillic-capable font (Geologica; Archivo deferred), no new sorting (source order), media ratio provisional, no gallery infrastructure / no reserved empty spaces | User review, Cyrillic font check | Phase 4 implementation started |
