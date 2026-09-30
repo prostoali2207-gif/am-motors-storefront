@@ -21,10 +21,10 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   production default adapter that returns `unavailable` when no source is configured.
 - Phase 2 (Google Sheets adapter) implemented in `src/adapters/google-sheets`, enabled by
   server env (`INVENTORY_SOURCE=google-sheets`, see `.env.example` and
-  `docs/google-sheets-setup.md`). Live read not yet verified until credentials exist.
+  `docs/google-sheets-setup.md`). Live read verified on Vercel Preview (Phase 6).
 - Phase 3 (Drive media pipeline) implemented in `src/adapters/google-drive-media` and the
   route `src/app/media/…`, enabled only by `MEDIA_SOURCE=google-drive` (off by default). Live
-  Drive read not verified until the service account exists. Business decision 2026-09-30:
+  Drive read not verified (media is off). Business decision 2026-09-30:
   no website-ready photos exist yet — media stays off, VDPs show "Photos unavailable", and
   publishing rules wait for final photos (`docs/business-rules.md` → "Website photos").
   Only `getById`/the media route resolve media; listings make 0 Drive calls. Photo cache
@@ -42,17 +42,20 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   (no click IDs) in `sessionStorage`, appended to prefills (`src/attribution/`). No pixels,
   analytics, cookies, forms, API or CRM (open question 15). Confirmed decisions:
   `docs/business-rules.md` → "Contact and inquiries".
-- Phase 6 (Vercel preview + real data verification) **in progress**: Vercel project
+- Phase 6 (Vercel preview + real data verification) **complete, PR #7 ready for review**: Vercel project
   `am-motors-storefront` (Hobby account scope), Vercel Authentication on all previews,
   production builds skipped (project "Ignored Build Step" + `vercel.json`
   `git.deploymentEnabled.main = false`). Preview-only env vars; `MEDIA_SOURCE` unset.
   Google Workload Identity Federation set up by the user in Google Cloud (2026-09-30; pool and
   provider IDs `vercel` per `docs/google-sheets-setup.md`); all seven Preview-only env vars set,
-  Preview redeployed. Live read verified on preview `689a914` (2026-09-30): OIDC works, 18
-  available + 2 sold, no adapter issues; browser checks (routes, prefills, UTM first-touch,
-  sticky bar, 320/390/1440, axe, keyboard, leak scan) passed. Still open: business review of
-  the real data, real iOS/Android devices, data-unavailable path, revalidation window.
-  Security issue flagged, not changed: the Sheet is shared "Anyone with the link → Editor".
+  Preview redeployed. Live read verified on preview `689a914` (2026-09-30): OIDC works, 20
+  public vehicles (18 available on `/` and `/cars`, 2 sold as direct-only VDPs AM-002 / AM-004
+  with no actions), no adapter issues; browser checks (routes, prefills, UTM first-touch,
+  sticky bar, 320/390/1440, axe, keyboard, console, leak scan) passed. Truthful `unavailable`
+  state verified on an earlier Preview without Google auth (no fixture fallback). Human visual
+  review accepted the current visual direction for this phase. Sheet link sharing is
+  Restricted (owner, named staff, service account as Viewer). Not run: real iOS Safari and
+  Android Chrome devices; live cache propagation after a genuine Sheet status change.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.

@@ -11,7 +11,7 @@ identity that reads the Sheet.
 
 | Permission | Value |
 | - | - |
-| Sheet access | Shared with the service-account email as **Viewer** (read-only) |
+| Sheet access | Link sharing **Restricted** (owner and named staff only); the service-account email added as **Viewer** (read-only) |
 | OAuth scope requested by the app | `https://www.googleapis.com/auth/spreadsheets.readonly` |
 | Google Cloud project IAM roles for the service account | **None** |
 | APIs enabled in the project | Google Sheets API (+ IAM Service Account Credentials API and Security Token Service API for `vercel-oidc`) |
