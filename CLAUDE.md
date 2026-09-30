@@ -61,8 +61,8 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   EN · العربية · RU keeps the same page / vehicle ID. Per-language root layouts `src/app/(en)`,
   `src/app/ar`, `src/app/ru` (one-line route files) share `src/app/_site` (route bodies,
   metadata, fonts) and `src/components/site-document.tsx`. Copy in `src/i18n/messages.ts`;
-  approved categorical display values in `src/i18n/vehicle-values.ts` (unknown values shown
-  verbatim); WhatsApp prefills follow the page language (`src/conversion/`). Arabic companion
+  approved categorical display values incl. current colours in `src/i18n/vehicle-values.ts`
+  (unknown values shown verbatim; `AED` everywhere, `Ref:` in English in every language); WhatsApp prefills follow the page language (`src/conversion/`). Arabic companion
   font Noto Kufi Arabic (Arabic pages only). Decisions: `docs/business-rules.md` → "Languages —
   Phase 7"; benchmark: `docs/ux-benchmark.md` → "Phase 7".
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase

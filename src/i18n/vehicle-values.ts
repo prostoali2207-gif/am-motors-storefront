@@ -4,14 +4,14 @@ import type { Locale } from "./locales";
  * Localized DISPLAY labels for known categorical Sheet values (Phase 7).
  *
  * Only these exact source values (after trimming) have a display label; everything else — and
- * every free-text or factual field (make, model, trim, ID, price, mileage, engine, year, colour)
- * — is shown exactly as the Sheet provides it. A value missing here is never guessed or
+ * every free-text or factual field (make, model, trim, ID, price, mileage, engine, year) — is
+ * shown exactly as the Sheet provides it. A value missing here is never guessed or
  * translated on the fly: the original public value is shown instead.
  *
  * Adding a value: add the exact Sheet spelling with all three labels, record it in
  * docs/business-rules.md → "Localized display values", and extend the tests.
  */
-export type CategoricalField = "regionalSpec" | "transmission" | "fuel" | "drivetrain";
+export type CategoricalField = "regionalSpec" | "transmission" | "fuel" | "drivetrain" | "color";
 
 type Labels = Readonly<Record<Locale, string>>;
 
@@ -30,6 +30,14 @@ export const VEHICLE_VALUE_LABELS: Readonly<Record<CategoricalField, Readonly<Re
   },
   drivetrain: {
     FWD: { en: "FWD", ar: "دفع أمامي", ru: "Передний (FWD)" },
+  },
+  // Current colour values of the live Sheet — confirmed 2026-09-30. Any other colour stays verbatim.
+  color: {
+    White: { en: "White", ar: "أبيض", ru: "Белый" },
+    Silver: { en: "Silver", ar: "فضي", ru: "Серебристый" },
+    Red: { en: "Red", ar: "أحمر", ru: "Красный" },
+    Black: { en: "Black", ar: "أسود", ru: "Чёрный" },
+    Orange: { en: "Orange", ar: "برتقالي", ru: "Оранжевый" },
   },
 };
 

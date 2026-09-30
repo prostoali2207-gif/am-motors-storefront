@@ -55,8 +55,8 @@ Mapped field-by-field from existing Sheet columns only.
 Display labels and value normalization (e.g. Russian source values → English UI labels) must
 be an explicit, reviewed mapping table; unknown values are shown as written or omitted, never
 guessed. Phase 7 table (en / ar / ru): `docs/business-rules.md` → "Languages — Phase 7", code
-`src/i18n/vehicle-values.ts`. Make, model, trim, ID, price, mileage, engine, year and colour are
-never translated.
+`src/i18n/vehicle-values.ts` (includes the current colour values). Make, model, trim, ID, price,
+mileage, engine and year are never translated.
 
 ## Pending business decision
 

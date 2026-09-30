@@ -26,6 +26,7 @@ const mapped: Vehicle = {
   transmission: "Автомат",
   fuel: "Бензин",
   drivetrain: "FWD",
+  color: "Silver",
 };
 
 function prefill(link: HTMLElement): string {
@@ -63,8 +64,9 @@ describe.each(LOCALES)("available VDP in %s", (locale) => {
       t.spec.reference,
     ]);
     const values = within(spec).getAllByRole("definition").map((dd) => dd.textContent);
-    // Engine, year, colour and ID are never translated.
-    expect(values.slice(4)).toEqual(["Test engine", expect.any(String), "2001", "Test color", "TEST-0001"]);
+    // Engine, year and ID are never translated; colour uses the approved dictionary.
+    const silver: Record<Locale, string> = { en: "Silver", ar: "فضي", ru: "Серебристый" };
+    expect(values.slice(4)).toEqual(["Test engine", expect.any(String), "2001", silver[locale], "TEST-0001"]);
     expect(screen.getByText(t.photosUnavailable)).toBeDefined();
     expect(screen.getByRole("link", { name: t.allCars }).getAttribute("href")).toBe(`${PREFIX[locale]}/cars`);
   });
@@ -179,8 +181,9 @@ describe("localized categorical values", () => {
 
   it("shows an unmapped value verbatim in every language", () => {
     for (const locale of LOCALES) {
-      render(<VehicleDetail locale={locale} vehicle={{ ...mapped, transmission: "Механика", fuel: "Гибрид" }} />);
+      render(<VehicleDetail locale={locale} vehicle={{ ...mapped, transmission: "Механика", fuel: "Гибрид", color: "Test color" }} />);
       expect(screen.getAllByText("Механика").length).toBeGreaterThan(0);
+      expect(screen.getByText("Test color")).toBeDefined();
       expect(screen.getAllByText("Гибрид").length).toBeGreaterThan(0);
       cleanup();
     }

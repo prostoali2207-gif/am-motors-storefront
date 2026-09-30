@@ -8,6 +8,7 @@ describe("localized display values for categorical Sheet values", () => {
     expect(Object.keys(VEHICLE_VALUE_LABELS.fuel)).toEqual(["Бензин"]);
     expect(Object.keys(VEHICLE_VALUE_LABELS.drivetrain)).toEqual(["FWD"]);
     expect(Object.keys(VEHICLE_VALUE_LABELS.regionalSpec).sort()).toEqual(["American Specs", "GCC", "Korean Specs"].sort());
+    expect(Object.keys(VEHICLE_VALUE_LABELS.color).sort()).toEqual(["Black", "Orange", "Red", "Silver", "White"]);
   });
 
   it.each([
@@ -18,6 +19,11 @@ describe("localized display values for categorical Sheet values", () => {
     ["regionalSpec", "GCC", "GCC", "مواصفات خليجية", "GCC"],
     ["regionalSpec", "American Specs", "American Specs", "مواصفات أمريكية", "Американская спецификация"],
     ["regionalSpec", "Korean Specs", "Korean Specs", "مواصفات كورية", "Корейская спецификация"],
+    ["color", "White", "White", "أبيض", "Белый"],
+    ["color", "Silver", "Silver", "فضي", "Серебристый"],
+    ["color", "Red", "Red", "أحمر", "Красный"],
+    ["color", "Black", "Black", "أسود", "Чёрный"],
+    ["color", "Orange", "Orange", "برتقالي", "Оранжевый"],
   ] as const)("%s %s → en %s / ar %s / ru %s", (field, value, en, ar, ru) => {
     expect(displayVehicleValue(field, value, "en")).toBe(en);
     expect(displayVehicleValue(field, value, "ar")).toBe(ar);
@@ -33,6 +39,9 @@ describe("localized display values for categorical Sheet values", () => {
       expect(displayVehicleValue("transmission", "Механика", locale)).toBe("Механика");
       expect(displayVehicleValue("fuel", "Test fuel", locale)).toBe("Test fuel");
       expect(displayVehicleValue("regionalSpec", "gcc", locale)).toBe("gcc"); // exact match only
+      expect(displayVehicleValue("color", "Blue", locale)).toBe("Blue");
+      expect(displayVehicleValue("color", "white", locale)).toBe("white"); // exact match only
+      expect(displayVehicleValue("color", "Белый", locale)).toBe("Белый"); // never reverse-translated
     }
   });
 

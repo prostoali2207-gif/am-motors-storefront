@@ -229,10 +229,12 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
 - **SEO:** `<html lang dir>` per language; self-referencing canonical and `hreflang` en / ar /
   ru + `x-default` (English) built from the origin the visitor used (no domain configured,
   q 15). Indexing rules unchanged (sold VDP indexing is still q 9).
-- **Never translated or altered:** make, model, trim, ID, price, mileage, engine, year, colour.
-  Figures stay identical; only digit grouping follows the language (Western digits everywhere;
-  Russian groups thousands with a space, e.g. `48 000 км`). Currency is written `AED` in every
-  language (see open question 20).
+- **Never translated or altered:** make, model, trim, ID, price, mileage, engine, year.
+  Figures stay identical; only digit grouping follows the language (Western digits everywhere).
+- **Currency — Confirmed 2026-09-30:** `AED` on English, Arabic and Russian pages. No Dirham
+  symbol and no `درهم` in Phase 7.
+- **Russian digit grouping — Confirmed 2026-09-30:** thousands grouped with a space
+  (`209 999`, `48 000 км`), because a comma reads as a decimal separator in Russian.
 - **Localized display values** (display only; the Sheet value is unchanged). Exact match after
   trimming; **any value not in this table is shown exactly as written in the Sheet** in every
   language. Source: `src/i18n/vehicle-values.ts`.
@@ -246,16 +248,23 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
   | `Региональная спецификация` | `GCC` | GCC | مواصفات خليجية | GCC |
   | `Региональная спецификация` | `American Specs` | American Specs | مواصفات أمريكية | Американская спецификация |
   | `Региональная спецификация` | `Korean Specs` | Korean Specs | مواصفات كورية | Корейская спецификация |
+  | `Цвет` | `White` | White | أبيض | Белый |
+  | `Цвет` | `Silver` | Silver | فضي | Серебристый |
+  | `Цвет` | `Red` | Red | أحمر | Красный |
+  | `Цвет` | `Black` | Black | أسود | Чёрный |
+  | `Цвет` | `Orange` | Orange | برتقالي | Оранжевый |
   | Status `sold` (chip / VDP line) | `Продана` | Sold / This car has been sold. | مباعة / تم بيع هذه السيارة. | Продан / Этот автомобиль продан. |
 
+  Colour rows: the current colour values of the live Sheet, confirmed 2026-09-30; any other
+  colour is shown verbatim, never inferred or translated.
   `В наличии` has no visible label (available cars show a price, not a status chip). Status
   mapping itself is unchanged (fail closed). Adding a value: exact Sheet spelling + all three
   labels here and in the code, with tests.
 - **WhatsApp prefills follow the page language**, with the same content and restrictions
   (title = public `year make model trim` verbatim, `Ref: <ID>`, the VDP URL in the page's
-  language; no price, mileage or claims). The `Ref:` marker and the attribution block labels
-  (`Source:`, `Medium:`, …) stay identical in every language so Sales can read every inquiry the
-  same way. English templates are unchanged (see "Contact and inquiries"). First-touch UTM
+  language; no price, mileage or claims). The `Ref:` marker (**Confirmed 2026-09-30:** stays in
+  English in EN / AR / RU messages, intentionally, for consistent Sales handling) and the
+  attribution block labels (`Source:`, `Medium:`, …) stay identical in every language. English templates are unchanged (see "Contact and inquiries"). First-touch UTM
   behaviour is unchanged.
 
   | Intent | Arabic | Russian |
@@ -279,9 +288,9 @@ Ask the user; do not assume answers.
 3. Should `Состояние` be shown publicly, and with what allowed values/wording?
 4. Is `Пробег, км` always public, or can it be withheld per car?
 5. Is full VIN ever public? (Default: no.)
-6. ~~Display labels for Russian source values~~ — partly resolved 2026-09-30 (Phase 7): the
-   approved dictionary in "Languages — Phase 7". Still open: labels for any other categorical
-   value (e.g. other gearbox/fuel/drivetrain values, colours), which are shown verbatim until added.
+6. ~~Display labels for Russian source values~~ — resolved 2026-09-30 (Phase 7) for every
+   current categorical value, including the current colours: see the dictionary in
+   "Languages — Phase 7". A new Sheet value is shown verbatim until it is added there.
 7. ~~WhatsApp business number~~ — confirmed 2026-09-30 (see "Contact and inquiries"). Still
    open: routing to several numbers, phone number, showroom address, opening hours.
 8. ~~Viewing vs test drive~~ — confirmed 2026-09-30: separate intents, both WhatsApp prefills,
@@ -321,7 +330,7 @@ Ask the user; do not assume answers.
     no price on sold cars.)
 19. Native-speaker review of the Arabic and Russian interface copy and WhatsApp templates
     (`src/i18n/messages.ts`, `src/conversion/inquiry-message.ts`) before any production launch.
-20. Currency in Arabic: keep `AED` (current, as DubiCars) or use `درهم` / the Dirham symbol
-    (as Automall / Alba)? Russian digit grouping with a space (`209 999`) — acceptable?
-21. Should `Ref:` in Arabic/Russian WhatsApp messages stay in Latin (current, identical for Sales)
-    or be localized?
+20. ~~Currency in Arabic / Russian digit grouping~~ — confirmed 2026-09-30: `AED` everywhere,
+    no Dirham symbol in Phase 7; Russian keeps space-grouped thousands.
+21. ~~`Ref:` in Arabic/Russian messages~~ — confirmed 2026-09-30: stays `Ref:` in English in
+    every language.
