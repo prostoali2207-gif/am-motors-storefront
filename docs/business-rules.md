@@ -176,6 +176,38 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
    "Didn't find what you need?" → WhatsApp. This path must not promise sourcing, import or
    availability that the business has not confirmed.
 
+## Contact and inquiries — Confirmed 2026-09-30
+
+- **WhatsApp business number: +971 50 343 2337** (canonical wa.me digits `971503432337`).
+  Public business information, not a secret; defined once in `src/conversion/whatsapp.ts`.
+- **No scheduling / booking system in V1.** "Request a viewing" and "Request a test drive" are
+  separate inquiry intents; both only open WhatsApp with a different prefilled message. They do
+  not book a time, confirm an appointment, reserve a car or create a qualified lead — they
+  create an inquiry (lead candidate) only. Qualification stays in Sales / Lead Conversion.
+- **Handoff destination: WhatsApp only.** No database, CRM, API endpoint, form or lead table on
+  the site. Nothing is sent anywhere except by the visitor's own click and send in WhatsApp.
+- **Vehicle actions (available VDPs only):** WhatsApp (primary), Request a viewing, Request a
+  test drive (secondary). Sold VDPs have no inquiry, viewing or test-drive actions.
+- **Prefill templates** (title = public `year make model trim`, ID = public `ID`, URL = the
+  current VDP URL; nothing else — no price, status, condition, finance or promises):
+
+  | Intent | Message |
+  | - | - |
+  | General vehicle question | `Hi, I'm interested in [vehicle title] (Ref: [public ID]).`<br>`[vehicle URL]` |
+  | Viewing | `Hi, I'd like to request a viewing for [vehicle title] (Ref: [public ID]).`<br>`[vehicle URL]` |
+  | Test drive | `Hi, I'd like to request a test drive for [vehicle title] (Ref: [public ID]).`<br>`[vehicle URL]` |
+  | General request | `Hi, I couldn't find the car I'm looking for on the website. Can you help me with current availability?` |
+
+- **General request:** heading "Didn't find what you need?" on the homepage and `/cars` after the
+  available inventory (and in the empty / unavailable states). No sourcing or import promise.
+- **Attribution (minimal, first-party):** only `utm_source`, `utm_medium`, `utm_campaign`,
+  `utm_content`, `utm_term`, `fbclid` are captured, first touch per browser-tab session
+  (`sessionStorage`, no cookies, no third-party SDK, no pixels). When any exist, a block with
+  only the received values is appended to the WhatsApp prefill (`Source:`, `Medium:`,
+  `Campaign:`, `Content:`, `Term:`, `fbclid:`). fbclid is kept as a click ID; no campaign or
+  source is derived from it. Isolated in `src/attribution/` so an analytics/CRM handoff can
+  replace it. Tracking pixels and analytics wait for open question 15.
+
 ## CTA wording — Confirmed until a booking system exists
 
 - Use "Request a test drive" and "Request a viewing".
@@ -192,9 +224,10 @@ Ask the user; do not assume answers.
 4. Is `Пробег, км` always public, or can it be withheld per car?
 5. Is full VIN ever public? (Default: no.)
 6. Display labels for Russian source values (e.g. `Коробка`, `Топливо`, `Привод`) in English UI.
-7. WhatsApp business number(s) and routing; phone number; showroom address; opening hours.
-8. Are viewing and test-drive requests separate? Which details are collected? Is any scheduling
-   system planned (needed before "Book" wording)?
+7. ~~WhatsApp business number~~ — confirmed 2026-09-30 (see "Contact and inquiries"). Still
+   open: routing to several numbers, phone number, showroom address, opening hours.
+8. ~~Viewing vs test drive~~ — confirmed 2026-09-30: separate intents, both WhatsApp prefills,
+   no scheduling system in V1, no extra details collected on the site.
 9. Should Sold VDPs stay online (for old ad links/SEO) and for how long? Indexable or `noindex`?
 10. Which sold cars may be shown as social proof, and for how long after sale?
 11. Revalidation window: how quickly must a Sheet status change appear on the site?
@@ -218,9 +251,12 @@ Ask the user; do not assume answers.
     f. Urgent removal: V1 caches bound it to ≈ 1 hour; faster removal needs purge tooling.
 13. Language(s) for launch: English only, or also Arabic/Russian?
 14. Brand assets: logo, brand colors, fonts — do they exist?
-15. Domain and analytics/ad platforms in use (Meta, Google Ads, TikTok) for Phase 5 attribution.
+15. Domain and analytics/ad platforms in use (Meta, Google Ads, TikTok). Still open: Phase 5
+    carries UTM/fbclid into WhatsApp messages only; no pixels or analytics until decided
+    (with consent handling as required). No site domain is configured; VDP URLs in messages use
+    the origin the visitor actually used.
 16. Which of finance, trade-in, warranty, delivery, export are actually offered (for later phases)?
-17. Exact wording and scope of the "Didn't find what you need?" path (no sourcing promise unless
-    confirmed).
+17. ~~"Didn't find what you need?" wording~~ — confirmed 2026-09-30 (see "Contact and
+    inquiries"). Sourcing/import remains unconfirmed and is not promised.
 18. Should a sold car's page or sold section show its last listed price? (Default until decided:
     no price on sold cars.)

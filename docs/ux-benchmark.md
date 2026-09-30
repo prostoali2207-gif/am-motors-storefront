@@ -567,6 +567,32 @@ ad creatives in galleries, first-visit modals, floating chat bubbles, all-caps t
 black-and-gold, gradients, glassmorphism, placeholder or rendered car images, table/spreadsheet
 styling, boxed shadow cards, empty "reserved" UI areas.
 
+## Phase 5 — conversion actions (implemented 2026-09-30, pending review)
+
+Evidence: synthesis 3 (WhatsApp prominent in the UAE set), 4 (1–2 action sticky bars are the
+norm; 3 actions or stacked bars eat the viewport), 5 (desktop right panel), and the "do not
+transfer" table (no floating chat bubble, no "Book"/"Reserve", no stacked bars).
+
+- **In-page action zone** directly after the fact line (mobile) / at the top of the right-hand
+  panel above the specification (desktop, cols 8–12): "Chat on WhatsApp" primary (solid ink,
+  52 px), "Request a viewing" + "Request a test drive" secondary (ink outline, 48 px, side by
+  side), then one muted line "Opens WhatsApp with a message about this car." Not sticky on
+  desktop (sticky panel still deferred with the gallery work).
+- **Neutral styling:** no WhatsApp green and no accent — the label names WhatsApp; brand accent
+  is still pending (q 14). No WhatsApp logo asset.
+- **Mobile sticky bar** (< 64 rem): WhatsApp + "Request a test drive" only; appears once the
+  in-page zone has scrolled above the viewport, hides when it returns; no animation; `hidden`
+  when not shown (out of tab order and accessibility tree); canvas background, top hairline,
+  64 px + `env(safe-area-inset-bottom)` (`viewport-fit=cover`). The page reserves the bar's
+  measured height as bottom padding, so the last content and footer are never covered (checked
+  at 390 and 320 px, where a label wraps). Absent on sold VDPs and on desktop. On a short VDP
+  the in-page zone never leaves the viewport, so the bar never appears — by design.
+- **General request** block after the inventory (and after the empty / unavailable notice) on
+  `/` and `/cars`, and on the VDP "inventory unavailable" state: heading "Didn't find what you
+  need?", line "Ask us about current availability on WhatsApp.", outline "Chat on WhatsApp".
+  Not on sold or not-found VDPs.
+- Links open WhatsApp in a new browsing context (`target=_blank`, `noopener noreferrer`).
+
 ## Decisions log
 
 | Date | Decision | Evidence | Notes |
@@ -575,3 +601,4 @@ styling, boxed shadow cards, empty "reserved" UI areas.
 | 2026-09-30 | Review: benchmark accepted; direction revised (neutral palette, typography evidence, photo-ready geometry, Phase 4/5 split, more editorial) | User review | — |
 | 2026-09-30 | "Coachwork" accepted as the Phase 4 basis with four edits: Cyrillic-capable font (Geologica; Archivo deferred), no new sorting (source order), media ratio provisional, no gallery infrastructure / no reserved empty spaces | User review, Cyrillic font check | Phase 4 implementation started |
 | 2026-09-30 | Phase 4 implemented per this spec (PR for review) | Browser verification 390×844 / 1440×900 | Not merged; no deployment |
+| 2026-09-30 | Phase 5 conversion actions, sticky bar and general request (see "Phase 5") | Synthesis 3–5, confirmed business decisions | PR for review; no deployment |

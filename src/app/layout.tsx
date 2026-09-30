@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import Link from "next/link";
 
+import { AttributionCapture } from "@/components/attribution-capture";
+
 import "./globals.css";
 
 /**
@@ -27,6 +29,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
+  // Lets the mobile sticky action bar sit above the home indicator via env(safe-area-inset-*).
+  viewportFit: "cover",
   themeColor: "#f6f5f1",
 };
 
@@ -34,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html lang="en" className={geologica.variable}>
       <body>
+        <AttributionCapture />
         <a className="skip-link" href="#main">
           Skip to content
         </a>

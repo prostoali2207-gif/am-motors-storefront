@@ -131,7 +131,8 @@ a {
   width: 100%;
   max-width: calc(var(--max-width) + 2 * var(--gutter));
   margin-inline: auto;
-  padding-inline: var(--gutter);
+  /* viewport-fit=cover (layout.tsx): keep content clear of notches in landscape. */
+  padding-inline: max(var(--gutter), env(safe-area-inset-left)) max(var(--gutter), env(safe-area-inset-right));
 }
 
 main {
@@ -383,9 +384,39 @@ main {
   padding-top: var(--space-2);
 }
 
-.vehicle-main {
+/*
+ * Mobile: one column. The two layout wrappers dissolve so their children can be ordered:
+ * lead photo → title block → actions → remaining photos / "Photos unavailable" → specification.
+ * Keyboard order is unchanged by this (the photos contain no focusable elements).
+ */
+.vehicle {
   display: flex;
   flex-direction: column;
+}
+
+.vehicle-main,
+.vehicle-panel {
+  display: contents;
+}
+
+.vehicle-main > .vehicle-photos:first-child {
+  order: 1;
+}
+
+.vehicle-heading {
+  order: 2;
+}
+
+.vehicle-actions {
+  order: 3;
+}
+
+.vehicle-heading ~ * {
+  order: 4;
+}
+
+.vehicle-spec {
+  order: 5;
 }
 
 .vehicle-heading {
@@ -462,6 +493,120 @@ main {
 
 .gallery-frame img {
   object-fit: contain;
+}
+
+/* ---- Conversion actions (Phase 5) ---- */
+
+/*
+ * Neutral Coachwork styling: no WhatsApp green and no accent colour (brand accent is pending,
+ * open question 14). Primary = solid ink, secondary = ink outline. Labels say "Request…", never
+ * "Book".
+ */
+.action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: var(--space-2) var(--space-3);
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  font-weight: 500;
+  text-align: center;
+  text-decoration: none;
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+}
+
+.action:hover {
+  text-decoration: underline;
+}
+
+.action-primary {
+  min-height: 52px;
+  font-weight: 600;
+  color: var(--canvas);
+  background: var(--ink);
+}
+
+.vehicle-actions {
+  display: grid;
+  gap: var(--space-2);
+  padding-bottom: var(--space-6);
+}
+
+.action-secondary-group {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.action-hint {
+  font-size: 0.8125rem;
+  line-height: 1.125rem;
+  color: var(--muted);
+}
+
+/*
+ * Mobile sticky bar: 64 px + safe-area inset, canvas background, top hairline, two actions.
+ * Display is left to the `hidden` attribute (never set `display` on .sticky-actions itself).
+ */
+.sticky-actions {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 20;
+  background: var(--canvas);
+  border-top: var(--hairline);
+  padding: var(--space-2) max(var(--gutter), env(safe-area-inset-right))
+    calc(var(--space-2) + env(safe-area-inset-bottom)) max(var(--gutter), env(safe-area-inset-left));
+}
+
+.sticky-actions-inner {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+
+.sticky-actions .action {
+  min-height: 48px;
+  padding-inline: var(--space-2);
+  font-size: 0.875rem;
+}
+
+/*
+ * Reserve the bar's height at the end of the page so it never covers the last content.
+ * Default = 64 px + inset; the measured height (sticky-actions.tsx) replaces it when larger or
+ * smaller (e.g. a label wraps on a narrow screen).
+ */
+body:has(.sticky-actions) {
+  padding-bottom: var(--sticky-actions-height, calc(4rem + env(safe-area-inset-bottom)));
+}
+
+.general-request {
+  margin-top: var(--space-8);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--ink);
+  max-width: 40rem;
+}
+
+.general-request-title {
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.general-request-text {
+  margin-top: var(--space-2);
+  color: var(--muted);
+}
+
+.general-request-action {
+  display: inline-flex;
+  margin-top: var(--space-4);
+  padding-inline: var(--space-6);
 }
 
 .vehicle-spec {
@@ -573,6 +718,32 @@ main {
 
   .vehicle-main {
     grid-column: 1 / span 7;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Right-hand conversion area: actions above the specification. */
+  .vehicle-panel {
+    grid-column: 8 / span 5;
+    display: block;
+    padding-top: var(--space-8);
+  }
+
+  .vehicle-actions {
+    padding-bottom: var(--space-8);
+  }
+
+  /* Desktop keeps the actions in the panel; no sticky bar, no reserved space. */
+  .sticky-actions {
+    display: none;
+  }
+
+  body:has(.sticky-actions) {
+    padding-bottom: 0;
+  }
+
+  .general-request {
+    margin-top: 0;
   }
 
   .vehicle-heading {
@@ -597,10 +768,6 @@ main {
     line-height: 1.5rem;
   }
 
-  .vehicle-spec {
-    grid-column: 8 / span 5;
-    margin-top: var(--space-8);
-  }
 
   .gallery {
     margin-top: var(--space-4);
