@@ -9,7 +9,7 @@ afterEach(cleanup);
 
 describe("VehicleDetail", () => {
   it("renders an available vehicle from public fields only", () => {
-    render(<VehicleDetail vehicle={syntheticAvailable} />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} />);
     expect(
       screen.getByRole("heading", { level: 1, name: "2001 Testmake Fixture Alpha Synthetic Trim" }),
     ).toBeDefined();
@@ -21,7 +21,7 @@ describe("VehicleDetail", () => {
   });
 
   it("lists the specification in the fixed order with the public reference last", () => {
-    render(<VehicleDetail vehicle={syntheticAvailable} />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} />);
     const spec = screen.getByRole("region", { name: "Specification" });
     expect(within(spec).getAllByRole("term").map((dt) => dt.textContent)).toEqual([
       "Mileage",
@@ -38,7 +38,7 @@ describe("VehicleDetail", () => {
   });
 
   it("summarises mileage, regional spec and transmission under the price", () => {
-    render(<VehicleDetail vehicle={syntheticAvailable} />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} />);
     const heading = screen.getByRole("heading", { level: 1 }).parentElement as HTMLElement;
     expect(within(heading).getAllByRole("listitem").map((li) => li.textContent)).toEqual([
       "22,222 km",
@@ -47,13 +47,13 @@ describe("VehicleDetail", () => {
     ]);
   });
 
-  it("shows Sheet text verbatim, including Cyrillic, without translating it", () => {
-    render(<VehicleDetail vehicle={{ ...syntheticAvailable, transmission: "Тестовая коробка" }} />);
+  it("shows unmapped Sheet text verbatim, including Cyrillic, without translating it", () => {
+    render(<VehicleDetail locale="en" vehicle={{ ...syntheticAvailable, transmission: "Тестовая коробка" }} />);
     expect(screen.getAllByText("Тестовая коробка").length).toBeGreaterThan(0);
   });
 
   it("renders the three WhatsApp actions for an available vehicle and no forms or phone links", () => {
-    const { container } = render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const zone = screen.getByRole("region", { name: "Ask about this car" });
     expect(within(zone).getAllByRole("link").map((a) => a.textContent)).toEqual([
       "Chat on WhatsApp",
@@ -64,7 +64,7 @@ describe("VehicleDetail", () => {
   });
 
   it("marks a sold vehicle as sold and offers no viewing or test-drive requests", () => {
-    render(<VehicleDetail vehicle={syntheticSold} />);
+    render(<VehicleDetail locale="en" vehicle={syntheticSold} />);
     expect(screen.getByText("Sold")).toBeDefined();
     expect(screen.getByText("This car has been sold.")).toBeDefined();
     expect(screen.queryByText(/AED/)).toBeNull();
@@ -73,14 +73,14 @@ describe("VehicleDetail", () => {
   });
 
   it("gives a sold vehicle zero conversion actions and no sticky bar", () => {
-    const { container } = render(<VehicleDetail vehicle={syntheticSold} serverOrigin="https://site.test" />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={syntheticSold} serverOrigin="https://site.test" />);
     expect(container.querySelectorAll("a[href*='wa.me']")).toHaveLength(0);
     expect(container.querySelector("[data-sticky-actions]")).toBeNull();
     expect(container.textContent).not.toMatch(/whatsapp|request a|didn.t find/i);
   });
 
   it("omits missing values instead of filling them in", () => {
-    const { container } = render(<VehicleDetail vehicle={syntheticSparse} />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={syntheticSparse} />);
     expect(screen.queryByText(/AED/)).toBeNull();
     expect(screen.queryByText(/km/)).toBeNull();
     expect(container.textContent).not.toMatch(/N\/A|unknown|on request/i);
@@ -95,12 +95,12 @@ describe("VehicleDetail", () => {
       minPriceAed: 99999,
       notes: "PRIVATE-NOTES-MARKER",
     } as Vehicle;
-    const { container } = render(<VehicleDetail vehicle={leaky} />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={leaky} />);
     expect(container.innerHTML).not.toMatch(/PRIVATE-|99,?999/);
   });
 
   it("uses request wording only and never 'Book' or 'qualified lead'", () => {
-    const { container } = render(<VehicleDetail vehicle={syntheticAvailable} />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={syntheticAvailable} />);
     expect(container.textContent).not.toMatch(/\bbook\b|qualified lead/i);
   });
 });

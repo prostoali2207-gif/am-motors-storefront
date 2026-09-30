@@ -1,18 +1,20 @@
 import type { Vehicle } from "@/domain/vehicle";
+import type { Locale } from "@/i18n/locales";
+import { messages } from "@/i18n/messages";
+import { formatNumber } from "@/i18n/numbers";
+import { displayVehicleValue } from "@/i18n/vehicle-values";
 
 /**
  * Display formatting only — values come from the public model unchanged.
  * Digit grouping is provisional: AED formatting rules are an open question in
- * docs/business-rules.md.
+ * docs/business-rules.md. The currency is written as "AED" in every language.
  */
-const grouped = new Intl.NumberFormat("en-US", { maximumFractionDigits: 2 });
-
-export function formatPriceAed(amount: number): string {
-  return `AED ${grouped.format(amount)}`;
+export function formatPriceAed(amount: number, locale: Locale): string {
+  return `AED ${formatNumber(amount, locale)}`;
 }
 
-export function formatMileageKm(km: number): string {
-  return `${grouped.format(km)} km`;
+export function formatMileageKm(km: number, locale: Locale): string {
+  return `${formatNumber(km, locale)} ${messages(locale).kmUnit}`;
 }
 
 function present(value: string | null): value is string {
@@ -31,17 +33,21 @@ export function makeYearLine(vehicle: Pick<Vehicle, "make" | "year">): string {
 
 /**
  * Key facts for cards and the VDP summary line, in a fixed order: mileage, regional spec,
- * transmission. Only values that exist; Sheet text is shown verbatim (open question 6).
+ * transmission. Only values that exist; categorical values use the approved display dictionary
+ * (src/i18n/vehicle-values.ts), anything else is shown as the Sheet writes it.
  */
-export function keyFacts(vehicle: Pick<Vehicle, "mileageKm" | "regionalSpec" | "transmission">): string[] {
+export function keyFacts(
+  vehicle: Pick<Vehicle, "mileageKm" | "regionalSpec" | "transmission">,
+  locale: Locale,
+): string[] {
   return [
-    vehicle.mileageKm === null ? null : formatMileageKm(vehicle.mileageKm),
-    vehicle.regionalSpec,
-    vehicle.transmission,
+    vehicle.mileageKm === null ? null : formatMileageKm(vehicle.mileageKm, locale),
+    displayVehicleValue("regionalSpec", vehicle.regionalSpec, locale),
+    displayVehicleValue("transmission", vehicle.transmission, locale),
   ].filter(present);
 }
 
 /** "1 car available" / "12 cars available" — a count of what the source returned, nothing more. */
-export function availableCount(count: number): string {
-  return `${grouped.format(count)} ${count === 1 ? "car" : "cars"} available`;
+export function availableCount(count: number, locale: Locale): string {
+  return messages(locale).availableCount(count);
 }

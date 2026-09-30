@@ -1,6 +1,8 @@
 import Image from "next/image";
 
 import { vehicleImages, type VehicleMedia } from "@/domain/vehicle-media";
+import type { Locale } from "@/i18n/locales";
+import { messages, type Messages } from "@/i18n/messages";
 
 /**
  * VDP photos — deliberately simple until real approved website photos exist.
@@ -21,11 +23,14 @@ export function VehicleGallery({
   media,
   title,
   part = "all",
+  locale,
 }: {
   media: readonly VehicleMedia[];
   title: string;
   part?: "all" | "lead" | "rest";
+  locale: Locale;
 }) {
+  const t = messages(locale);
   const images = vehicleImages(media);
   const start = part === "rest" ? 1 : 0;
   const end = part === "lead" ? 1 : images.length;
@@ -33,9 +38,9 @@ export function VehicleGallery({
 
   if (part === "rest") {
     return shown.length === 0 ? null : (
-      <ul className="gallery gallery-rest" aria-label="More photos">
+      <ul className="gallery gallery-rest" aria-label={t.morePhotos}>
         {shown.map((image, offset) => (
-          <Frame key={image.id} src={image.src} index={start + offset} count={images.length} title={title} />
+          <Frame key={image.id} src={image.src} index={start + offset} count={images.length} title={title} t={t} />
         ))}
       </ul>
     );
@@ -44,14 +49,14 @@ export function VehicleGallery({
   return (
     <section className="vehicle-photos" aria-labelledby="vehicle-photos-heading">
       <h2 id="vehicle-photos-heading" className="visually-hidden">
-        Photos
+        {t.photosHeading}
       </h2>
       {images.length === 0 ? (
-        <p className="media-unavailable">Photos unavailable</p>
+        <p className="media-unavailable">{t.photosUnavailable}</p>
       ) : (
         <ul className="gallery">
           {shown.map((image, offset) => (
-            <Frame key={image.id} src={image.src} index={start + offset} count={images.length} title={title} />
+            <Frame key={image.id} src={image.src} index={start + offset} count={images.length} title={title} t={t} />
           ))}
         </ul>
       )}
@@ -59,12 +64,24 @@ export function VehicleGallery({
   );
 }
 
-function Frame({ src, index, count, title }: { src: string; index: number; count: number; title: string }) {
+function Frame({
+  src,
+  index,
+  count,
+  title,
+  t,
+}: {
+  src: string;
+  index: number;
+  count: number;
+  title: string;
+  t: Messages;
+}) {
   return (
     <li className="gallery-frame">
       <Image
         src={src}
-        alt={`${title}, photo ${index + 1} of ${count}`}
+        alt={t.photoAlt(title, index + 1, count)}
         fill
         sizes="(min-width: 64rem) 46rem, 100vw"
         loading={index === 0 ? "eager" : "lazy"}

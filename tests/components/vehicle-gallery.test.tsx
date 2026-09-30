@@ -16,20 +16,20 @@ const MEDIA: VehicleMedia[] = [
 
 describe("VehicleGallery", () => {
   it("shows a neutral 'Photos unavailable' state without any placeholder image", () => {
-    const { container } = render(<VehicleGallery media={[]} title="Test title" />);
+    const { container } = render(<VehicleGallery locale="en" media={[]} title="Test title" />);
     expect(screen.getByText("Photos unavailable")).toBeDefined();
     expect(container.querySelector("img, video, picture")).toBeNull();
     expect(container.textContent).not.toMatch(/coming soon|soon|stock|placeholder/i);
   });
 
   it("treats video-only media as photos unavailable and never renders or autoloads video", () => {
-    const { container } = render(<VehicleGallery media={[MEDIA[1]]} title="Test title" />);
+    const { container } = render(<VehicleGallery locale="en" media={[MEDIA[1]]} title="Test title" />);
     expect(screen.getByText("Photos unavailable")).toBeDefined();
     expect(container.querySelector("video, source, iframe")).toBeNull();
   });
 
   it("renders images only through the site's media route, in the given order", () => {
-    const { container } = render(<VehicleGallery media={MEDIA} title="2001 Testmake Fixture Alpha" />);
+    const { container } = render(<VehicleGallery locale="en" media={MEDIA} title="2001 Testmake Fixture Alpha" />);
     const images = screen.getAllByRole("img");
     expect(images.map((img) => img.getAttribute("alt"))).toEqual([
       "2001 Testmake Fixture Alpha, photo 1 of 2",
@@ -49,14 +49,14 @@ describe("VehicleGallery", () => {
 
 describe("VehicleDetail media states", () => {
   it("shows 'Photos unavailable' on a VDP without media and keeps all facts", () => {
-    render(<VehicleDetail vehicle={syntheticAvailable} />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} />);
     expect(screen.getByRole("heading", { level: 2, name: "Photos" })).toBeDefined();
     expect(screen.getByText("Photos unavailable")).toBeDefined();
     expect(screen.getByText("AED 11,111")).toBeDefined();
   });
 
   it("keeps the title right after the first photo and the other photos after the summary", () => {
-    const { container } = render(<VehicleDetail vehicle={{ ...syntheticAvailable, media: MEDIA }} />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={{ ...syntheticAvailable, media: MEDIA }} />);
     const order = [...container.querySelectorAll("img, h1")].map((el) =>
       el.tagName === "H1" ? "title" : el.getAttribute("alt"),
     );
@@ -69,7 +69,7 @@ describe("VehicleDetail media states", () => {
   });
 
   it("shows photos on a sold VDP without making it look available", () => {
-    render(<VehicleDetail vehicle={{ ...syntheticSold, media: MEDIA }} />);
+    render(<VehicleDetail locale="en" vehicle={{ ...syntheticSold, media: MEDIA }} />);
     expect(screen.getAllByRole("img")).toHaveLength(2);
     expect(screen.getByText("This car has been sold.")).toBeDefined();
     expect(screen.queryByText(/AED/)).toBeNull();

@@ -10,7 +10,7 @@ import { syntheticAvailable, syntheticLongId } from "../fixtures/vehicles";
 const ORIGIN = "https://site.test";
 
 function vehicleInquiry(intent: "question" | "viewing" | "test-drive", vehicle = syntheticAvailable): Inquiry {
-  return { kind: "vehicle", intent, title: vehicleTitle(vehicle), id: vehicle.id, path: vehiclePath(vehicle.id) };
+  return { kind: "vehicle", intent, title: vehicleTitle(vehicle), id: vehicle.id, path: vehiclePath(vehicle.id), locale: "en" };
 }
 
 /** Decodes the `text` parameter exactly as WhatsApp would. */
@@ -88,7 +88,7 @@ describe("general-request message", () => {
     expect(GENERAL_REQUEST_MESSAGE).toBe(
       "Hi, I couldn't find the car I'm looking for on the website. Can you help me with current availability?",
     );
-    expect(inquiryMessage({ kind: "general" }, ORIGIN)).toBe(GENERAL_REQUEST_MESSAGE);
+    expect(inquiryMessage({ kind: "general", locale: "en" }, ORIGIN)).toBe(GENERAL_REQUEST_MESSAGE);
     expect(GENERAL_REQUEST_MESSAGE).not.toMatch(/source|import|order|find (it|any)|guarantee|\bbook|reserve|confirm/i);
   });
 });
@@ -114,7 +114,7 @@ describe("attribution block in messages", () => {
   });
 
   it("adds nothing for an ad click ID alone and invents no source from it", () => {
-    const text = inquiryMessage({ kind: "general" }, ORIGIN, parseAttribution("?fbclid=IwAR0synthetic"));
+    const text = inquiryMessage({ kind: "general", locale: "en" }, ORIGIN, parseAttribution("?fbclid=IwAR0synthetic"));
     expect(text).toBe(GENERAL_REQUEST_MESSAGE);
     expect(text).not.toMatch(/fbclid|IwAR0|Source|Campaign|facebook|meta|instagram/i);
   });
