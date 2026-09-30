@@ -1,7 +1,12 @@
 import type { Vehicle } from "./vehicle";
 
-/** Why inventory cannot be shown. Never rendered as "no cars". */
-export type UnavailableReason = "not-configured" | "source-error";
+/**
+ * Why inventory cannot be shown. Never rendered as "no cars".
+ * - `not-configured`: no data source or incomplete server configuration.
+ * - `source-error`: the source could not be read (network, auth, quota, upstream error).
+ * - `invalid-data`: the source was read but its structure failed validation (e.g. header).
+ */
+export type UnavailableReason = "not-configured" | "source-error" | "invalid-data";
 
 export type InventoryUnavailable = { readonly kind: "unavailable"; readonly reason: UnavailableReason };
 

@@ -107,6 +107,10 @@ unavailable" state with contact options — it is never rendered as "no cars".
 
 - Define one revalidation window for inventory (agreed with the business) and tag cached reads
   (e.g. `inventory`) so on-demand revalidation can be added.
+- Phase 2 implementation (`src/inventory/freshness.ts`): `unstable_cache` over the mapped public
+  snapshot (60 s, tag `inventory`) plus a 120 s hard max age that bypasses stale entries.
+  Raw Sheet responses are fetched with `no-store` and never cached. `use cache` would need the
+  `cacheComponents` flag; migrating is a separate, deliberate change.
 - On source error, prefer showing `unavailable` over serving data older than the window.
 - VDP static params: optional; dynamic rendering is acceptable for small stock.
 
@@ -119,5 +123,11 @@ unavailable" state with contact options — it is never rendered as "no cars".
 
 ## Environment variables
 
-Names are finalized in Phase 2. Rules: server-only, documented in `.env.example` without values,
-validated in `lib/env.ts`, never prefixed `NEXT_PUBLIC_` for credentials or Sheet/Drive IDs.
+Rules: server-only, documented in `.env.example` without values, validated in `lib/env.ts`,
+never prefixed `NEXT_PUBLIC_` for credentials or Sheet/Drive IDs.
+
+Finalized in Phase 2: `INVENTORY_SOURCE`, `GOOGLE_SHEETS_SPREADSHEET_ID`, `GOOGLE_AUTH_MODE`
+(`vercel-oidc` | `service-account-key`), `GOOGLE_SERVICE_ACCOUNT_EMAIL`,
+`GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` (key mode), `GCP_PROJECT_NUMBER`,
+`GCP_WORKLOAD_IDENTITY_POOL_ID`, `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID` (OIDC mode).
+See `docs/google-sheets-setup.md`.
