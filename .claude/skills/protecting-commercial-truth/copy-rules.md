@@ -34,5 +34,8 @@ Applies to page text, card text, SEO titles/meta, Open Graph, JSON-LD, ads and W
 
 ## WhatsApp prefill
 
-Template uses only: title, public ID, canonical URL. No price in the prefill unless the business
-approves it (price may change between page view and message).
+Template uses only: title, public ID, the VDP URL. No price in the prefill unless the business
+approves it (price may change between page view and message). The confirmed templates (vehicle
+question, viewing, test drive, general request) live in `docs/business-rules.md` → "Contact and
+inquiries"; an optional attribution block may follow, holding only received UTM values
+(no ad click IDs).

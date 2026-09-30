@@ -35,6 +35,14 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   (`src/app/fonts/`), inventory-first home and `/cars`, photo-free cards, VDP no-photo state,
   sold VDP styling. No conversion actions (Phase 5), no sorting (source order), media ratio
   provisional (`--media-ratio`).
+- Phase 5 (Conversion & attribution) implemented 2026-09-30 — **pending review**: available
+  VDPs get WhatsApp (primary) + "Request a viewing" / "Request a test drive" (secondary), all
+  opening WhatsApp +971 50 343 2337 with confirmed prefills (`src/conversion/`); mobile sticky
+  bar (WhatsApp + test drive) after the in-page actions scroll away; sold VDPs have no actions;
+  "Didn't find what you need?" general request on `/` and `/cars`. First-touch UTM parameters (no click IDs) in
+  `sessionStorage`, appended to prefills (`src/attribution/`). No pixels, analytics, cookies,
+  forms, API or CRM (open question 15). Confirmed decisions: `docs/business-rules.md` →
+  "Contact and inquiries".
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.
@@ -126,8 +134,9 @@ React / TypeScript / ESLint majors follow the official `create-next-app@16.3.7` 
 | `npm run smoke:media` | Read-only live Drive media smoke test (per-vehicle state/counts only; not in `verify`) |
 
 Layout: `src/domain` (public types, ID rules), `src/inventory` (repository interface, adapter
-factory, request-time queries), `src/adapters` (data sources), `src/components` (sync views),
-`src/app` (routes). Tests and synthetic fixtures live only in `tests/`.
+factory, request-time queries), `src/adapters` (data sources), `src/conversion` (WhatsApp
+number, prefill templates), `src/attribution` (first-touch UTM parameters, browser session only),
+`src/components` (sync views + small client islands), `src/app` (routes). Tests and synthetic fixtures live only in `tests/`.
 Vitest cannot render async Server Components: keep pages thin and test the sync views.
 
 <!-- BEGIN:nextjs-agent-rules -->

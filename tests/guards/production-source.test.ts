@@ -72,6 +72,42 @@ describe("production source guards", () => {
   });
 });
 
+describe("conversion and attribution guards", () => {
+  it("keeps the WhatsApp number and wa.me URL building in one module", () => {
+    const withNumber = files.filter(({ text }) => /971\s*50\s*343\s*2337|971503432337/.test(text));
+    expect(withNumber.map((f) => f.path)).toEqual([join(SRC, "conversion", "whatsapp.ts")]);
+    const withWaMe = files.filter(({ text }) => /wa\.me|api\.whatsapp|whatsapp:\/\//.test(text));
+    expect(withWaMe.map((f) => f.path)).toEqual([join(SRC, "conversion", "whatsapp.ts")]);
+  });
+
+  it("loads no tracking pixels or third-party analytics", () => {
+    const offenders = files.filter(({ text }) =>
+      /googletagmanager|google-analytics|gtag\(|fbq\(|connect\.facebook\.net|analytics\.tiktok|ttq\.|next\/script|@vercel\/analytics|posthog|segment\.com|hotjar|clarity\.ms/i.test(
+        text,
+      ),
+    );
+    expect(offenders.map((f) => f.path)).toEqual([]);
+  });
+
+  it("sets no cookies and posts no inquiry data anywhere (no API route, no fetch from the browser)", () => {
+    expect(files.filter(({ text }) => /document\.cookie|cookies\(\)/.test(text)).map((f) => f.path)).toEqual([]);
+    const client = files.filter(({ text }) => /^["']use client["'];/m.test(text));
+    expect(client.length).toBeGreaterThan(0);
+    const clientOffenders = client.filter(({ text }) => /\bfetch\(|sendBeacon|XMLHttpRequest|WebSocket/.test(text));
+    expect(clientOffenders.map((f) => f.path)).toEqual([]);
+    const routes = files.filter(({ path }) => /[\\/]route\.ts$/.test(path)).map((f) => f.path);
+    expect(routes).toEqual([join(SRC, "app", "media", "[vehicleId]", "[mediaId]", "[revision]", "route.ts")]);
+  });
+
+  it("keeps attribution storage free of vehicle data", () => {
+    const attribution = files.filter(({ path }) => path.includes(join("src", "attribution")));
+    expect(attribution.length).toBe(2);
+    for (const { text } of attribution) {
+      expect(text).not.toMatch(/@\/domain|@\/inventory|@\/adapters|Vehicle\b/);
+    }
+  });
+});
+
 describe("media guards", () => {
   const rendered = files.filter(({ path }) => /src[\\/](app|components|domain)[\\/]/.test(path));
 

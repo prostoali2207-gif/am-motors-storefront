@@ -6,6 +6,7 @@ import { vehicleImages } from "@/domain/vehicle-media";
 import { FactLine } from "./fact-line";
 import { formatMileageKm, formatPriceAed, keyFacts, makeYearLine, modelLine } from "./format";
 import { SoldBadge } from "./sold-badge";
+import { VehicleActions } from "./vehicle-actions";
 import { VehicleGallery } from "./vehicle-gallery";
 
 type Fact = { label: string; value: string | null };
@@ -29,11 +30,16 @@ function specification(vehicle: Vehicle): Fact[] {
 }
 
 /**
- * VDP body. Conversion actions (WhatsApp, request a viewing / test drive) arrive in Phase 5 once
- * the business confirms contact details; they go after the summary facts. Nothing is reserved
- * or shown for them here, and sold vehicles never get them.
+ * VDP body. Available vehicles get the conversion actions (WhatsApp, request a viewing / test
+ * drive); sold vehicles get none.
+ *
+ * Layout: `vehicle-main` (photos, title block) and `vehicle-panel` (actions, specification).
+ * Desktop: two columns, the panel on the right. Mobile: both wrappers dissolve into one column
+ * ordered title block → actions → photos line → specification (globals.css).
+ *
+ * `serverOrigin` is the request origin for the VDP URL in WhatsApp messages (null if unknown).
  */
-export function VehicleDetail({ vehicle }: { vehicle: Vehicle }) {
+export function VehicleDetail({ vehicle, serverOrigin = null }: { vehicle: Vehicle; serverOrigin?: string | null }) {
   const specRows = specification(vehicle).filter(
     (fact): fact is { label: string; value: string } => fact.value !== null && fact.value.trim() !== "",
   );
@@ -82,21 +88,25 @@ export function VehicleDetail({ vehicle }: { vehicle: Vehicle }) {
         )}
       </div>
 
-      {specRows.length > 0 ? (
-        <section className="vehicle-spec" aria-labelledby="vehicle-spec-heading">
-          <h2 id="vehicle-spec-heading" className="label spec-heading">
-            Specification
-          </h2>
-          <dl className="spec">
-            {specRows.map((fact) => (
-              <div key={fact.label} className="spec-row">
-                <dt>{fact.label}</dt>
-                <dd className="figure">{fact.value}</dd>
-              </div>
-            ))}
-          </dl>
-        </section>
-      ) : null}
+      <div className="vehicle-panel">
+        {sold ? null : <VehicleActions vehicle={vehicle} serverOrigin={serverOrigin} />}
+
+        {specRows.length > 0 ? (
+          <section className="vehicle-spec" aria-labelledby="vehicle-spec-heading">
+            <h2 id="vehicle-spec-heading" className="label spec-heading">
+              Specification
+            </h2>
+            <dl className="spec">
+              {specRows.map((fact) => (
+                <div key={fact.label} className="spec-row">
+                  <dt>{fact.label}</dt>
+                  <dd className="figure">{fact.value}</dd>
+                </div>
+              ))}
+            </dl>
+          </section>
+        ) : null}
+      </div>
     </article>
   );
 }

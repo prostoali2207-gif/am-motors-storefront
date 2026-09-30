@@ -52,10 +52,15 @@ describe("VehicleDetail", () => {
     expect(screen.getAllByText("Тестовая коробка").length).toBeGreaterThan(0);
   });
 
-  it("renders no action area, buttons or contact links before Phase 5", () => {
-    const { container } = render(<VehicleDetail vehicle={syntheticAvailable} />);
-    expect(container.querySelector("button, form, a[href^='https://wa.me'], a[href^='tel:']")).toBeNull();
-    expect(container.textContent).not.toMatch(/whatsapp|request a|didn.t find/i);
+  it("renders the three WhatsApp actions for an available vehicle and no forms or phone links", () => {
+    const { container } = render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    const zone = screen.getByRole("region", { name: "Ask about this car" });
+    expect(within(zone).getAllByRole("link").map((a) => a.textContent)).toEqual([
+      "Chat on WhatsApp",
+      "Request a viewing",
+      "Request a test drive",
+    ]);
+    expect(container.querySelector("button, form, a[href^='tel:']")).toBeNull();
   });
 
   it("marks a sold vehicle as sold and offers no viewing or test-drive requests", () => {
@@ -65,6 +70,13 @@ describe("VehicleDetail", () => {
     expect(screen.queryByText(/AED/)).toBeNull();
     expect(screen.queryByText(/request a (viewing|test drive)/i)).toBeNull();
     expect(screen.getByRole("link", { name: "See cars in stock" }).getAttribute("href")).toBe("/cars");
+  });
+
+  it("gives a sold vehicle zero conversion actions and no sticky bar", () => {
+    const { container } = render(<VehicleDetail vehicle={syntheticSold} serverOrigin="https://site.test" />);
+    expect(container.querySelectorAll("a[href*='wa.me']")).toHaveLength(0);
+    expect(container.querySelector("[data-sticky-actions]")).toBeNull();
+    expect(container.textContent).not.toMatch(/whatsapp|request a|didn.t find/i);
   });
 
   it("omits missing values instead of filling them in", () => {
