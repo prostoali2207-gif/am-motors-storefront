@@ -17,7 +17,8 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
 
 ## Current status
 
-- Repository operating layer only (CLAUDE.md, project skills, docs). No application code yet.
+- Phase 1 (Foundation) implemented: routes, public `Vehicle` type, `InventoryRepository`, and a
+  production default adapter that always returns `unavailable`. No data source is connected.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.
@@ -83,9 +84,38 @@ Security
 ## Conventions
 
 - Language of code, docs and commits: English. The Sheet name stays verbatim (Russian).
-- Stack (from Phase 1): current stable Next.js App Router + TypeScript (strict), Server
-  Components by default. Exact versions are pinned when Phase 1 starts — check official
-  docs, don't rely on memory.
-- Commands (lint, typecheck, test, build) will be documented here once Phase 1 adds them.
+- Stack: Next.js App Router + TypeScript (strict), Server Components by default. Versions are
+  pinned exactly in `package.json`; upgrade deliberately, after reading the official docs.
 - Open questions and unconfirmed business facts live in `docs/business-rules.md` →
   "Open questions". When a task depends on one, ask the user; do not assume.
+
+## Stack and commands
+
+Pinned versions (Node >= 20.9, npm): `next` 16.3.7, `react` / `react-dom` 19.2.8,
+`typescript` 5.9.3, `eslint` 9.39.5 + `eslint-config-next` 16.3.7 (flat config),
+`vitest` 5.0.2 + `@testing-library/react` 16.3.3 + `jsdom` 30.1.1, `server-only` 0.0.1.
+React / TypeScript / ESLint majors follow the official `create-next-app@16.3.7` template.
+
+| Command | What it does |
+| - | - |
+| `npm run dev` | Dev server (Turbopack) |
+| `npm run lint` | ESLint CLI (`next lint` no longer exists in Next 16) |
+| `npm run typecheck` | `next typegen` (route types for `PageProps`/`LayoutProps`) + `tsc --noEmit` |
+| `npm run test` | Vitest, single run |
+| `npm run build` | Production build (does not lint) |
+| `npm run verify` | lint → typecheck → test → build |
+
+Layout: `src/domain` (public types, ID rules), `src/inventory` (repository interface, adapter
+factory, request-time queries), `src/adapters` (data sources), `src/components` (sync views),
+`src/app` (routes). Tests and synthetic fixtures live only in `tests/`.
+Vitest cannot render async Server Components: keep pages thin and test the sync views.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+# This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

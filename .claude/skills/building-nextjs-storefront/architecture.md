@@ -32,16 +32,18 @@ src/
   inventory/
     repository.ts            # InventoryRepository interface
     index.ts                 # server-only factory selecting the configured adapter
+    queries.ts               # request-time reads (connection + cache), errors → unavailable
   adapters/
     unavailable/             # Phase 1: always returns "unavailable" (production-safe default)
     google-sheets/           # Phase 2
     google-drive-media/      # Phase 3
   components/                # presentational, domain-typed
   lib/
-    env.ts                   # validated server env
+    env.ts                   # validated server env (added with the first real data source)
 tests/
   fixtures/                  # synthetic vehicles only
-  ...
+  support/                   # in-memory test adapter, server-only stub
+  domain/ inventory/ components/ guards/
 ```
 
 ## Domain types (shape, not final)
