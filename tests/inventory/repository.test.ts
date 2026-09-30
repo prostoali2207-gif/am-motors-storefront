@@ -34,6 +34,8 @@ describe("adapter selection", () => {
         workloadIdentityPoolId: "test-pool",
         workloadIdentityPoolProviderId: "test-provider",
       },
+      media: "none",
+      warnings: [],
     });
     expect(repo).toBeInstanceOf(GoogleSheetsInventoryRepository);
   });

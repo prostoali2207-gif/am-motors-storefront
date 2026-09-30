@@ -36,6 +36,8 @@ describe("readInventorySourceConfig", () => {
         serviceAccountEmail: SA,
         privateKey: "-----BEGIN PRIVATE KEY-----\nTESTKEYMATERIAL\n-----END PRIVATE KEY-----\n",
       },
+      media: "none",
+      warnings: [],
     });
   });
 
@@ -60,7 +62,32 @@ describe("readInventorySourceConfig", () => {
         workloadIdentityPoolId: "test-pool",
         workloadIdentityPoolProviderId: "test-provider",
       },
+      media: "none",
+      warnings: [],
     });
+  });
+
+  it("enables Drive media only with MEDIA_SOURCE=google-drive; a bad value disables media, not inventory", () => {
+    const base = {
+      INVENTORY_SOURCE: "google-sheets",
+      GOOGLE_SHEETS_SPREADSHEET_ID: SHEET,
+      GOOGLE_AUTH_MODE: "service-account-key",
+      GOOGLE_SERVICE_ACCOUNT_EMAIL: SA,
+      GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY: KEY,
+    };
+    expect(readInventorySourceConfig({ ...base, MEDIA_SOURCE: "google-drive" })).toMatchObject({
+      kind: "google-sheets",
+      media: "google-drive",
+      warnings: [],
+    });
+    expect(readInventorySourceConfig({ ...base, MEDIA_SOURCE: "https://drive.google.com/x" })).toMatchObject({
+      kind: "google-sheets",
+      media: "none",
+      warnings: ["MEDIA_SOURCE"],
+    });
+    expect(JSON.stringify(readInventorySourceConfig({ ...base, MEDIA_SOURCE: "SECRET-VALUE" }))).not.toContain(
+      "SECRET-VALUE",
+    );
   });
 
   it("reports missing or malformed variables by name only, never their values", () => {

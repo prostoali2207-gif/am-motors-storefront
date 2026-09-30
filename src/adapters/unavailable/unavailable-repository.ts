@@ -1,6 +1,7 @@
 import type {
   InventoryListResult,
   InventoryUnavailable,
+  MediaImageResult,
   VehicleLookupResult,
 } from "@/domain/inventory-result";
 import type { InventoryRepository } from "@/inventory/repository";
@@ -22,6 +23,13 @@ export class UnavailableInventoryRepository implements InventoryRepository {
 
   async getById(id: string): Promise<VehicleLookupResult> {
     void id; // No source to look up in Phase 1.
+    return NOT_CONFIGURED;
+  }
+
+  async getImage(vehicleId: string, mediaId: string, revision: string): Promise<MediaImageResult> {
+    void vehicleId;
+    void mediaId;
+    void revision;
     return NOT_CONFIGURED;
   }
 }

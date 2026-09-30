@@ -50,6 +50,7 @@ describe("mapRows: field-by-field mapping", () => {
         fuel: "Test fuel",
         transmission: "Test gearbox",
         drivetrain: "Test drive",
+        media: [],
       },
     ]);
   });
@@ -59,7 +60,8 @@ describe("mapRows: field-by-field mapping", () => {
     for (const vehicle of vehicles) {
       expect(Object.keys(vehicle).sort()).toEqual([...PUBLIC_VEHICLE_FIELDS].sort());
     }
-    expect([...PUBLIC_FIELDS].sort()).toEqual([...PUBLIC_VEHICLE_FIELDS].sort());
+    // Every public field except `media` (resolved from Drive, not a Sheet column) is Sheet-backed.
+    expect([...PUBLIC_FIELDS, "media"].sort()).toEqual([...PUBLIC_VEHICLE_FIELDS].sort());
   });
 
   it("normalizes whitespace in text but otherwise keeps values as written", () => {

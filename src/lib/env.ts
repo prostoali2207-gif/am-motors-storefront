@@ -23,6 +23,12 @@ export type GoogleAuthConfig =
       readonly privateKey: string;
     };
 
+/**
+ * Vehicle media source. `none` (default): no Drive access, every vehicle has empty media.
+ * `google-drive`: resolve each vehicle's folder from `Ссылка на фото/видео` (Phase 3).
+ */
+export type MediaSourceKind = "none" | "google-drive";
+
 export type InventorySourceConfig =
   | { readonly kind: "none" }
   | { readonly kind: "invalid"; readonly problems: readonly string[] }
@@ -30,6 +36,9 @@ export type InventorySourceConfig =
       readonly kind: "google-sheets";
       readonly spreadsheetId: string;
       readonly auth: GoogleAuthConfig;
+      readonly media: MediaSourceKind;
+      /** Non-fatal config problems (variable names only), e.g. an unknown MEDIA_SOURCE. */
+      readonly warnings: readonly string[];
     };
 
 type Env = Readonly<Record<string, string | undefined>>;
@@ -75,7 +84,13 @@ export function readInventorySourceConfig(env: Env = process.env): InventorySour
   }
 
   if (problems.length > 0 || auth === null) return { kind: "invalid", problems };
-  return { kind: "google-sheets", spreadsheetId, auth };
+
+  // Media is optional: a bad value disables media only, never the inventory.
+  const mediaValue = value(env, "MEDIA_SOURCE");
+  const media: MediaSourceKind = mediaValue === "google-drive" ? "google-drive" : "none";
+  const warnings = mediaValue !== undefined && mediaValue !== "google-drive" ? ["MEDIA_SOURCE"] : [];
+
+  return { kind: "google-sheets", spreadsheetId, auth, media, warnings };
 }
 
 function value(env: Env, name: string): string | undefined {

@@ -66,6 +66,7 @@ describe("loadInventorySnapshot: values", () => {
         fuel: "Test fuel",
         transmission: "Test gearbox",
         drivetrain: "Test drive",
+        media: [],
       },
       expect.objectContaining({ id: "TEST-0002", status: "sold", priceAed: null }),
     ]);

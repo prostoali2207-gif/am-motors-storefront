@@ -20,6 +20,12 @@ export type VehicleLookupResult =
   | { readonly kind: "not-found" }
   | InventoryUnavailable;
 
+/** Result of serving one sanitized vehicle image through the site's media route. */
+export type MediaImageResult =
+  | { readonly kind: "ok"; readonly bytes: Uint8Array; readonly contentType: "image/jpeg" }
+  | { readonly kind: "not-found" }
+  | InventoryUnavailable;
+
 export function listResult(vehicles: readonly Vehicle[]): InventoryListResult {
   return vehicles.length === 0 ? { kind: "empty" } : { kind: "ok", vehicles };
 }

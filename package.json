@@ -12,8 +12,9 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "smoke:sheets": "vitest run --config vitest.live.config.mts",
-    "verify": "npm run lint && npm run typecheck && npm run test && npm run build"
+    "smoke:sheets": "vitest run --config vitest.live.config.mts tests/live/sheets.smoke.ts",
+    "verify": "npm run lint && npm run typecheck && npm run test && npm run build",
+    "smoke:media": "vitest run --config vitest.live.config.mts tests/live/drive-media.smoke.ts"
   },
   "dependencies": {
     "@vercel/oidc": "3.8.9",
@@ -21,7 +22,8 @@
     "next": "16.3.7",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "server-only": "0.0.1"
+    "server-only": "0.0.1",
+    "sharp": "0.35.5"
   },
   "devDependencies": {
     "@testing-library/dom": "10.4.2",

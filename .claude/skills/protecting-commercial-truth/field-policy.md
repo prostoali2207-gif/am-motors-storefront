@@ -138,10 +138,20 @@ Sheet column must be added and classified first.
 
 ## Media policy
 
-- Only files in the Drive folder referenced by `Ссылка на фото/видео`; order and cover rules
-  defined in Phase 3.
-- Strip EXIF/GPS metadata from published images.
-- Exclude files that show documents, plates (business decision), people or paperwork.
+- **Confirmed 2026-09-30:** no website-ready photos exist yet; the current Drive folders are
+  working source material, not a website library. Media stays off (`MEDIA_SOURCE` unset) and
+  nothing is published automatically; VDPs show "Photos unavailable". See
+  `docs/business-rules.md` → "Website photos".
+- Only files in the Drive folder referenced by `Ссылка на фото/видео` (direct children; no
+  subfolders or shortcuts). Identity = Drive file ID, never the file name.
+- Public model: `Vehicle.media: VehicleMedia[]` — opaque hashed ID, `type`, and for images a
+  same-origin `/media/…` path. Never the link, folder ID, file ID, file name, owner or EXIF.
+- Order is a technical fallback (natural name → upload time → file ID) until the business
+  defines cover/order (open question 12); nothing may claim a file is the cover.
+- Strip EXIF/GPS metadata from published images (done by the media route's re-encode).
+- Exclude files that show documents, plates (business decision), people or paperwork, and ad
+  creatives with commercial claims. This cannot be automated without image interpretation, so
+  media stays disabled until website photos exist and open question 12 is decided.
 - No stock, AI-generated or other-vehicle images as fallbacks.
 
 ## Adding or changing a field

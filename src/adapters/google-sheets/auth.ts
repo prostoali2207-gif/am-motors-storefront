@@ -10,7 +10,9 @@ import { SHEETS_READONLY_SCOPE, type AccessTokenProvider } from "./sheets-client
  * Builds a server-side access-token provider for the configured auth mode.
  *
  * Both modes end up as the same dedicated service account, which only has Viewer access to
- * the one Sheet (shared with its email) and requests only the `spreadsheets.readonly` scope.
+ * the one Sheet (shared with its email) and requests only the `spreadsheets.readonly` scope —
+ * plus `drive.readonly` when the Drive media source is enabled (Viewer access to the vehicle
+ * media folders).
  * The service account needs no IAM roles on the Google Cloud project itself.
  *
  * - `vercel-oidc` (recommended for Vercel): no long-lived secret. The Vercel OIDC token is
@@ -21,8 +23,11 @@ import { SHEETS_READONLY_SCOPE, type AccessTokenProvider } from "./sheets-client
  *
  * google-auth-library caches and refreshes the access token internally.
  */
-export function createAccessTokenProvider(auth: GoogleAuthConfig): AccessTokenProvider {
-  const client = createAuthClient(auth);
+export function createAccessTokenProvider(
+  auth: GoogleAuthConfig,
+  scopes: readonly string[] = [SHEETS_READONLY_SCOPE],
+): AccessTokenProvider {
+  const client = createAuthClient(auth, [...scopes]);
   return async () => {
     const { token } = await client.getAccessToken();
     if (!token) throw new Error("no access token");
@@ -30,13 +35,13 @@ export function createAccessTokenProvider(auth: GoogleAuthConfig): AccessTokenPr
   };
 }
 
-function createAuthClient(auth: GoogleAuthConfig): AuthClient {
+function createAuthClient(auth: GoogleAuthConfig, scopes: string[]): AuthClient {
   switch (auth.mode) {
     case "service-account-key":
       return new JWT({
         email: auth.serviceAccountEmail,
         key: auth.privateKey,
-        scopes: [SHEETS_READONLY_SCOPE],
+        scopes,
       });
     case "vercel-oidc": {
       const audience =
@@ -50,7 +55,7 @@ function createAuthClient(auth: GoogleAuthConfig): AuthClient {
         service_account_impersonation_url:
           `https://iamcredentials.googleapis.com/v1/projects/-/serviceAccounts/` +
           `${auth.serviceAccountEmail}:generateAccessToken`, // format-validated in lib/env
-        scopes: [SHEETS_READONLY_SCOPE],
+        scopes,
         subject_token_supplier: {
           // Default Vercel OIDC token (aud = https://vercel.com/<team-slug>); the Google
           // provider must list that audience as allowed.

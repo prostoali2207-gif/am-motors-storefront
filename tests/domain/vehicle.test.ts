@@ -13,6 +13,7 @@ describe("public Vehicle allowlist", () => {
         "fuel",
         "id",
         "make",
+        "media",
         "mileageKm",
         "model",
         "priceAed",

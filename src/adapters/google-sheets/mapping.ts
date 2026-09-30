@@ -1,3 +1,4 @@
+import { parseDriveFolderLink, type DriveFolderRef } from "@/adapters/google-drive-media/folder-link";
 import type { Vehicle, VehicleStatus } from "@/domain/vehicle";
 import { isUsableVehicleId } from "@/domain/vehicle-id";
 import { PUBLIC_FIELDS, STATUS_MAP, type PublicField } from "./schema";
@@ -10,6 +11,11 @@ import { PUBLIC_FIELDS, STATUS_MAP, type PublicField } from "./schema";
 export interface SourceRow {
   readonly rowNumber: number;
   readonly cells: Readonly<Record<PublicField, unknown>>;
+  /**
+   * Server/source-only `Ссылка на фото/видео` value; `undefined` when the column is not read.
+   * Kept apart from `cells` so it can never be mapped into a public field.
+   */
+  readonly mediaLink?: unknown;
 }
 
 /** Row problems, reported by row number and code only — never with cell values. */
@@ -35,6 +41,8 @@ export interface MappedInventory {
   readonly issues: RowIssue[];
   /** Rows with a status that is not confirmed as public (count only; values not kept). */
   readonly nonPublicStatusCount: number;
+  /** Server-only: parsed Drive folder reference per public vehicle ID. Never public. */
+  readonly mediaFolders: [vehicleId: string, folder: DriveFolderRef][];
 }
 
 export const MIN_YEAR = 1900;
@@ -59,6 +67,7 @@ export function mapRows(rows: readonly SourceRow[], currentYear: number): Mapped
   }
 
   const vehicles: Vehicle[] = [];
+  const mediaFolders: [string, DriveFolderRef][] = [];
   let nonPublicStatusCount = 0;
 
   for (const row of candidates) {
@@ -126,10 +135,13 @@ export function mapRows(rows: readonly SourceRow[], currentYear: number): Mapped
       fuel: optionalText(cells.fuel),
       transmission: optionalText(cells.transmission),
       drivetrain: optionalText(cells.drivetrain),
+      // Resolved from Drive by the repository; the link itself never enters the public model.
+      media: [],
     });
+    mediaFolders.push([id, parseDriveFolderLink(row.mediaLink)]);
   }
 
-  return { vehicles, issues, nonPublicStatusCount };
+  return { vehicles, issues, nonPublicStatusCount, mediaFolders };
 }
 
 export function mapStatus(value: unknown): VehicleStatus | null {

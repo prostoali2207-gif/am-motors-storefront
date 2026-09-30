@@ -64,7 +64,12 @@ export function createSnapshotReader(options: SnapshotReaderOptions): () => Prom
 }
 
 function ok(snapshot: InventorySnapshot): SnapshotResult {
-  return { kind: "ok", vehicles: snapshot.vehicles, fetchedAt: snapshot.fetchedAt };
+  return {
+    kind: "ok",
+    vehicles: snapshot.vehicles,
+    fetchedAt: snapshot.fetchedAt,
+    mediaFolders: snapshot.mediaFolders,
+  };
 }
 
 function toUnavailable(error: unknown, logError: (message: string) => void): InventoryUnavailable {

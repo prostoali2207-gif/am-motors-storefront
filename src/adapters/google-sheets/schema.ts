@@ -45,7 +45,7 @@ export const EXPECTED_HEADER = [
  * from the Sheets API. Every other column (private, pending, server-only, or unknown/new) is
  * never fetched, so its values cannot reach the cache, logs, or the client.
  *
- * `satisfies Record<keyof Vehicle, …>` makes this fail to compile if `Vehicle` and the
+ * `satisfies Record<SheetBackedField, …>` makes this fail to compile if `Vehicle` and the
  * mapping drift apart.
  */
 export const PUBLIC_COLUMNS = {
@@ -63,7 +63,17 @@ export const PUBLIC_COLUMNS = {
   fuel: "Топливо",
   transmission: "Коробка",
   drivetrain: "Привод",
-} as const satisfies Record<keyof Vehicle, (typeof EXPECTED_HEADER)[number]>;
+} as const satisfies Record<SheetBackedField, (typeof EXPECTED_HEADER)[number]>;
+
+/** Public fields that come straight from one Sheet column (`media` is resolved from Drive). */
+type SheetBackedField = Exclude<keyof Vehicle, "media">;
+
+/**
+ * Server/source-only column read only when the Drive media source is enabled (Phase 3). Its
+ * value (a Drive folder link) is parsed into a folder reference server-side and never becomes a
+ * public field, a log line or client data.
+ */
+export const MEDIA_LINK_COLUMN = "Ссылка на фото/видео" satisfies (typeof EXPECTED_HEADER)[number];
 
 export type PublicField = keyof typeof PUBLIC_COLUMNS;
 
