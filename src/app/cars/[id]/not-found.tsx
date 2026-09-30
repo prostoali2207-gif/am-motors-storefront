@@ -2,12 +2,14 @@ import Link from "next/link";
 
 export default function VehicleNotFound() {
   return (
-    <>
-      <h1>Car not found</h1>
+    <section className="status-page">
+      <h1 className="page-title">Car not found</h1>
       <p>This car is not listed.</p>
       <p>
-        <Link className="text-link" href="/cars">See available cars</Link>
+        <Link className="text-link" href="/cars">
+          See cars in stock
+        </Link>
       </p>
-    </>
+    </section>
   );
 }

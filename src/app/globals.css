@@ -1,11 +1,53 @@
-/* Phase 1: minimal, accessible baseline only. Visual design is Phase 4. */
+/*
+ * Phase 4 visual system — "Coachwork" (docs/ux-benchmark.md).
+ * Neutral light palette; NO accent colour until brand assets exist (open question 14).
+ * Status of each token (confirmed vs provisional) is recorded in docs/ux-benchmark.md.
+ */
 :root {
   color-scheme: light;
-  --text: #1a1a1a;
-  --muted: #555;
-  --border: #d0d0d0;
-  --focus: #005fcc;
-  --background: #fff;
+
+  /* Colour — provisional values, neutral roles. */
+  --canvas: #f6f5f1;
+  --ink: #161616; /* 16.6:1 on canvas */
+  --muted: #66645e; /* 5.4:1 on canvas */
+  --rule: #d9d6ce; /* decorative hairlines only */
+  --surface-media: #ebe9e3; /* letterbox behind contained photos */
+  --interactive: var(--ink); /* provisional neutral interaction token */
+
+  /* Type (--font-sans is set by next/font on <html>: Geologica) */
+  --tracking-title: -0.02em;
+  --tracking-label: 0.12em;
+
+  /* Spacing (4 px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Layout */
+  --gutter: 1rem;
+  --max-width: 80rem; /* 1280 px */
+  --hairline: 1px solid var(--rule);
+
+  /* Media frame ratio — PROVISIONAL, not a business standard (open question 12). */
+  --media-ratio: 3 / 2;
+}
+
+@media (min-width: 40rem) {
+  :root {
+    --gutter: 1.5rem;
+  }
+}
+
+@media (min-width: 64rem) {
+  :root {
+    --gutter: 3rem;
+  }
 }
 
 *,
@@ -16,145 +58,557 @@
 
 html {
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  font-size: 1rem;
-  line-height: 1.5;
-  color: var(--text);
-  background: var(--background);
-}
-
-main,
-.site-header nav {
-  max-width: 60rem;
-  margin: 0 auto;
-  padding: 0 1rem;
-}
-
-main {
-  padding-bottom: 2rem;
-}
-
-.site-header {
-  border-bottom: 1px solid var(--border);
-}
-
-.site-header nav {
+  min-height: 100vh;
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  font-family: var(--font-sans, Arial), Arial, sans-serif;
+  font-size: 1rem;
+  line-height: 1.625;
+  color: var(--ink);
+  background: var(--canvas);
+  -webkit-font-smoothing: antialiased;
 }
 
-.site-header a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
+h1,
+h2,
+h3,
+p,
+ul,
+dl,
+dd {
+  margin: 0;
 }
 
 a {
   color: inherit;
-}
-
-/* Standalone links get a 44px touch target. */
-.text-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.2em;
 }
 
 :focus-visible {
-  outline: 3px solid var(--focus);
+  outline: 2px solid var(--interactive);
   outline-offset: 2px;
+}
+
+/* ---- Type roles ---- */
+
+/* Small tracked capitals: eyebrows, section labels, chips. Never used for car titles. */
+.label {
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Every number on the site: tabular figures so prices and km align. */
+.figure,
+.fact-line {
+  font-variant-numeric: tabular-nums;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- Frame ---- */
+
+.shell {
+  width: 100%;
+  max-width: calc(var(--max-width) + 2 * var(--gutter));
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+main {
+  flex: 1;
+  padding-bottom: var(--space-16);
 }
 
 .skip-link {
   position: absolute;
   left: -999px;
+  top: var(--space-2);
+  z-index: 10;
+  padding: var(--space-2) var(--space-4);
+  background: var(--canvas);
+  border: 1px solid var(--ink);
 }
 
 .skip-link:focus {
-  left: 1rem;
-  top: 0.5rem;
-  background: var(--background);
-  padding: 0.5rem;
+  left: var(--gutter);
 }
+
+.site-header {
+  border-bottom: var(--hairline);
+}
+
+.site-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 3.5rem;
+}
+
+.wordmark {
+  font-size: 0.8125rem;
+  line-height: 1;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.site-nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+}
+
+.nav-link {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  text-decoration: none;
+  padding-inline: var(--space-2);
+  margin-inline-end: calc(-1 * var(--space-2));
+}
+
+.nav-link:hover {
+  text-decoration: underline;
+}
+
+.site-footer {
+  border-top: var(--hairline);
+}
+
+.site-footer .shell {
+  display: flex;
+  align-items: center;
+  min-height: 4.5rem;
+}
+
+.site-footer .wordmark {
+  color: var(--muted);
+}
+
+/* Standalone links get a 44 px touch target. */
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* ---- Page header (listing pages) ---- */
+
+.page-header {
+  padding: var(--space-6) 0 var(--space-5);
+}
+
+.page-title {
+  font-size: 2rem;
+  line-height: 1.0625;
+  font-weight: 600;
+  letter-spacing: var(--tracking-title);
+}
+
+.page-count {
+  margin-top: var(--space-2);
+  font-size: 0.9375rem;
+  line-height: 1.25rem;
+  color: var(--muted);
+}
+
+/* ---- Inventory list + card ---- */
 
 .inventory {
   list-style: none;
-  margin: 0;
   padding: 0;
   display: grid;
-  gap: 1rem;
+  border-top: 1px solid var(--ink);
+}
+
+.inventory > li {
+  border-bottom: var(--hairline);
 }
 
 .card {
-  border: 1px solid var(--border);
-  padding: 1rem;
+  position: relative;
+  padding: var(--space-5) 0;
+}
+
+.card-eyebrow {
+  margin-bottom: var(--space-1);
 }
 
 .card-title {
-  margin: 0 0 0.5rem;
-  font-size: 1.125rem;
+  font-size: 1.375rem;
+  line-height: 1.625rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-title);
+  overflow-wrap: anywhere;
 }
 
-.card-title a {
-  display: inline-block;
-  min-height: 44px;
-  padding: 0.5rem 0;
+.card-link {
+  text-decoration: none;
+}
+
+/* The whole card is one tap target. */
+.card-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.card-link:focus-visible {
+  outline: none;
+}
+
+.card:has(.card-link:focus-visible) {
+  outline: 2px solid var(--interactive);
+  outline-offset: 2px;
+}
+
+.card:hover .card-link {
+  text-decoration: underline;
+}
+
+.card-price {
+  margin-top: var(--space-2);
+  font-size: 1.375rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.card .badge-sold {
+  margin-top: var(--space-2);
+}
+
+.fact-line {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: var(--space-2);
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  color: var(--muted);
+}
+
+.fact-line li + li::before {
+  content: "·";
+  content: "·" / "";
+  margin-inline-end: var(--space-2);
 }
 
 .card-facts {
-  margin: 0;
-  padding-left: 1.25rem;
+  margin-top: var(--space-2);
+}
+
+/* ---- Notices and status pages ---- */
+
+.notice {
+  border-top: 1px solid var(--ink);
+  padding: var(--space-5) 0;
+  max-width: 40rem;
+}
+
+.notice-title {
+  font-size: 1.25rem;
+  line-height: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  margin-bottom: var(--space-2);
+}
+
+.notice p {
   color: var(--muted);
+}
+
+.status-page {
+  padding-top: var(--space-6);
+  max-width: 40rem;
+}
+
+.status-page .page-title {
+  margin-bottom: var(--space-4);
+}
+
+.status-page > p {
+  color: var(--muted);
+}
+
+.status-page .notice {
+  margin-top: var(--space-2);
+}
+
+.button {
+  font: inherit;
+  font-weight: 500;
+  min-height: 48px;
+  margin-top: var(--space-4);
+  padding: 0 var(--space-5);
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid var(--ink);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.button:hover {
+  background: var(--ink);
+  color: var(--canvas);
+}
+
+/* ---- VDP ---- */
+
+.back-link {
+  padding-top: var(--space-2);
+}
+
+.vehicle-main {
+  display: flex;
+  flex-direction: column;
+}
+
+.vehicle-heading {
+  padding: var(--space-4) 0 var(--space-5);
+}
+
+.vehicle-eyebrow {
+  margin-bottom: var(--space-2);
+}
+
+.vehicle-title {
+  font-size: 2rem;
+  line-height: 2.125rem;
+  font-weight: 600;
+  letter-spacing: var(--tracking-title);
+  overflow-wrap: anywhere;
+}
+
+.vehicle-price {
+  margin-top: var(--space-3);
+  font-size: 1.75rem;
+  line-height: 2rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.vehicle-sold {
+  margin-top: var(--space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.vehicle-facts {
+  margin-top: var(--space-3);
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
 }
 
 .badge-sold {
   display: inline-block;
-  margin: 0 0 0.5rem;
-  padding: 0.125rem 0.5rem;
-  border: 2px solid var(--text);
-  font-weight: 700;
-  text-transform: uppercase;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--ink);
+  border-radius: 2px;
+  color: var(--ink);
 }
 
-.price {
-  font-size: 1.25rem;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.facts {
-  display: grid;
-  gap: 0.5rem;
-  margin: 0;
-}
-
-.facts div {
-  display: grid;
-  grid-template-columns: minmax(8rem, 1fr) 2fr;
-  gap: 0.5rem;
-}
-
-.facts dt {
+.vehicle-photos .media-unavailable {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
   color: var(--muted);
+  padding-bottom: var(--space-6);
 }
 
-.facts dd {
-  margin: 0;
+/* Synthetic/approved media state: simple sequence, provisional ratio, nothing cropped. */
+.gallery {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+  margin-inline: calc(-1 * var(--gutter));
 }
 
-.notice {
-  border: 1px solid var(--border);
-  padding: 1rem;
+.gallery-rest {
+  padding-bottom: var(--space-8);
 }
 
-button {
-  font: inherit;
-  min-height: 44px;
-  padding: 0.5rem 1rem;
+.gallery-frame {
+  position: relative;
+  aspect-ratio: var(--media-ratio);
+  background: var(--surface-media);
+}
+
+.gallery-frame img {
+  object-fit: contain;
+}
+
+.vehicle-spec {
+  border-top: 1px solid var(--ink);
+  padding-top: var(--space-3);
+}
+
+.spec-heading {
+  margin-bottom: var(--space-2);
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-4);
+  min-height: 3rem;
+  padding: var(--space-3) 0;
+  border-bottom: var(--hairline);
+}
+
+.spec-row dt {
+  color: var(--muted);
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  flex-shrink: 0;
+}
+
+.spec-row dd {
+  font-size: 0.9375rem;
+  line-height: 1.375rem;
+  font-weight: 500;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+
+/* ---- Tablet ---- */
+
+@media (min-width: 40rem) {
+  .inventory {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-6);
+  }
+
+  .gallery {
+    margin-inline: 0;
+  }
+}
+
+/* ---- Desktop ---- */
+
+@media (min-width: 64rem) {
+  .site-nav {
+    min-height: 4.5rem;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-6);
+    padding: var(--space-12) 0 var(--space-8);
+  }
+
+  .page-title {
+    font-size: 3.5rem;
+    line-height: 3.5rem;
+    letter-spacing: -0.025em;
+  }
+
+  .page-count {
+    margin-top: 0;
+    font-size: 1rem;
+  }
+
+  .inventory {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    border-top: none;
+  }
+
+  /* Each card carries its own top rule so the rhythm reads per column. */
+  .inventory > li {
+    border-top: 1px solid var(--ink);
+    border-bottom: none;
+    margin-bottom: var(--space-12);
+  }
+
+  .card {
+    padding: var(--space-4) 0 0;
+  }
+
+  .card-title,
+  .card-price {
+    font-size: 1.5rem;
+    line-height: 1.75rem;
+  }
+
+  .vehicle {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--space-6);
+    align-items: start;
+  }
+
+  .back-link {
+    grid-column: 1 / -1;
+  }
+
+  .vehicle-main {
+    grid-column: 1 / span 7;
+  }
+
+  .vehicle-heading {
+    padding: var(--space-8) 0 var(--space-6);
+  }
+
+  .vehicle-title {
+    font-size: 3.5rem;
+    line-height: 3.625rem;
+    letter-spacing: -0.025em;
+  }
+
+  .vehicle-price {
+    margin-top: var(--space-4);
+    font-size: 2.5rem;
+    line-height: 2.75rem;
+  }
+
+  .vehicle-facts {
+    margin-top: var(--space-4);
+    font-size: 1rem;
+    line-height: 1.5rem;
+  }
+
+  .vehicle-spec {
+    grid-column: 8 / span 5;
+    margin-top: var(--space-8);
+  }
+
+  .gallery {
+    margin-top: var(--space-4);
+  }
+
+  .status-page {
+    padding-top: var(--space-12);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -163,27 +617,4 @@ button {
     transition: none !important;
     scroll-behavior: auto !important;
   }
-}
-
-/* Phase 3: technical photo list only (gallery design is Phase 4). */
-.gallery {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: grid;
-  gap: 0.5rem;
-}
-
-.gallery-frame {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  background: #f2f2f2;
-}
-
-.gallery-frame img {
-  object-fit: contain;
-}
-
-.media-unavailable {
-  color: var(--muted);
 }

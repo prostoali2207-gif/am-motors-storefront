@@ -38,10 +38,10 @@ export default async function VehiclePage(props: PageProps<"/cars/[id]">) {
       notFound();
     case "unavailable":
       return (
-        <>
-          <h1>Car details</h1>
+        <section className="status-page">
+          <h1 className="page-title">Car details</h1>
           <InventoryUnavailable />
-        </>
+        </section>
       );
     default: {
       const unhandled: never = result;

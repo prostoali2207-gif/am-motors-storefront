@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
 import { VehicleDetail } from "@/components/vehicle-detail";
@@ -14,9 +14,48 @@ describe("VehicleDetail", () => {
       screen.getByRole("heading", { level: 1, name: "2001 Testmake Fixture Alpha Synthetic Trim" }),
     ).toBeDefined();
     expect(screen.getByText("AED 11,111")).toBeDefined();
-    expect(screen.getByText("22,222 km")).toBeDefined();
-    expect(screen.getByText("Test gearbox")).toBeDefined();
+    const spec = screen.getByRole("region", { name: "Specification" });
+    expect(within(spec).getByText("22,222 km")).toBeDefined();
+    expect(within(spec).getByText("Test gearbox")).toBeDefined();
     expect(screen.queryByText("Sold")).toBeNull();
+  });
+
+  it("lists the specification in the fixed order with the public reference last", () => {
+    render(<VehicleDetail vehicle={syntheticAvailable} />);
+    const spec = screen.getByRole("region", { name: "Specification" });
+    expect(within(spec).getAllByRole("term").map((dt) => dt.textContent)).toEqual([
+      "Mileage",
+      "Regional spec",
+      "Transmission",
+      "Fuel",
+      "Engine",
+      "Drivetrain",
+      "Year",
+      "Colour",
+      "Reference",
+    ]);
+    expect(within(spec).getAllByRole("definition").at(-1)?.textContent).toBe("TEST-0001");
+  });
+
+  it("summarises mileage, regional spec and transmission under the price", () => {
+    render(<VehicleDetail vehicle={syntheticAvailable} />);
+    const heading = screen.getByRole("heading", { level: 1 }).parentElement as HTMLElement;
+    expect(within(heading).getAllByRole("listitem").map((li) => li.textContent)).toEqual([
+      "22,222 km",
+      "Test spec",
+      "Test gearbox",
+    ]);
+  });
+
+  it("shows Sheet text verbatim, including Cyrillic, without translating it", () => {
+    render(<VehicleDetail vehicle={{ ...syntheticAvailable, transmission: "Тестовая коробка" }} />);
+    expect(screen.getAllByText("Тестовая коробка").length).toBeGreaterThan(0);
+  });
+
+  it("renders no action area, buttons or contact links before Phase 5", () => {
+    const { container } = render(<VehicleDetail vehicle={syntheticAvailable} />);
+    expect(container.querySelector("button, form, a[href^='https://wa.me'], a[href^='tel:']")).toBeNull();
+    expect(container.textContent).not.toMatch(/whatsapp|request a|didn.t find/i);
   });
 
   it("marks a sold vehicle as sold and offers no viewing or test-drive requests", () => {
@@ -25,7 +64,7 @@ describe("VehicleDetail", () => {
     expect(screen.getByText("This car has been sold.")).toBeDefined();
     expect(screen.queryByText(/AED/)).toBeNull();
     expect(screen.queryByText(/request a (viewing|test drive)/i)).toBeNull();
-    expect(screen.getByRole("link", { name: "See available cars" }).getAttribute("href")).toBe("/cars");
+    expect(screen.getByRole("link", { name: "See cars in stock" }).getAttribute("href")).toBe("/cars");
   });
 
   it("omits missing values instead of filling them in", () => {
@@ -33,8 +72,8 @@ describe("VehicleDetail", () => {
     expect(screen.queryByText(/AED/)).toBeNull();
     expect(screen.queryByText(/km/)).toBeNull();
     expect(container.textContent).not.toMatch(/N\/A|unknown|on request/i);
-    // Year is the only fact left.
-    expect(screen.getAllByRole("definition").map((dd) => dd.textContent)).toEqual(["2003"]);
+    // Year and the public reference are the only rows left.
+    expect(screen.getAllByRole("definition").map((dd) => dd.textContent)).toEqual(["2003", "TEST-0003"]);
   });
 
   it("never renders fields outside the allowlist, even if an object carries them", () => {

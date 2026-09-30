@@ -29,6 +29,12 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   publishing rules wait for final photos (`docs/business-rules.md` → "Website photos").
   Only `getById`/the media route resolve media; listings make 0 Drive calls. Photo cache
   policy (~1 h worst case): `src/lib/media-cache-policy.ts`.
+- Phase 4A (live visual benchmark, accepted) and Phase 4 (storefront UX, "Coachwork" direction)
+  recorded in `docs/ux-benchmark.md`. Phase 4 implemented 2026-09-30 — **pending review**:
+  neutral tokens (no accent until brand assets), Geologica self-hosted with Cyrillic
+  (`src/app/fonts/`), inventory-first home and `/cars`, photo-free cards, VDP no-photo state,
+  sold VDP styling. No conversion actions (Phase 5), no sorting (source order), media ratio
+  provisional (`--media-ratio`).
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.
