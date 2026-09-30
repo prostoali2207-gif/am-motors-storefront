@@ -201,12 +201,16 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
 - **General request:** heading "Didn't find what you need?" on the homepage and `/cars` after the
   available inventory (and in the empty / unavailable states). No sourcing or import promise.
 - **Attribution (minimal, first-party):** only `utm_source`, `utm_medium`, `utm_campaign`,
-  `utm_content`, `utm_term`, `fbclid` are captured, first touch per browser-tab session
+  `utm_content`, `utm_term` are captured, first touch per browser-tab session
   (`sessionStorage`, no cookies, no third-party SDK, no pixels). When any exist, a block with
   only the received values is appended to the WhatsApp prefill (`Source:`, `Medium:`,
-  `Campaign:`, `Content:`, `Term:`, `fbclid:`). fbclid is kept as a click ID; no campaign or
-  source is derived from it. Isolated in `src/attribution/` so an analytics/CRM handoff can
-  replace it. Tracking pixels and analytics wait for open question 15.
+  `Campaign:`, `Content:`, `Term:`). Nothing is inferred or filled in. Isolated in
+  `src/attribution/` so an analytics/CRM handoff can replace it. Tracking pixels and analytics
+  wait for open question 15.
+- **Ad click IDs (`fbclid`, `gclid`, …) are not captured in V1** (review of PR #6,
+  2026-09-30): they are long opaque IDs that would be shown to the customer in the prefill, and
+  no analytics/CRM consumes them yet. Add them only once open question 15 is resolved and a real
+  downstream consumer exists; never infer a source from them.
 
 ## CTA wording — Confirmed until a booking system exists
 
@@ -252,7 +256,7 @@ Ask the user; do not assume answers.
 13. Language(s) for launch: English only, or also Arabic/Russian?
 14. Brand assets: logo, brand colors, fonts — do they exist?
 15. Domain and analytics/ad platforms in use (Meta, Google Ads, TikTok). Still open: Phase 5
-    carries UTM/fbclid into WhatsApp messages only; no pixels or analytics until decided
+    carries UTM parameters into WhatsApp messages only (no click IDs); no pixels or analytics until decided
     (with consent handling as required). No site domain is configured; VDP URLs in messages use
     the origin the visitor actually used.
 16. Which of finance, trade-in, warranty, delivery, export are actually offered (for later phases)?

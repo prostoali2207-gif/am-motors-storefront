@@ -83,7 +83,7 @@ or "Request a viewing" CTA, excluded from the Available inventory list and from 
 - General-request path: "Didn't find what you need?" → WhatsApp, for customers looking for a car
   not in the catalog. Place it where browsing ends (end of /cars, empty state, homepage). Do not
   promise sourcing, import or availability unless confirmed.
-- Attribution (Phase 5): first-touch UTM/fbclid appended to WhatsApp prefills only; no pixels
+- Attribution (Phase 5): first-touch UTM parameters appended to WhatsApp prefills only; no pixels
   or analytics until confirmed (`docs/business-rules.md` → "Contact and inquiries").
 - On mobile, the primary CTA stays reachable (sticky bottom bar) without covering content or
   system UI; respect safe-area insets.

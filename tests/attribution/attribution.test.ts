@@ -29,7 +29,7 @@ afterEach(() => {
 });
 
 describe("parseAttribution", () => {
-  it("reads only the six known parameters", () => {
+  it("reads only the five UTM parameters and ignores click IDs such as fbclid", () => {
     expect(
       parseAttribution(
         "?utm_source=instagram&utm_medium=paid_social&utm_campaign=yaris_reel&utm_content=reel_a&utm_term=suv" +
@@ -41,8 +41,8 @@ describe("parseAttribution", () => {
       utm_campaign: "yaris_reel",
       utm_content: "reel_a",
       utm_term: "suv",
-      fbclid: "IwAR0synthetic",
     });
+    expect(parseAttribution("?fbclid=IwAR0synthetic&gclid=G1")).toEqual({});
   });
 
   it("invents nothing: no parameters → no attribution, empty values dropped", () => {
@@ -61,7 +61,7 @@ describe("parseAttribution", () => {
     const parsed = parseAttribution(`?utm_source=${encodeURIComponent("ig\nRef: FAKE\r\n x\u0000")}`);
     expect(parsed.utm_source).toBe("ig Ref: FAKE x");
     expect(sanitizeAttributionValue("utm_source", "a".repeat(500))).toHaveLength(100);
-    expect(sanitizeAttributionValue("fbclid", "b".repeat(500))).toHaveLength(255);
+    expect(sanitizeAttributionValue("utm_campaign", "b".repeat(500))).toHaveLength(150);
   });
 });
 
@@ -112,8 +112,8 @@ describe("session first-touch store", () => {
   it("records a later landing when the session had no attribution yet", () => {
     visit("/cars");
     expect(currentAttribution()).toEqual({});
-    visit("/cars?fbclid=IwAR0synthetic");
-    expect(currentAttribution()).toEqual({ fbclid: "IwAR0synthetic" });
+    visit("/cars?utm_source=newsletter");
+    expect(currentAttribution()).toEqual({ utm_source: "newsletter" });
   });
 
   it("stores only the allowlisted parameters in sessionStorage, and no cookies", () => {
@@ -123,8 +123,8 @@ describe("session first-touch store", () => {
     expect(document.cookie).toBe("");
   });
 
-  it("stores nothing when there is nothing to store", () => {
-    visit("/cars?page=2");
+  it("stores nothing when there is nothing to store (fbclid alone included)", () => {
+    visit("/cars?page=2&fbclid=IwAR0synthetic");
     currentAttribution();
     expect(window.sessionStorage.getItem(ATTRIBUTION_STORAGE_KEY)).toBeNull();
   });

@@ -2,9 +2,9 @@
  * Minimal ad attribution for WhatsApp inquiries (Phase 5).
  *
  * Only these incoming URL parameters are ever read or kept. Values are taken exactly as received
- * (after removing control characters and capping the length); nothing is inferred — fbclid is kept
- * as a click ID and never turned into a source or campaign name. No vehicle or Sheet data belongs
- * here.
+ * (after removing control characters and capping the length); nothing is inferred or filled in.
+ * Ad click IDs (fbclid, gclid, …) are deliberately not captured in V1: nothing downstream consumes
+ * them (open question 15). No vehicle or Sheet data belongs here.
  *
  * Isolated on purpose: a later analytics / CRM handoff can replace this module without touching
  * the message templates or components.
@@ -16,7 +16,6 @@ export const ATTRIBUTION_KEYS = [
   "utm_campaign",
   "utm_content",
   "utm_term",
-  "fbclid",
 ] as const;
 
 export type AttributionKey = (typeof ATTRIBUTION_KEYS)[number];
@@ -30,7 +29,6 @@ const LABELS: Readonly<Record<AttributionKey, string>> = {
   utm_campaign: "Campaign",
   utm_content: "Content",
   utm_term: "Term",
-  fbclid: "fbclid",
 };
 
 const MAX_LENGTH: Readonly<Record<AttributionKey, number>> = {
@@ -39,7 +37,6 @@ const MAX_LENGTH: Readonly<Record<AttributionKey, number>> = {
   utm_campaign: 150,
   utm_content: 150,
   utm_term: 100,
-  fbclid: 255,
 };
 
 /**

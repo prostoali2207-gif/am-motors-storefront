@@ -39,7 +39,7 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   VDPs get WhatsApp (primary) + "Request a viewing" / "Request a test drive" (secondary), all
   opening WhatsApp +971 50 343 2337 with confirmed prefills (`src/conversion/`); mobile sticky
   bar (WhatsApp + test drive) after the in-page actions scroll away; sold VDPs have no actions;
-  "Didn't find what you need?" general request on `/` and `/cars`. First-touch UTM/fbclid in
+  "Didn't find what you need?" general request on `/` and `/cars`. First-touch UTM parameters (no click IDs) in
   `sessionStorage`, appended to prefills (`src/attribution/`). No pixels, analytics, cookies,
   forms, API or CRM (open question 15). Confirmed decisions: `docs/business-rules.md` →
   "Contact and inquiries".
@@ -135,7 +135,7 @@ React / TypeScript / ESLint majors follow the official `create-next-app@16.3.7` 
 
 Layout: `src/domain` (public types, ID rules), `src/inventory` (repository interface, adapter
 factory, request-time queries), `src/adapters` (data sources), `src/conversion` (WhatsApp
-number, prefill templates), `src/attribution` (first-touch UTM/fbclid, browser session only),
+number, prefill templates), `src/attribution` (first-touch UTM parameters, browser session only),
 `src/components` (sync views + small client islands), `src/app` (routes). Tests and synthetic fixtures live only in `tests/`.
 Vitest cannot render async Server Components: keep pages thin and test the sync views.
 

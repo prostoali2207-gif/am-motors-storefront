@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { parseAttribution } from "@/attribution/attribution";
 import { GENERAL_REQUEST_MESSAGE, inquiryMessage, type Inquiry } from "@/conversion/inquiry-message";
 import { WHATSAPP_BUSINESS_NUMBER, whatsAppUrl } from "@/conversion/whatsapp";
 import { vehicleTitle } from "@/domain/vehicle";
@@ -112,10 +113,10 @@ describe("attribution block in messages", () => {
     expect(text).not.toMatch(/Medium|Term|fbclid/);
   });
 
-  it("carries fbclid as a click ID without inventing a source or campaign", () => {
-    const text = inquiryMessage({ kind: "general" }, ORIGIN, { fbclid: "IwAR0synthetic" });
-    expect(text).toBe(`${GENERAL_REQUEST_MESSAGE}\n\nfbclid: IwAR0synthetic`);
-    expect(text).not.toMatch(/Source|Campaign|facebook|meta|instagram/i);
+  it("adds nothing for an ad click ID alone and invents no source from it", () => {
+    const text = inquiryMessage({ kind: "general" }, ORIGIN, parseAttribution("?fbclid=IwAR0synthetic"));
+    expect(text).toBe(GENERAL_REQUEST_MESSAGE);
+    expect(text).not.toMatch(/fbclid|IwAR0|Source|Campaign|facebook|meta|instagram/i);
   });
 
   it("round-trips through the wa.me URL encoding", () => {

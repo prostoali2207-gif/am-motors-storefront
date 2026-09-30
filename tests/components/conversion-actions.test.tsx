@@ -81,7 +81,7 @@ describe("available VDP actions", () => {
   });
 
   it("keeps the attribution after internal navigation and refreshes the link at click time", () => {
-    window.history.pushState({}, "", "/?utm_source=tiktok&fbclid=IwAR0synthetic");
+    window.history.pushState({}, "", "/?utm_source=tiktok&utm_medium=paid_social&fbclid=IwAR0synthetic");
     render(<GeneralRequest />);
     cleanup();
     window.history.pushState({}, "", "/cars/TEST-0001");
@@ -89,7 +89,8 @@ describe("available VDP actions", () => {
     const link = within(zone()).getByRole("link", { name: "Request a test drive" });
     link.addEventListener("click", (event) => event.preventDefault());
     act(() => link.click());
-    expect(text(link)).toMatch(/\n\nSource: tiktok\nfbclid: IwAR0synthetic$/);
+    expect(text(link)).toMatch(/\n\nSource: tiktok\nMedium: paid_social$/);
+    expect(text(link)).not.toMatch(/fbclid|IwAR0synthetic/);
   });
 
   it("adds no attribution block when none was received", () => {
