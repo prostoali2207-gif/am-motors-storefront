@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { GoogleSheetsInventoryRepository } from "@/adapters/google-sheets/sheets-repository";
 import { UnavailableInventoryRepository } from "@/adapters/unavailable/unavailable-repository";
 import { getInventoryRepository } from "@/inventory";
 import { safeRead } from "@/inventory/queries";
@@ -8,11 +9,37 @@ import { InMemoryInventoryRepository } from "../support/in-memory-repository";
 
 const NOT_CONFIGURED = { kind: "unavailable", reason: "not-configured" };
 
-describe("production default adapter", () => {
-  it("is the unavailable adapter", () => {
-    expect(getInventoryRepository()).toBeInstanceOf(UnavailableInventoryRepository);
+describe("adapter selection", () => {
+  it("defaults to the unavailable adapter when no source is configured", () => {
+    expect(getInventoryRepository({ kind: "none" })).toBeInstanceOf(UnavailableInventoryRepository);
   });
 
+  it("uses the unavailable adapter (never fixtures) when configuration is invalid", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => {});
+    const repo = getInventoryRepository({ kind: "invalid", problems: ["GOOGLE_AUTH_MODE"] });
+    expect(repo).toBeInstanceOf(UnavailableInventoryRepository);
+    await expect(repo.listAvailable()).resolves.toEqual(NOT_CONFIGURED);
+    expect(JSON.stringify(log.mock.calls)).toContain("GOOGLE_AUTH_MODE");
+    log.mockRestore();
+  });
+
+  it("uses the Google Sheets adapter when configured", () => {
+    const repo = getInventoryRepository({
+      kind: "google-sheets",
+      spreadsheetId: "TEST_spreadsheet_id_0000000000",
+      auth: {
+        mode: "vercel-oidc",
+        serviceAccountEmail: "test-reader@test-project.iam.gserviceaccount.com",
+        projectNumber: "123456789012",
+        workloadIdentityPoolId: "test-pool",
+        workloadIdentityPoolProviderId: "test-provider",
+      },
+    });
+    expect(repo).toBeInstanceOf(GoogleSheetsInventoryRepository);
+  });
+});
+
+describe("unavailable adapter", () => {
   it("reports unavailable for every read and never returns vehicles", async () => {
     const repo = new UnavailableInventoryRepository();
     await expect(repo.listAvailable()).resolves.toEqual(NOT_CONFIGURED);

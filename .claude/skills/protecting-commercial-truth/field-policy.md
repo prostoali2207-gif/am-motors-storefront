@@ -88,6 +88,10 @@ Changing any of these to public requires a recorded business decision in
 | `Ссылка на пост` | Source reference (e.g. social post) for internal use/attribution design | Rendered or linked publicly unless the business decides otherwise |
 | `Дата обновления` | Freshness checks, cache decisions, diagnostics | Shown as a public "updated" claim unless the business decides otherwise |
 
+Phase 2 adapter: none of these columns is fetched yet (data minimization). They are added to
+the server-side read only when a phase needs them (media link in Phase 3), and never to the
+public `Vehicle`.
+
 ## Numeric fields
 
 `Цена, AED` and `Пробег, км` hold numeric effective values; "AED" and "km" are Sheet number

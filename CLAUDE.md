@@ -18,7 +18,10 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
 ## Current status
 
 - Phase 1 (Foundation) implemented: routes, public `Vehicle` type, `InventoryRepository`, and a
-  production default adapter that always returns `unavailable`. No data source is connected.
+  production default adapter that returns `unavailable` when no source is configured.
+- Phase 2 (Google Sheets adapter) implemented in `src/adapters/google-sheets`, enabled by
+  server env (`INVENTORY_SOURCE=google-sheets`, see `.env.example` and
+  `docs/google-sheets-setup.md`). Live read not yet verified until credentials exist.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.
@@ -93,7 +96,8 @@ Security
 
 Pinned versions (Node >= 20.9, npm): `next` 16.3.7, `react` / `react-dom` 19.2.8,
 `typescript` 5.9.3, `eslint` 9.39.5 + `eslint-config-next` 16.3.7 (flat config),
-`vitest` 5.0.2 + `@testing-library/react` 16.3.3 + `jsdom` 30.1.1, `server-only` 0.0.1.
+`vitest` 5.0.2 + `@testing-library/react` 16.3.3 + `jsdom` 30.1.1, `server-only` 0.0.1,
+`google-auth-library` 10.9.1 (v11 needs Node >= 22), `@vercel/oidc` 3.8.9.
 React / TypeScript / ESLint majors follow the official `create-next-app@16.3.7` template.
 
 | Command | What it does |
@@ -104,6 +108,7 @@ React / TypeScript / ESLint majors follow the official `create-next-app@16.3.7` 
 | `npm run test` | Vitest, single run |
 | `npm run build` | Production build (does not lint) |
 | `npm run verify` | lint → typecheck → test → build |
+| `npm run smoke:sheets` | Read-only live Sheet smoke test (needs `.env.local`; prints counts only; not in `verify`) |
 
 Layout: `src/domain` (public types, ID rules), `src/inventory` (repository interface, adapter
 factory, request-time queries), `src/adapters` (data sources), `src/components` (sync views),

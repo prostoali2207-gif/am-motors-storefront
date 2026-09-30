@@ -88,6 +88,24 @@ the business confirms a real Sheet value and its public meaning.
 - Keep it unless the real source shows a stability problem (IDs reused, changed or duplicated);
   then raise it with the user before changing URLs.
 
+## Google Sheets integration — Phase 2 (technical, pending review)
+
+Recorded 2026-09-30. Technical proposals, not business facts; confirm or change in review.
+
+- **Auth (proposed):** dedicated read-only service account, shared on the Sheet as Viewer,
+  scope `spreadsheets.readonly`, no project IAM roles. On Vercel: keyless Workload Identity
+  Federation via Vercel OIDC (`GOOGLE_AUTH_MODE=vercel-oidc`). A JSON key
+  (`service-account-key`) is only a fallback for the local smoke test and should be deleted
+  once federation works. Setup: `docs/google-sheets-setup.md`.
+- **Data minimization:** only the header row and the 14 public-candidate columns are fetched;
+  private, pending, server-only and unknown columns are never requested. `Ссылка на фото/видео`
+  is not read until Phase 3.
+- **Freshness (proposed, see open question 11):** mapped public vehicles cached for 60 s
+  (tag `inventory`); a snapshot older than 120 s is never served — the request reads the Sheet
+  directly or shows `unavailable`. Worst case a `В наличии` → `Продана` change appears within
+  ~2 minutes. On-demand revalidation (e.g. a Sheet edit hook calling `revalidateTag`) can
+  shorten this later.
+
 ## Inquiries and lead qualification — Confirmed
 
 Project chain:
@@ -136,6 +154,7 @@ Ask the user; do not assume answers.
 9. Should Sold VDPs stay online (for old ad links/SEO) and for how long? Indexable or `noindex`?
 10. Which sold cars may be shown as social proof, and for how long after sale?
 11. Revalidation window: how quickly must a Sheet status change appear on the site?
+    (Phase 2 proposal: ≤ 2 minutes — 60 s cache, 120 s hard max age. Needs confirmation.)
 12. Drive media rules: cover image selection, ordering, plates visible or blurred, video allowed.
 13. Language(s) for launch: English only, or also Arabic/Russian?
 14. Brand assets: logo, brand colors, fonts — do they exist?

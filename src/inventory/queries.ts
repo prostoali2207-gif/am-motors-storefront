@@ -31,8 +31,8 @@ export async function safeRead<T>(
 }
 
 async function repository(): Promise<InventoryRepository> {
-  // Inventory is never baked into the build output: it is read per request. Caching and
-  // revalidation are designed with the real source in Phase 2.
+  // Pages are rendered per request and never baked into the build output. Source reads are
+  // cached inside the repository with a bounded max age (see ./freshness.ts).
   await connection();
   return getInventoryRepository();
 }
