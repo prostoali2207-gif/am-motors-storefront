@@ -486,8 +486,9 @@ convention (q 12) is known.
 7. Footer.
 
 **VDP with media (synthetic-tested only in Phase 4):** the existing media component renders
-the approved images in the provisional-ratio frame above the title block (first image eager,
-rest lazy), as a simple sequence. **No lightbox, full-screen viewer or swipe system in Phase 4**;
+the first approved image in the provisional-ratio frame above the title block (eager, high
+fetch priority) and the remaining images as a simple sequence after the summary facts (lazy),
+so the title and price never drop below a stack of photos. **No lightbox, full-screen viewer or swipe system in Phase 4**;
 gallery interaction is designed and tested when real approved photos exist.
 
 **Phase 5 insertion points (spec only — no reserved empty space in Phase 4 UI):**
@@ -506,8 +507,8 @@ Container max 1280 px, side margins ≥ 48 px, 12 columns, 24 px gaps.
   3-column card grid (≈ 411 px each), column gap 24, row gap 48; first two rows above the fold.
 - **VDP, no photos:** back link; **cols 1–7:** eyebrow, H1 56/58, price 40/44 tabular, fact line,
   "Photos unavailable" line; **cols 8–12:** "Specification" ruled list.
-- **VDP with media (synthetic):** media sequence in cols 1–7 above the title block; the
-  specification stays in cols 8–12. A sticky gallery/panel layout is deferred with the gallery
+- **VDP with media (synthetic):** first image in cols 1–7 above the title block, remaining
+  images after the summary in the same column; the specification stays in cols 8–12. A sticky gallery/panel layout is deferred with the gallery
   interaction work.
 - Sold VDP: Sold chip in place of price; no actions.
 
@@ -573,3 +574,4 @@ styling, boxed shadow cards, empty "reserved" UI areas.
 | 2026-09-30 | Proposed "Showroom ledger" direction | Synthesis 1–10 | Superseded same day after review |
 | 2026-09-30 | Review: benchmark accepted; direction revised (neutral palette, typography evidence, photo-ready geometry, Phase 4/5 split, more editorial) | User review | — |
 | 2026-09-30 | "Coachwork" accepted as the Phase 4 basis with four edits: Cyrillic-capable font (Geologica; Archivo deferred), no new sorting (source order), media ratio provisional, no gallery infrastructure / no reserved empty spaces | User review, Cyrillic font check | Phase 4 implementation started |
+| 2026-09-30 | Phase 4 implemented per this spec (PR for review) | Browser verification 390×844 / 1440×900 | Not merged; no deployment |

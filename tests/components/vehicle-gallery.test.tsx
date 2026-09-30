@@ -55,6 +55,19 @@ describe("VehicleDetail media states", () => {
     expect(screen.getByText("AED 11,111")).toBeDefined();
   });
 
+  it("keeps the title right after the first photo and the other photos after the summary", () => {
+    const { container } = render(<VehicleDetail vehicle={{ ...syntheticAvailable, media: MEDIA }} />);
+    const order = [...container.querySelectorAll("img, h1")].map((el) =>
+      el.tagName === "H1" ? "title" : el.getAttribute("alt"),
+    );
+    expect(order).toEqual([
+      "2001 Testmake Fixture Alpha Synthetic Trim, photo 1 of 2",
+      "title",
+      "2001 Testmake Fixture Alpha Synthetic Trim, photo 2 of 2",
+    ]);
+    expect(screen.queryByText("Photos unavailable")).toBeNull();
+  });
+
   it("shows photos on a sold VDP without making it look available", () => {
     render(<VehicleDetail vehicle={{ ...syntheticSold, media: MEDIA }} />);
     expect(screen.getAllByRole("img")).toHaveLength(2);

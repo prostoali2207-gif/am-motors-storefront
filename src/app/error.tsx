@@ -7,10 +7,10 @@ import type { ErrorInfo } from "next/error";
 // 16.3.0, replacing 16.2's `unstable_retry`). Server error details are never shown to users.
 export default function Error({ retry }: ErrorInfo) {
   return (
-    <section className="notice" role="alert">
-      <h1>Something went wrong</h1>
+    <section className="status-page" role="alert">
+      <h1 className="page-title">Something went wrong</h1>
       <p>Please try again.</p>
-      <button type="button" onClick={() => retry()}>
+      <button className="button" type="button" onClick={() => retry()}>
         Try again
       </button>
     </section>

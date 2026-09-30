@@ -4,6 +4,7 @@ import { VehicleCard } from "./vehicle-card";
 
 /**
  * Renders every list state explicitly: ok, empty, unavailable.
+ * Vehicles keep the repository/source order — Phase 4 adds no sorting (no confirmed rule).
  * `headingLevel` keeps the heading outline valid for the page the list sits on.
  */
 export function InventoryList({
@@ -27,7 +28,7 @@ export function InventoryList({
     case "empty":
       return (
         <section className="notice" role="status">
-          <h2>No cars are listed right now</h2>
+          <h2 className="notice-title">No cars are listed right now</h2>
           <p>Please check back later.</p>
         </section>
       );
