@@ -2,6 +2,7 @@ import type { NextRequest } from "next/server";
 
 import { isPublicMediaToken } from "@/adapters/google-drive-media/public-media";
 import { getVehicleImage } from "@/inventory/queries";
+import { MEDIA_CACHE_CONTROL } from "@/lib/media-cache-policy";
 
 /**
  * Controlled media path: `/media/<vehicle ID>/<media ID>/<revision>`.
@@ -12,12 +13,9 @@ import { getVehicleImage } from "@/inventory/queries";
  * successful response is cacheable by browsers and the CDN; `next/image` builds responsive
  * variants from it.
  *
- * Cache trade-off (pending review): a photo removed from Drive disappears from pages within the
- * media listing window (~5 min), but an already-cached URL can keep serving from caches for up
- * to `s-maxage`. Purging needs a cache invalidation or redeploy.
+ * Cache lifetime: see `src/lib/media-cache-policy.ts` (~1 h worst case across the /media,
+ * optimized-image and browser layers; no purge tooling in V1).
  */
-const SUCCESS_CACHE = "public, max-age=86400, s-maxage=604800";
-
 export async function GET(_request: NextRequest, ctx: RouteContext<"/media/[vehicleId]/[mediaId]/[revision]">) {
   const { vehicleId, mediaId, revision } = await ctx.params;
   if (!isPublicMediaToken(mediaId, 22) || !isPublicMediaToken(revision, 12)) return notFound();
@@ -30,7 +28,7 @@ export async function GET(_request: NextRequest, ctx: RouteContext<"/media/[vehi
         headers: {
           "Content-Type": result.contentType,
           "Content-Length": String(result.bytes.byteLength),
-          "Cache-Control": SUCCESS_CACHE,
+          "Cache-Control": MEDIA_CACHE_CONTROL,
           "Content-Disposition": "inline",
           "X-Content-Type-Options": "nosniff",
         },

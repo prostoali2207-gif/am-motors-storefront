@@ -24,8 +24,11 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   `docs/google-sheets-setup.md`). Live read not yet verified until credentials exist.
 - Phase 3 (Drive media pipeline) implemented in `src/adapters/google-drive-media` and the
   route `src/app/media/…`, enabled only by `MEDIA_SOURCE=google-drive` (off by default). Live
-  Drive read not verified until the service account exists; media must stay off on public
-  deployments until `docs/business-rules.md` open question 12 is decided.
+  Drive read not verified until the service account exists. Business decision 2026-09-30:
+  no website-ready photos exist yet — media stays off, VDPs show "Photos unavailable", and
+  publishing rules wait for final photos (`docs/business-rules.md` → "Website photos").
+  Only `getById`/the media route resolve media; listings make 0 Drive calls. Photo cache
+  policy (~1 h worst case): `src/lib/media-cache-policy.ts`.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.

@@ -16,9 +16,11 @@ export type SnapshotResult = ({ readonly kind: "ok" } & InventorySnapshot) | Inv
  * Inventory repository backed by the Google Sheet. It only sees public `Vehicle` snapshots
  * (freshness-checked by the caller); it never falls back to other data.
  *
- * With a media service, each vehicle's `media` is resolved from its own Drive folder. A media
+ * Media is resolved ONLY for a single vehicle (`getById`, used by the VDP) and for the media
+ * route (`getImage`). Listing reads (`listAvailable`, `listSold`) return `media: []` and make no
+ * Drive calls: listing pages show no photos in Phase 3, and nothing is prefetched. A media
  * problem only empties that vehicle's `media`; it never affects inventory or other vehicles.
- * Without one (media source not enabled), `media` stays empty.
+ * Without a media service (media source not enabled), `media` stays empty everywhere.
  */
 export class GoogleSheetsInventoryRepository implements InventoryRepository {
   constructor(
@@ -29,13 +31,14 @@ export class GoogleSheetsInventoryRepository implements InventoryRepository {
   async listAvailable(): Promise<InventoryListResult> {
     const snapshot = await this.readSnapshot();
     if (snapshot.kind !== "ok") return snapshot;
-    return listResult(await this.withMedia(snapshot, snapshot.vehicles.filter((v) => v.status === "available")));
+    // No media resolution for listings: vehicles keep the `media: []` set by the mapper.
+    return listResult(snapshot.vehicles.filter((v) => v.status === "available"));
   }
 
   async listSold(): Promise<InventoryListResult> {
     const snapshot = await this.readSnapshot();
     if (snapshot.kind !== "ok") return snapshot;
-    return listResult(await this.withMedia(snapshot, snapshot.vehicles.filter((v) => v.status === "sold")));
+    return listResult(snapshot.vehicles.filter((v) => v.status === "sold"));
   }
 
   async getById(id: string): Promise<VehicleLookupResult> {
@@ -43,8 +46,7 @@ export class GoogleSheetsInventoryRepository implements InventoryRepository {
     if (snapshot.kind !== "ok") return snapshot;
     const vehicle = snapshot.vehicles.find((v) => v.id === id);
     if (!vehicle) return { kind: "not-found" };
-    const [withMedia] = await this.withMedia(snapshot, [vehicle]);
-    return { kind: "ok", vehicle: withMedia };
+    return { kind: "ok", vehicle: await this.withMedia(snapshot, vehicle) };
   }
 
   async getImage(vehicleId: string, mediaId: string, revision: string): Promise<MediaImageResult> {
@@ -57,15 +59,11 @@ export class GoogleSheetsInventoryRepository implements InventoryRepository {
     return this.media.imageFor(vehicleId, folder, mediaId, revision);
   }
 
-  private async withMedia(snapshot: InventorySnapshot, vehicles: readonly Vehicle[]): Promise<Vehicle[]> {
-    const media = this.media;
-    if (media === null) return [...vehicles];
-    return Promise.all(
-      vehicles.map(async (vehicle) => {
-        const folder = folderOf(snapshot, vehicle.id) ?? { kind: "missing" as const };
-        return { ...vehicle, media: await media.mediaFor(vehicle.id, folder) };
-      }),
-    );
+  /** Resolves the media of ONE vehicle from its own folder. */
+  private async withMedia(snapshot: InventorySnapshot, vehicle: Vehicle): Promise<Vehicle> {
+    if (this.media === null) return vehicle;
+    const folder = folderOf(snapshot, vehicle.id) ?? { kind: "missing" as const };
+    return { ...vehicle, media: await this.media.mediaFor(vehicle.id, folder) };
   }
 }
 

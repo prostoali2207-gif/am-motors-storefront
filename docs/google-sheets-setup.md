@@ -88,8 +88,10 @@ Enabled only with `MEDIA_SOURCE=google-drive`. Same service account, one more re
 
 Calls: per vehicle `files.get` (folder type) + `files.list` (direct children, fields `id,name,
 mimeType,size,createdTime,md5Checksum,version` only — never owners, permissions or image
-metadata/GPS); listings cached 5 minutes (tag `media`). Per image request (only on a CDN/image
-cache miss): `files.get?alt=media`, re-encoded server-side without metadata.
+metadata/GPS), only when a VDP (or the media route) needs that vehicle — `/` and `/cars`
+make no Drive calls; folder listings cached 5 minutes (tag `media`). Per image request (only
+on a CDN/image cache miss): `files.get?alt=media`, re-encoded server-side without metadata;
+responses cached 20 minutes (≈ 1 hour worst case across layers).
 
 Steps:
 
@@ -99,8 +101,9 @@ Steps:
    folder are visible to the service account through the folder share.
 3. Set `MEDIA_SOURCE=google-drive` locally (`.env.local`) and run `npm run smoke:media`
    (read-only; prints per-vehicle state and counts only, and sanitizes one image in memory).
-4. Do not enable it on a public deployment before open question 12 in
-   `docs/business-rules.md` is decided.
+4. Business decision 2026-09-30: there are no website-ready photos yet. Keep
+   `MEDIA_SOURCE` unset everywhere except a local smoke test until final website photos exist
+   and open question 12 is decided.
 
 Media failures never make the inventory unavailable: missing/invalid link, inaccessible folder,
 empty folder, only unsupported files or a Drive error only empty that one vehicle's media

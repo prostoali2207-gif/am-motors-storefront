@@ -92,6 +92,13 @@ describe("media guards", () => {
     expect(card).not.toMatch(/next\/image|<img|<video|\.media\b/);
   });
 
+  it("does not prefetch VDPs from listing cards (a VDP render resolves Drive media)", () => {
+    const card = readFileSync(join(process.cwd(), "src/components/vehicle-card.tsx"), "utf8");
+    const links = card.match(/<Link\b[^>]*>/g) ?? [];
+    expect(links.length).toBeGreaterThan(0);
+    for (const link of links) expect(link).toContain("prefetch={false}");
+  });
+
   it("never renders <video> anywhere (no public video delivery yet)", () => {
     const offenders = rendered.filter(({ text }) => /<video\b/.test(text));
     expect(offenders.map((f) => f.path)).toEqual([]);

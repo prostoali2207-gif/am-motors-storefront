@@ -28,6 +28,7 @@ function setup(options: { log?: (m: string) => void } = {}) {
     syntheticRow({ ID: "TEST-0005", [MEDIA_LINK_COLUMN]: undefined }),
     syntheticRow({ ID: "TEST-0006", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_EMPTY_006") }),
     syntheticRow({ ID: "TEST-0007", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_DOCS_0007") }),
+    syntheticRow({ ID: "TEST-0008", Статус: "Продана", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_OK_000001") }),
   ]);
   const drive = new FakeDrive(
     {
@@ -57,11 +58,55 @@ async function vehicles(repo: GoogleSheetsInventoryRepository): Promise<Vehicle[
   return [...result.vehicles];
 }
 
+/** One vehicle as the VDP reads it (the only read that resolves media). */
+async function vdp(repo: GoogleSheetsInventoryRepository, id: string): Promise<Vehicle> {
+  const result = await repo.getById(id);
+  if (result.kind !== "ok") throw new Error(`unexpected ${result.kind}`);
+  return result.vehicle;
+}
+
+const IDS = ["TEST-0001", "TEST-0002", "TEST-0003", "TEST-0004", "TEST-0005", "TEST-0006", "TEST-0007"];
+
+describe("Drive media: listings never touch Drive", () => {
+  it("listAvailable returns every available vehicle with media [] and makes 0 Drive calls", async () => {
+    const { repo, drive } = setup();
+    const all = await vehicles(repo);
+    expect(all.map((v) => v.id)).toEqual(IDS);
+    expect(all.every((v) => v.media.length === 0)).toBe(true);
+    expect(drive.calls).toEqual([]);
+    expect(drive.downloads).toEqual([]);
+  });
+
+  it("listSold returns sold vehicles with media [] and makes 0 Drive calls", async () => {
+    const { repo, drive } = setup();
+    const result = await repo.listSold();
+    expect(result.kind === "ok" && result.vehicles.map((v) => [v.id, v.media])).toEqual([["TEST-0008", []]]);
+    expect(drive.calls).toEqual([]);
+    expect(drive.downloads).toEqual([]);
+  });
+
+  it("repeated listing reads still make 0 Drive calls (no prefetch)", async () => {
+    const { repo, drive } = setup();
+    await vehicles(repo);
+    await repo.listSold();
+    await vehicles(repo);
+    expect(drive.calls).toEqual([]);
+  });
+});
+
 describe("Drive media: per-vehicle resolution", () => {
+  it("getById calls Drive only for that vehicle's own folder", async () => {
+    const { repo, drive } = setup();
+    await vdp(repo, "TEST-0001");
+    expect(drive.calls).toEqual(["get:TESTFOLDERID_OK_000001", "list:TESTFOLDERID_OK_000001"]);
+    await vdp(repo, "TEST-0006");
+    expect(drive.calls.slice(2)).toEqual(["get:TESTFOLDERID_EMPTY_006", "list:TESTFOLDERID_EMPTY_006"]);
+    expect(drive.downloads).toEqual([]); // listing a folder never downloads files
+  });
+
   it("attaches sanitized media to the vehicle whose folder is readable", async () => {
     const { repo } = setup();
-    const [first] = await vehicles(repo);
-    expect(first.id).toBe("TEST-0001");
+    const first = await vdp(repo, "TEST-0001");
     // Technical fallback order: natural name, then createdTime, then file ID (names collide).
     expect(first.media.map((m) => m.type)).toEqual(["image", "image", "video"]);
     expect(first.media.map((m) => m.id)).toEqual([IMG_A, IMG_B, VIDEO].map((f) => publicMediaId(f.id)));
@@ -73,25 +118,20 @@ describe("Drive media: per-vehicle resolution", () => {
 
   it("a denied, failing, empty, docs-only, invalid or missing folder only empties that vehicle's media", async () => {
     const { repo } = setup();
-    const all = await vehicles(repo);
-    expect(all.map((v) => v.id)).toEqual([
-      "TEST-0001",
-      "TEST-0002",
-      "TEST-0003",
-      "TEST-0004",
-      "TEST-0005",
-      "TEST-0006",
-      "TEST-0007",
-    ]);
+    const all = [];
+    for (const id of IDS) all.push(await vdp(repo, id));
     expect(all.map((v) => v.media.length)).toEqual([3, 0, 0, 0, 0, 0, 0]);
-    // Inventory facts are unaffected by media problems.
+    // Inventory facts are unaffected by media problems, and the listing still has every car.
     expect(all.every((v) => v.make === "Testmake" && v.priceAed === 11111)).toBe(true);
+    expect((await vehicles(repo)).map((v) => v.id)).toEqual(IDS);
+    // A failing folder elsewhere does not break a readable one.
+    expect((await vdp(repo, "TEST-0001")).media).toHaveLength(3);
   });
 
   it("reports the server-side state per vehicle without folder IDs, file IDs, names or links", async () => {
     const lines: string[] = [];
     const { repo } = setup({ log: (m) => lines.push(m) });
-    await vehicles(repo);
+    for (const id of IDS) await vdp(repo, id);
     const text = lines.join("\n");
     expect(text).toContain("TEST-0002: inaccessible");
     expect(text).toContain("TEST-0003: source-error (http-5xx)");
@@ -104,8 +144,8 @@ describe("Drive media: per-vehicle resolution", () => {
 
   it("backs off from a failing folder instead of hammering Drive", async () => {
     const { repo, drive } = setup();
-    await vehicles(repo);
-    await vehicles(repo);
+    await vdp(repo, "TEST-0003");
+    await vdp(repo, "TEST-0003");
     expect(drive.calls.filter((c) => c === "get:TESTFOLDERID_FLAKY_003")).toHaveLength(1);
   });
 
@@ -117,7 +157,7 @@ describe("Drive media: per-vehicle resolution", () => {
 
   it("reads the media link column (and no other non-public column) in the same batch when enabled", async () => {
     const { sheet, repo } = setup();
-    await vehicles(repo);
+    await vdp(repo, "TEST-0001");
     expect(sheet.batchCalls).toHaveLength(1);
     const requested = sheet.requestedColumnNames();
     expect(requested).toContain(MEDIA_LINK_COLUMN);
@@ -145,7 +185,7 @@ describe("Drive media: per-vehicle resolution", () => {
 describe("Drive media: no leakage into the public model", () => {
   it("public vehicles carry no Drive link, folder ID, file ID, file name or private field", async () => {
     const { repo } = setup();
-    const listed = JSON.stringify(await repo.listAvailable());
+    const listed = JSON.stringify([await repo.listAvailable(), await repo.listSold()]);
     const single = JSON.stringify(await repo.getById("TEST-0001"));
     for (const payload of [listed, single]) {
       expect(payload).not.toMatch(/drive\.google|googleapis|googleusercontent|usp=sharing/);
@@ -157,7 +197,7 @@ describe("Drive media: no leakage into the public model", () => {
 
 describe("Drive media: controlled image delivery", () => {
   async function firstImage(repo: GoogleSheetsInventoryRepository) {
-    const [vehicle] = await vehicles(repo);
+    const vehicle = await vdp(repo, "TEST-0001");
     const image = vehicle.media[0] as VehicleImage;
     const [, , , mediaId, revision] = image.src.split("/");
     return { vehicle, mediaId, revision };
@@ -175,7 +215,7 @@ describe("Drive media: controlled image delivery", () => {
   it("refuses media of another vehicle, stale revisions, videos, unknown and non-public vehicles", async () => {
     const { repo, drive } = setup();
     const { mediaId, revision } = await firstImage(repo);
-    const [vehicle] = await vehicles(repo);
+    const vehicle = await vdp(repo, "TEST-0001");
     const videoId = vehicle.media[2].id;
 
     await expect(repo.getImage("TEST-0002", mediaId, revision)).resolves.toEqual({ kind: "not-found" });
@@ -221,7 +261,7 @@ describe("Drive media: controlled image delivery", () => {
       kind: "ok",
       ...(await loadInventorySnapshot(sheet, { now: () => NOW, log: quietLog })),
     }));
-    const [vehicle] = await vehicles(repo);
+    const vehicle = await vdp(repo, "TEST-0001");
     expect(vehicle.media).toEqual([]);
     await expect(repo.getImage(vehicle.id, "A".repeat(22), "A".repeat(12))).resolves.toEqual({ kind: "not-found" });
   });

@@ -108,6 +108,19 @@ Recorded 2026-09-30. Technical proposals, not business facts; confirm or change 
   ~2 minutes. On-demand revalidation (e.g. a Sheet edit hook calling `revalidateTag`) can
   shorten this later.
 
+## Website photos — Confirmed 2026-09-30
+
+- **There are no website-ready photos yet.** The current Drive folders linked in
+  `Ссылка на фото/видео` are working source material (raw shots, ad creatives, duplicates),
+  **not** a website media library.
+- `MEDIA_SOURCE` stays **off** by default. Existing files — including ad creatives — are never
+  published automatically.
+- The site shows the neutral "Photos unavailable" state on every VDP until website photos exist.
+- Not defined now (deliberately): which files are publishable, cover/order, video, HEIC,
+  plates/people/documents. When final website photos are ready, a minimal publishing
+  convention is decided separately (open question 12). No Sheet change, no new folders, no CMS
+  until then.
+
 ## Google Drive media — Phase 3 (technical, pending review)
 
 Recorded 2026-09-30. Technical proposals, not business facts.
@@ -124,11 +137,18 @@ Recorded 2026-09-30. Technical proposals, not business facts.
   upload time, then file ID. The first image is not a declared cover.
 - **Delivery:** images only, through the site's route `/media/<ID>/<opaque id>/<revision>` —
   downloaded server-side, EXIF/GPS/all metadata stripped, re-encoded as JPEG (max 2048 px),
-  cached by browser/CDN (1 day / 7 days); `next/image` builds responsive sizes from it.
-  Videos: no public delivery yet (not rendered). Listing cards: no media yet.
+  `next/image` builds responsive sizes from it. Videos: no public delivery yet (not rendered).
+- **Where media is resolved:** only for one vehicle's VDP (`getById`) and the media route.
+  `/` and `/cars` (listing reads) return `media: []` and make 0 Drive calls; nothing is
+  prefetched. Listing cards show no media.
+- **Cache (V1, no purge tooling):** `/media` responses `public, max-age=1200, s-maxage=1200`
+  and `images.minimumCacheTTL = 1200` (Next 16 caches optimized images for the larger of the
+  two and sends that to browsers). Worst case a removed photo can still be served ≈ 1 hour
+  (route CDN copy → optimized copy → browser copy, 20 min each). Content-versioned URLs: a
+  replaced photo gets a new URL at once. Policy: `src/lib/media-cache-policy.ts`.
 - **Customer-facing states:** photos, or neutral "Photos unavailable". No placeholder car image.
-- **Switch:** `MEDIA_SOURCE=google-drive`, off by default. Must stay off on any public
-  deployment until open question 12 is decided (see below).
+- **Switch:** `MEDIA_SOURCE=google-drive`, off by default. Stays off (see "Website photos —
+  Confirmed" above) until website photos exist and open question 12 is decided.
 
 ## Inquiries and lead qualification — Confirmed
 
@@ -179,25 +199,23 @@ Ask the user; do not assume answers.
 10. Which sold cars may be shown as social proof, and for how long after sale?
 11. Revalidation window: how quickly must a Sheet status change appear on the site?
     (Accepted for V1 on 2026-09-30: ≤ 2 minutes — 60 s cache, 120 s hard max age.)
-12. Drive media rules — **blocking before media goes public** (observed 2026-09-30, metadata
-    only): vehicle folders mix real photos with ad creatives (e.g. a file named as an ad with a
-    payment-terms claim not confirmed in this file, "hero still" artwork, carousels) and
-    duplicate uploads; some folders list no files. The pipeline cannot tell a photo from an ad
-    or a document without interpreting image content, which is not allowed as a commercial
-    fact. Needed decisions:
-    a. Which files in a folder may be published (all? only photos? a convention such as a
-       `site` subfolder or a filename prefix, or an explicit list in the Sheet)?
-    b. Cover image and order (proposal: a new Sheet column, e.g. `Обложка сайта` holding a
-       file name/number, or numeric filename prefixes `01_`, `02_` that the current fallback
-       already honours).
+12. Website photo publishing convention — **deferred by business decision (2026-09-30)**:
+    no website-ready photos exist yet (see "Website photos — Confirmed"). Decide only when
+    final website photos are ready. Background (observed 2026-09-30, metadata only): current
+    folders mix real photos with ad creatives (e.g. a file named as an ad with a payment-terms
+    claim not confirmed in this file, "hero still" artwork, carousels), duplicate uploads and
+    empty folders; the pipeline cannot tell a photo from an ad or a document without
+    interpreting image content, which is not allowed. Topics to settle then, minimally:
+    a. Which files are publishable (e.g. a dedicated folder or filename convention, or an
+       explicit list in the Sheet).
+    b. Cover image and order (numeric filename prefixes `01_`, `02_` already work with the
+       current technical order).
     c. Plates visible or blurred; people/documents never published — who checks?
-    d. Video on the site: allowed? Then delivery needs a decision (see (e)).
-    e. Video delivery: proxying large `.MOV` originals through serverless functions is not a
-       production option; options are a public video host (e.g. YouTube unlisted) or a
-       transcoded asset store (e.g. Vercel Blob) — external infrastructure, needs approval.
-    f. HEIC photos (iPhone default): convert before upload, or approve a conversion service?
-    g. Cache purge when a photo must be removed urgently (CDN may serve an already-cached URL
-       up to 7 days unless invalidated).
+    d. Video on the site at all; if yes, delivery (public video host or a transcoded asset
+       store — external infrastructure, needs approval; serverless proxying of `.MOV`
+       originals is not an option).
+    e. HEIC photos: convert before upload, or approve a conversion step.
+    f. Urgent removal: V1 caches bound it to ≈ 1 hour; faster removal needs purge tooling.
 13. Language(s) for launch: English only, or also Arabic/Russian?
 14. Brand assets: logo, brand colors, fonts — do they exist?
 15. Domain and analytics/ad platforms in use (Meta, Google Ads, TikTok) for Phase 5 attribution.
