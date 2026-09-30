@@ -30,19 +30,24 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   Only `getById`/the media route resolve media; listings make 0 Drive calls. Photo cache
   policy (~1 h worst case): `src/lib/media-cache-policy.ts`.
 - Phase 4A (live visual benchmark, accepted) and Phase 4 (storefront UX, "Coachwork" direction)
-  recorded in `docs/ux-benchmark.md`. Phase 4 implemented 2026-09-30 — **pending review**:
-  neutral tokens (no accent until brand assets), Geologica self-hosted with Cyrillic
-  (`src/app/fonts/`), inventory-first home and `/cars`, photo-free cards, VDP no-photo state,
-  sold VDP styling. No conversion actions (Phase 5), no sorting (source order), media ratio
-  provisional (`--media-ratio`).
-- Phase 5 (Conversion & attribution) implemented 2026-09-30 — **pending review**: available
-  VDPs get WhatsApp (primary) + "Request a viewing" / "Request a test drive" (secondary), all
-  opening WhatsApp +971 50 343 2337 with confirmed prefills (`src/conversion/`); mobile sticky
-  bar (WhatsApp + test drive) after the in-page actions scroll away; sold VDPs have no actions;
-  "Didn't find what you need?" general request on `/` and `/cars`. First-touch UTM parameters (no click IDs) in
-  `sessionStorage`, appended to prefills (`src/attribution/`). No pixels, analytics, cookies,
-  forms, API or CRM (open question 15). Confirmed decisions: `docs/business-rules.md` →
-  "Contact and inquiries".
+  recorded in `docs/ux-benchmark.md`. Phase 4 **accepted and merged** (PR #5): neutral tokens
+  (no accent until brand assets), Geologica self-hosted with Cyrillic (`src/app/fonts/`),
+  inventory-first home and `/cars`, photo-free cards, VDP no-photo state, sold VDP styling. No
+  sorting (source order), media ratio provisional (`--media-ratio`).
+- Phase 5 (Conversion & attribution) **accepted and merged** (PR #6): available VDPs get
+  WhatsApp (primary) + "Request a viewing" / "Request a test drive" (secondary), all opening
+  WhatsApp +971 50 343 2337 with confirmed prefills (`src/conversion/`); mobile sticky bar
+  (WhatsApp + test drive) after the in-page actions scroll away; sold VDPs have no actions;
+  "Didn't find what you need?" general request on `/` and `/cars`. First-touch UTM parameters
+  (no click IDs) in `sessionStorage`, appended to prefills (`src/attribution/`). No pixels,
+  analytics, cookies, forms, API or CRM (open question 15). Confirmed decisions:
+  `docs/business-rules.md` → "Contact and inquiries".
+- Phase 6 (Vercel preview + real data verification) **in progress**: Vercel project
+  `am-motors-storefront` (Hobby account scope), Vercel Authentication on all previews,
+  production builds skipped (project "Ignored Build Step" + `vercel.json`
+  `git.deploymentEnabled.main = false`). Preview-only env vars; `MEDIA_SOURCE` unset.
+  Google Workload Identity Federation not yet set up (needs a human in Google Cloud Console;
+  steps in `docs/google-sheets-setup.md`).
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.

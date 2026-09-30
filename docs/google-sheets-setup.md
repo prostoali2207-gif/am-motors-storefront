@@ -57,23 +57,48 @@ May 2024. Vercel documents keyless OIDC federation to GCP with `google-auth-libr
    - `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY=<private_key from the JSON, one line with \n>`
 7. `npm run smoke:sheets` — read-only; prints header comparison, counts and issue codes only.
 
-### `vercel-oidc` (Phase 6, when the Vercel project exists)
+### `vercel-oidc` (Phase 6)
 
-Verify each step against <https://vercel.com/docs/oidc/gcp> at setup time.
+Checked 2026-09-30 against <https://vercel.com/docs/oidc/gcp>,
+<https://vercel.com/docs/oidc/reference> and Google's Workload Identity Federation docs.
+Re-check them if the Console differs.
 
-1. Enable **IAM Service Account Credentials API** and **Security Token Service API**.
-2. Vercel project → Settings → Security → OIDC Federation: team issuer
-   (`https://oidc.vercel.com/<team-slug>`).
-3. Google Cloud → IAM → Workload Identity Federation → create pool (e.g. `vercel`) and an
-   OIDC provider (e.g. `vercel`): issuer `https://oidc.vercel.com/<team-slug>`, allowed
-   audience `https://vercel.com/<team-slug>`, mapping `google.subject = assertion.sub`, and an
-   attribute condition restricted to this Vercel project (and the environments allowed to
-   read inventory).
-4. Grant that pool principal **Workload Identity User** on the service account (only).
-5. Vercel env vars (server-side, not `NEXT_PUBLIC_`): `INVENTORY_SOURCE`,
+Vercel values (not secrets):
+
+| Item | Value |
+| - | - |
+| Vercel project | `am-motors-storefront` (`prj_P1VGYeX1AUQQkowQo3PaIHE3j8If`) |
+| Team slug / ID | `prostoali2207-5636s-projects` / `team_wlh3TVLEQlmcpaPCBipCW3lC` |
+| OIDC issuer mode | Team → issuer `https://oidc.vercel.com/prostoali2207-5636s-projects` |
+| Token audience (default, used by the code) | `https://vercel.com/prostoali2207-5636s-projects` |
+| Token subject for Preview | `owner:prostoali2207-5636s-projects:project:am-motors-storefront:environment:preview` |
+
+Google Cloud steps (same project as the service account):
+
+1. APIs & Services → Library → enable **IAM Service Account Credentials API** and
+   **Security Token Service API** (Google Sheets API is already on from "Common").
+2. IAM & Admin → Workload Identity Federation → **Create pool**: name `Vercel`, ID `vercel`.
+3. Add provider → **OpenID Connect (OIDC)**: name `Vercel`, ID `vercel`, issuer URL
+   `https://oidc.vercel.com/prostoali2207-5636s-projects`, JWK file empty, audience
+   **Allowed audiences** → `https://vercel.com/prostoali2207-5636s-projects`.
+4. Provider attributes: mapping `google.subject` = `assertion.sub`. Attribute condition
+   (only this Vercel project, only Preview):
+   `assertion.owner_id == 'team_wlh3TVLEQlmcpaPCBipCW3lC' && assertion.project_id == 'prj_P1VGYeX1AUQQkowQo3PaIHE3j8If' && assertion.environment == 'preview'`
+5. Service account `storefront-sheets-reader` → Permissions → Grant access → principal
+   `principal://iam.googleapis.com/projects/<PROJECT_NUMBER>/locations/global/workloadIdentityPools/vercel/subject/owner:prostoali2207-5636s-projects:project:am-motors-storefront:environment:preview`
+   → role **Workload Identity User** (`roles/iam.workloadIdentityUser`). That is the only
+   grant; the service account itself still has no project roles.
+6. Vercel env vars, **Preview only**, server-side (never `NEXT_PUBLIC_`): `INVENTORY_SOURCE`,
    `GOOGLE_SHEETS_SPREADSHEET_ID`, `GOOGLE_AUTH_MODE=vercel-oidc`,
-   `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GCP_PROJECT_NUMBER`, `GCP_WORKLOAD_IDENTITY_POOL_ID`,
-   `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID`. `VERCEL_OIDC_TOKEN` is provided by Vercel.
+   `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GCP_PROJECT_NUMBER`,
+   `GCP_WORKLOAD_IDENTITY_POOL_ID=vercel`, `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID=vercel`.
+   `VERCEL_OIDC_TOKEN` is provided by Vercel. `MEDIA_SOURCE` stays unset.
+
+Google recommends the provider's "Default audience"; that would need the code to request a
+custom-audience Vercel token (`getVercelOidcToken({ audience })`). V1 uses the Vercel-documented
+"Allowed audiences" option instead; the attribute condition limits access to this project's
+Preview environment either way. Production gets its own principal and condition only when the
+user approves a production launch.
 
 ## Drive media (Phase 3, optional)
 
