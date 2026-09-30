@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import ErrorPage from "@/app/error";
+import ErrorPage from "@/app/(en)/error";
 
 afterEach(cleanup);
 

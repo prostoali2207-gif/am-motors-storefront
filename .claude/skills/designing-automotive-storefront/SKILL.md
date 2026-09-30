@@ -98,7 +98,9 @@ Aim for a credible, product-led automotive retail look: the cars and their photo
 - Neutral, high-contrast base with at most one restrained accent used for actions.
 - Typography chosen for legibility of numbers (price, mileage, year) — tabular figures.
 - Density closer to automotive retail than to marketing landing pages.
-- Arabic/RTL readiness is not in scope unless confirmed, but avoid layouts that make it impossible.
+- Three languages (Phase 7): English (default, unprefixed URLs), Arabic (RTL, `/ar`), Russian
+  (`/ru`). Use logical CSS (inline-start/end) so RTL mirrors; isolate Sheet values with `<bdi>`;
+  never letter-space or upper-case Arabic. Interface copy lives in `src/i18n/messages.ts`.
 
 ## Anti-pattern review (block these)
 

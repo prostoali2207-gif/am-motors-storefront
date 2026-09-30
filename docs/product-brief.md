@@ -86,7 +86,8 @@ drive", never "Book", so nothing implies a confirmed appointment.
 ## Out of scope until confirmed by the business
 
 Finance / monthly payments, trade-in, warranty, delivery, online reservation or deposit,
-insurance, car comparison, saved searches, user accounts, multi-language, Arabic/RTL.
+insurance, car comparison, saved searches, user accounts. (Multi-language — English, Arabic/RTL,
+Russian — was confirmed and added in Phase 7.)
 
 ## Success signals (to be instrumented in Phase 5)
 

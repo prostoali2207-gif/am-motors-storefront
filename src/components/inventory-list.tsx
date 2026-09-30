@@ -1,4 +1,6 @@
 import type { InventoryListResult } from "@/domain/inventory-result";
+import type { Locale } from "@/i18n/locales";
+import { messages } from "@/i18n/messages";
 import { InventoryUnavailable } from "./inventory-unavailable";
 import { VehicleCard } from "./vehicle-card";
 
@@ -10,17 +12,20 @@ import { VehicleCard } from "./vehicle-card";
 export function InventoryList({
   result,
   headingLevel,
+  locale,
 }: {
   result: InventoryListResult;
   headingLevel: 2 | 3;
+  locale: Locale;
 }) {
+  const t = messages(locale);
   switch (result.kind) {
     case "ok":
       return (
-        <ul className="inventory" aria-label="Available cars">
+        <ul className="inventory" aria-label={t.availableCarsLabel}>
           {result.vehicles.map((vehicle) => (
             <li key={vehicle.id}>
-              <VehicleCard vehicle={vehicle} headingLevel={headingLevel} />
+              <VehicleCard vehicle={vehicle} headingLevel={headingLevel} locale={locale} />
             </li>
           ))}
         </ul>
@@ -28,12 +33,12 @@ export function InventoryList({
     case "empty":
       return (
         <section className="notice" role="status">
-          <h2 className="notice-title">No cars are listed right now</h2>
-          <p>Please check back later.</p>
+          <h2 className="notice-title">{t.emptyTitle}</h2>
+          <p>{t.emptyText}</p>
         </section>
       );
     case "unavailable":
-      return <InventoryUnavailable />;
+      return <InventoryUnavailable locale={locale} />;
     default: {
       const unhandled: never = result;
       return unhandled;

@@ -3,6 +3,9 @@ import Link from "next/link";
 import type { Vehicle } from "@/domain/vehicle";
 import { vehicleTitle } from "@/domain/vehicle";
 import { vehicleImages } from "@/domain/vehicle-media";
+import { localizedPath, type Locale } from "@/i18n/locales";
+import { messages } from "@/i18n/messages";
+import { displayVehicleValue } from "@/i18n/vehicle-values";
 import { FactLine } from "./fact-line";
 import { formatMileageKm, formatPriceAed, keyFacts, makeYearLine, modelLine } from "./format";
 import { SoldBadge } from "./sold-badge";
@@ -13,19 +16,21 @@ type Fact = { label: string; value: string | null };
 
 /**
  * Only public-model fields, fixed order; empty values are omitted, never filled in.
- * Sheet text is shown verbatim (English display labels are open question 6).
+ * Categorical values (regional spec, transmission, fuel, drivetrain, colour) use the approved
+ * display dictionary; everything else — engine, year, ID — is shown exactly as in the Sheet.
  */
-function specification(vehicle: Vehicle): Fact[] {
+function specification(vehicle: Vehicle, locale: Locale): Fact[] {
+  const label = messages(locale).spec;
   return [
-    { label: "Mileage", value: vehicle.mileageKm === null ? null : formatMileageKm(vehicle.mileageKm) },
-    { label: "Regional spec", value: vehicle.regionalSpec },
-    { label: "Transmission", value: vehicle.transmission },
-    { label: "Fuel", value: vehicle.fuel },
-    { label: "Engine", value: vehicle.engine },
-    { label: "Drivetrain", value: vehicle.drivetrain },
-    { label: "Year", value: String(vehicle.year) },
-    { label: "Colour", value: vehicle.color },
-    { label: "Reference", value: vehicle.id },
+    { label: label.mileage, value: vehicle.mileageKm === null ? null : formatMileageKm(vehicle.mileageKm, locale) },
+    { label: label.regionalSpec, value: displayVehicleValue("regionalSpec", vehicle.regionalSpec, locale) },
+    { label: label.transmission, value: displayVehicleValue("transmission", vehicle.transmission, locale) },
+    { label: label.fuel, value: displayVehicleValue("fuel", vehicle.fuel, locale) },
+    { label: label.engine, value: vehicle.engine },
+    { label: label.drivetrain, value: displayVehicleValue("drivetrain", vehicle.drivetrain, locale) },
+    { label: label.year, value: String(vehicle.year) },
+    { label: label.colour, value: displayVehicleValue("color", vehicle.color, locale) },
+    { label: label.reference, value: vehicle.id },
   ];
 }
 
@@ -38,9 +43,19 @@ function specification(vehicle: Vehicle): Fact[] {
  * ordered title block → actions → photos line → specification (globals.css).
  *
  * `serverOrigin` is the request origin for the VDP URL in WhatsApp messages (null if unknown).
+ * `locale` selects the interface language; RTL mirroring comes from `dir` on <html> and logical CSS.
  */
-export function VehicleDetail({ vehicle, serverOrigin = null }: { vehicle: Vehicle; serverOrigin?: string | null }) {
-  const specRows = specification(vehicle).filter(
+export function VehicleDetail({
+  vehicle,
+  locale,
+  serverOrigin = null,
+}: {
+  vehicle: Vehicle;
+  locale: Locale;
+  serverOrigin?: string | null;
+}) {
+  const t = messages(locale);
+  const specRows = specification(vehicle, locale).filter(
     (fact): fact is { label: string; value: string } => fact.value !== null && fact.value.trim() !== "",
   );
   const title = vehicleTitle(vehicle);
@@ -50,57 +65,63 @@ export function VehicleDetail({ vehicle, serverOrigin = null }: { vehicle: Vehic
   return (
     <article className="vehicle">
       <p className="back-link">
-        <Link className="text-link" href="/cars">
-          {sold ? "See cars in stock" : "All cars"}
+        <Link className="text-link" href={localizedPath(locale, { kind: "cars" })}>
+          {sold ? t.seeCarsInStock : t.allCars}
         </Link>
       </p>
 
       <div className="vehicle-main">
-        {hasPhotos ? <VehicleGallery media={vehicle.media} title={title} part="lead" /> : null}
+        {hasPhotos ? <VehicleGallery media={vehicle.media} title={title} part="lead" locale={locale} /> : null}
 
         <header className="vehicle-heading">
           <p className="label vehicle-eyebrow" aria-hidden="true">
-            {makeYearLine(vehicle)}
+            <bdi>{makeYearLine(vehicle)}</bdi>
           </p>
           <h1 className="vehicle-title">
-            <span className="visually-hidden">
-              {vehicle.year} {vehicle.make}
-            </span>{" "}
-            {modelLine(vehicle)}
+            <bdi>
+              <span className="visually-hidden">
+                {vehicle.year} {vehicle.make}
+              </span>{" "}
+              {modelLine(vehicle)}
+            </bdi>
           </h1>
           {sold ? (
             <div className="vehicle-sold">
-              <SoldBadge />
-              <p>This car has been sold.</p>
+              <SoldBadge locale={locale} />
+              <p>{t.soldNotice}</p>
             </div>
           ) : null}
           {/* Whether sold cars show their price is an open business question: hidden until decided. */}
           {!sold && vehicle.priceAed !== null ? (
-            <p className="vehicle-price figure">{formatPriceAed(vehicle.priceAed)}</p>
+            <p className="vehicle-price figure">
+              <bdi>{formatPriceAed(vehicle.priceAed, locale)}</bdi>
+            </p>
           ) : null}
-          <FactLine facts={keyFacts(vehicle)} className="vehicle-facts" />
+          <FactLine facts={keyFacts(vehicle, locale)} className="vehicle-facts" />
         </header>
 
         {hasPhotos ? (
-          <VehicleGallery media={vehicle.media} title={title} part="rest" />
+          <VehicleGallery media={vehicle.media} title={title} part="rest" locale={locale} />
         ) : (
-          <VehicleGallery media={vehicle.media} title={title} />
+          <VehicleGallery media={vehicle.media} title={title} locale={locale} />
         )}
       </div>
 
       <div className="vehicle-panel">
-        {sold ? null : <VehicleActions vehicle={vehicle} serverOrigin={serverOrigin} />}
+        {sold ? null : <VehicleActions vehicle={vehicle} serverOrigin={serverOrigin} locale={locale} />}
 
         {specRows.length > 0 ? (
           <section className="vehicle-spec" aria-labelledby="vehicle-spec-heading">
             <h2 id="vehicle-spec-heading" className="label spec-heading">
-              Specification
+              {t.specHeading}
             </h2>
             <dl className="spec">
               {specRows.map((fact) => (
                 <div key={fact.label} className="spec-row">
                   <dt>{fact.label}</dt>
-                  <dd className="figure">{fact.value}</dd>
+                  <dd className="figure">
+                    <bdi>{fact.value}</bdi>
+                  </dd>
                 </div>
               ))}
             </dl>

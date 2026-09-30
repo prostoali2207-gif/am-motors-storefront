@@ -218,6 +218,67 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
 - Do not use "Book", "Confirm", "Reserve" or wording that implies a confirmed appointment until
   a real scheduling/booking system is confirmed and recorded here.
 
+## Languages — Phase 7 (confirmed by the user 2026-09-30)
+
+- **Languages:** English (default), Arabic (full RTL), Russian. Resolves open question 13.
+- **URLs:** English keeps the original unprefixed URLs (`/`, `/cars`, `/cars/<ID>`) so existing
+  and ad links never break. Arabic: `/ar`, `/ar/cars`, `/ar/cars/<ID>`. Russian: `/ru`,
+  `/ru/cars`, `/ru/cars/<ID>`. The vehicle ID is the same verbatim Sheet `ID` in every language.
+- **No automatic redirect** by browser language. An explicit switcher (EN · العربية · RU, no
+  flags) keeps the visitor on the same page (homepage, `/cars`, or the same vehicle ID).
+- **SEO:** `<html lang dir>` per language; self-referencing canonical and `hreflang` en / ar /
+  ru + `x-default` (English) built from the origin the visitor used (no domain configured,
+  q 15). Indexing rules unchanged (sold VDP indexing is still q 9).
+- **Never translated or altered:** make, model, trim, ID, price, mileage, engine, year.
+  Figures stay identical; only digit grouping follows the language (Western digits everywhere).
+- **Currency — Confirmed 2026-09-30:** `AED` on English, Arabic and Russian pages. No Dirham
+  symbol and no `درهم` in Phase 7.
+- **Russian digit grouping — Confirmed 2026-09-30:** thousands grouped with a space
+  (`209 999`, `48 000 км`), because a comma reads as a decimal separator in Russian.
+- **Localized display values** (display only; the Sheet value is unchanged). Exact match after
+  trimming; **any value not in this table is shown exactly as written in the Sheet** in every
+  language. Source: `src/i18n/vehicle-values.ts`.
+
+  | Column | Sheet value | English | Arabic | Russian |
+  | - | - | - | - | - |
+  | `Коробка` | `Автомат` | Automatic | أوتوماتيك | Автомат |
+  | `Коробка` | `CVT` | CVT | CVT | Вариатор (CVT) |
+  | `Топливо` | `Бензин` | Petrol | بنزين | Бензин |
+  | `Привод` | `FWD` | FWD | دفع أمامي | Передний (FWD) |
+  | `Региональная спецификация` | `GCC` | GCC | مواصفات خليجية | GCC |
+  | `Региональная спецификация` | `American Specs` | American Specs | مواصفات أمريكية | Американская спецификация |
+  | `Региональная спецификация` | `Korean Specs` | Korean Specs | مواصفات كورية | Корейская спецификация |
+  | `Цвет` | `White` | White | أبيض | Белый |
+  | `Цвет` | `Silver` | Silver | فضي | Серебристый |
+  | `Цвет` | `Red` | Red | أحمر | Красный |
+  | `Цвет` | `Black` | Black | أسود | Чёрный |
+  | `Цвет` | `Orange` | Orange | برتقالي | Оранжевый |
+  | Status `sold` (chip / VDP line) | `Продана` | Sold / This car has been sold. | مباعة / تم بيع هذه السيارة. | Продан / Этот автомобиль продан. |
+
+  Colour rows: the current colour values of the live Sheet, confirmed 2026-09-30; any other
+  colour is shown verbatim, never inferred or translated.
+  `В наличии` has no visible label (available cars show a price, not a status chip). Status
+  mapping itself is unchanged (fail closed). Adding a value: exact Sheet spelling + all three
+  labels here and in the code, with tests.
+- **WhatsApp prefills follow the page language**, with the same content and restrictions
+  (title = public `year make model trim` verbatim, `Ref: <ID>`, the VDP URL in the page's
+  language; no price, mileage or claims). The `Ref:` marker (**Confirmed 2026-09-30:** stays in
+  English in EN / AR / RU messages, intentionally, for consistent Sales handling) and the
+  attribution block labels (`Source:`, `Medium:`, …) stay identical in every language. English templates are unchanged (see "Contact and inquiries"). First-touch UTM
+  behaviour is unchanged.
+
+  | Intent | Arabic | Russian |
+  | - | - | - |
+  | Vehicle question | `مرحباً، أود الاستفسار عن [title] (Ref: [ID]).` | `Здравствуйте, меня интересует [title] (Ref: [ID]).` |
+  | Viewing | `مرحباً، أود طلب معاينة [title] (Ref: [ID]).` | `Здравствуйте, хочу запросить осмотр автомобиля [title] (Ref: [ID]).` |
+  | Test drive | `مرحباً، أود طلب تجربة قيادة [title] (Ref: [ID]).` | `Здравствуйте, хочу запросить тест-драйв автомобиля [title] (Ref: [ID]).` |
+  | General request | `مرحباً، لم أجد السيارة التي أبحث عنها على الموقع. هل يمكنكم مساعدتي بمعرفة السيارات المتوفرة حالياً؟` | `Здравствуйте, мне не удалось найти на сайте нужный автомобиль. Подскажите, пожалуйста, что сейчас есть в наличии?` |
+
+  Vehicle messages end with the VDP URL on its own line, as in English.
+- **Interface copy:** Arabic and Russian translate the confirmed English wording
+  (`src/i18n/messages.ts`), including "Request a viewing / test drive" (never booking wording)
+  and the neutral general request. Native-speaker review is open question 19.
+
 ## Open questions
 
 Ask the user; do not assume answers.
@@ -227,7 +288,9 @@ Ask the user; do not assume answers.
 3. Should `Состояние` be shown publicly, and with what allowed values/wording?
 4. Is `Пробег, км` always public, or can it be withheld per car?
 5. Is full VIN ever public? (Default: no.)
-6. Display labels for Russian source values (e.g. `Коробка`, `Топливо`, `Привод`) in English UI.
+6. ~~Display labels for Russian source values~~ — resolved 2026-09-30 (Phase 7) for every
+   current categorical value, including the current colours: see the dictionary in
+   "Languages — Phase 7". A new Sheet value is shown verbatim until it is added there.
 7. ~~WhatsApp business number~~ — confirmed 2026-09-30 (see "Contact and inquiries"). Still
    open: routing to several numbers, phone number, showroom address, opening hours.
 8. ~~Viewing vs test drive~~ — confirmed 2026-09-30: separate intents, both WhatsApp prefills,
@@ -253,7 +316,8 @@ Ask the user; do not assume answers.
        originals is not an option).
     e. HEIC photos: convert before upload, or approve a conversion step.
     f. Urgent removal: V1 caches bound it to ≈ 1 hour; faster removal needs purge tooling.
-13. Language(s) for launch: English only, or also Arabic/Russian?
+13. ~~Language(s) for launch~~ — confirmed 2026-09-30: English (default), Arabic, Russian
+    (see "Languages — Phase 7").
 14. Brand assets: logo, brand colors, fonts — do they exist?
 15. Domain and analytics/ad platforms in use (Meta, Google Ads, TikTok). Still open: Phase 5
     carries UTM parameters into WhatsApp messages only (no click IDs); no pixels or analytics until decided
@@ -264,3 +328,9 @@ Ask the user; do not assume answers.
     inquiries"). Sourcing/import remains unconfirmed and is not promised.
 18. Should a sold car's page or sold section show its last listed price? (Default until decided:
     no price on sold cars.)
+19. Native-speaker review of the Arabic and Russian interface copy and WhatsApp templates
+    (`src/i18n/messages.ts`, `src/conversion/inquiry-message.ts`) before any production launch.
+20. ~~Currency in Arabic / Russian digit grouping~~ — confirmed 2026-09-30: `AED` everywhere,
+    no Dirham symbol in Phase 7; Russian keeps space-grouped thousands.
+21. ~~`Ref:` in Arabic/Russian messages~~ — confirmed 2026-09-30: stays `Ref:` in English in
+    every language.

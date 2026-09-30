@@ -86,3 +86,17 @@ Skills: `verifying-storefront`, `building-nextjs-storefront`.
 - Full verification plus `release-checklist.md` on preview with real Sheet data, reviewed with
   the business; real-device checks.
 - Production launch only after explicit user approval (separate decision, not part of this plan).
+
+## Phase 7 — Multilingual storefront
+
+Skills: `designing-automotive-storefront`, `protecting-commercial-truth`,
+`building-nextjs-storefront`, `verifying-storefront`.
+
+- English (default, original unprefixed URLs), Arabic (full RTL, `/ar…`), Russian (`/ru…`); no
+  automatic language redirect; header switcher EN · العربية · RU keeps the same page / vehicle ID.
+- Per-language root layouts (`app/(en)`, `app/ar`, `app/ru`) sharing one document and one set of
+  route bodies (`app/_site`); catch-all routes give each language its own 404.
+- Interface dictionaries, approved categorical display values, localized WhatsApp prefills;
+  commercial facts never translated.
+- `lang`/`dir`, canonical + hreflang; Arabic companion font; RTL via logical CSS.
+- Benchmark recorded in `docs/ux-benchmark.md`; decisions in `docs/business-rules.md`.

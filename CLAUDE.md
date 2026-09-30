@@ -42,7 +42,7 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   (no click IDs) in `sessionStorage`, appended to prefills (`src/attribution/`). No pixels,
   analytics, cookies, forms, API or CRM (open question 15). Confirmed decisions:
   `docs/business-rules.md` → "Contact and inquiries".
-- Phase 6 (Vercel preview + real data verification) **complete, PR #7 ready for review**: Vercel project
+- Phase 6 (Vercel preview + real data verification) **complete, PR #7 merged**: Vercel project
   `am-motors-storefront` (Hobby account scope), Vercel Authentication on all previews,
   production builds skipped (project "Ignored Build Step" + `vercel.json`
   `git.deploymentEnabled.main = false`). Preview-only env vars; `MEDIA_SOURCE` unset.
@@ -56,6 +56,15 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   review accepted the current visual direction for this phase. Sheet link sharing is
   Restricted (owner, named staff, service account as Viewer). Not run: real iOS Safari and
   Android Chrome devices; live cache propagation after a genuine Sheet status change.
+- Phase 7 (multilingual) **implemented, PR #8 ready for review** (not merged): English (default, original unprefixed
+  URLs), Arabic (RTL, `/ar…`), Russian (`/ru…`); no browser-language redirect; header switcher
+  EN · العربية · RU keeps the same page / vehicle ID. Per-language root layouts `src/app/(en)`,
+  `src/app/ar`, `src/app/ru` (one-line route files) share `src/app/_site` (route bodies,
+  metadata, fonts) and `src/components/site-document.tsx`. Copy in `src/i18n/messages.ts`;
+  approved categorical display values incl. current colours in `src/i18n/vehicle-values.ts`
+  (unknown values shown verbatim; `AED` everywhere, `Ref:` in English in every language); WhatsApp prefills follow the page language (`src/conversion/`). Arabic companion
+  font Noto Kufi Arabic (Arabic pages only). Decisions: `docs/business-rules.md` → "Languages —
+  Phase 7"; benchmark: `docs/ux-benchmark.md` → "Phase 7".
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.
@@ -146,10 +155,12 @@ React / TypeScript / ESLint majors follow the official `create-next-app@16.3.7` 
 | `npm run smoke:sheets` | Read-only live Sheet smoke test (needs `.env.local`; prints counts only; not in `verify`) |
 | `npm run smoke:media` | Read-only live Drive media smoke test (per-vehicle state/counts only; not in `verify`) |
 
-Layout: `src/domain` (public types, ID rules), `src/inventory` (repository interface, adapter
+Layout: `src/domain` (public types, ID rules), `src/i18n` (locales, paths, interface copy,
+categorical display values), `src/inventory` (repository interface, adapter
 factory, request-time queries), `src/adapters` (data sources), `src/conversion` (WhatsApp
 number, prefill templates), `src/attribution` (first-touch UTM parameters, browser session only),
-`src/components` (sync views + small client islands), `src/app` (routes). Tests and synthetic fixtures live only in `tests/`.
+`src/components` (sync views + small client islands), `src/app` (per-language route trees +
+`_site` shared route bodies). Tests and synthetic fixtures live only in `tests/`.
 Vitest cannot render async Server Components: keep pages thin and test the sync views.
 
 <!-- BEGIN:nextjs-agent-rules -->

@@ -400,8 +400,8 @@ Cyrillic values (scratchpad, not committed):
 ## Typography decision
 
 **Geologica (SIL OFL 1.1), one variable family (weights 100–900), self-hosted via `next/font`,
-subsets `latin` + `cyrillic`.** Arabic is not required now; if an Arabic launch is confirmed
-(q 13), an Arabic companion is chosen separately.
+subsets `latin` + `cyrillic`.** Arabic was not required in Phase 4; Phase 7 added the Arabic companion Noto Kufi
+Arabic (see "Phase 7 — multilingual benchmark").
 
 Roles (mechanics from the sub-benchmark above):
 - **Titles** (car model + trim, page titles): weight 600, tracking −0.02 em, **mixed case**,
@@ -412,7 +412,8 @@ Roles (mechanics from the sub-benchmark above):
   wherever a number appears (mechanic 1); price weight 600.
 - **Body**: weight 400, 16/26, measure ≤ 68 ch.
 - Currency written as text: `AED 209,999`.
-- Sheet values are shown verbatim (Latin or Cyrillic) until q 6 is decided.
+- Sheet values are shown verbatim (Latin or Cyrillic) unless they have an approved display label
+  (Phase 7 dictionary, `src/i18n/vehicle-values.ts`).
 
 ## Design direction — "Coachwork" (accepted as the Phase 4 basis, 2026-09-30)
 
@@ -593,6 +594,69 @@ transfer" table (no floating chat bubble, no "Book"/"Reserve", no stacked bars).
   Not on sold or not-found VDPs.
 - Links open WhatsApp in a new browsing context (`target=_blank`, `noopener noreferrer`).
 
+## Phase 7 — multilingual benchmark (2026-09-30)
+
+Question: how do strong UAE car sites switch between English and Arabic, and what happens to
+navigation, the VDP, prices/specs, mixed Arabic + Latin names and CTAs in RTL?
+
+Method: same tooling and rules as above (headless Chromium through the egress proxy, normal TLS
+verification — the proxy CA was added to the browser's NSS store; no certificate-ignore flags).
+Mobile 390×844 (iPhone UA) and desktop 1440×900; one VDP per site picked from its own listing;
+EN page first, then the Arabic target of its own language link. DOM read for `lang`/`dir`,
+`hreflang`/canonical, language-link hrefs and boxes, computed fonts, fixed/sticky elements and
+CTA boxes. Screenshots stay in the scratchpad (not committed).
+
+Access: **DubiCars**, **Al-Futtaim Automall**, **Alba Cars** observed. **Kavak UAE**: homepage only
+(Arabic link present but hidden in a menu; listing URL returned its 404). **Dubizzle**: blank page
+(bot protection) — not evidence. **The Elite Cars**: 502 — not evidence. **CARS24 UAE**: no Arabic
+version (hreflang only for en-IN/en-AU/en-AE) — not relevant.
+
+### Observed
+
+| Mechanic | DubiCars | Al-Futtaim Automall | Alba Cars |
+| - | - | - | - |
+| URL scheme | EN unprefixed (`/2024-…-976130.html`), AR `/ar/` + same path | `/en/…` and `/ar/…`, same VIN-based detail path | EN unprefixed, AR `/ar/` + same path |
+| Switch on a VDP keeps the car | Yes — link href `/ar/<same slug>` (verified) | Yes — `/ar/used-cars-shop/details/<same id>/` (verified) | Header control (dropdown button) — href not exposed; same-path `/ar/` VDP exists |
+| Switcher placement, mobile | Footer: plain text links "English" / "العربية" (both shown, current included) | Footer: single text link "العربية" | Header, top end: compact code button "EN" / "AR" |
+| Switcher placement, desktop | Header: "English - EN" / "العربية - AR" | Footer (not re-checked in header) | Header (same button) |
+| `hreflang` / canonical | `en`, `ar`, `x-default` → EN; canonical = own language URL | `en-ae`, `ar-ae` (+ Qatar); canonical = own language URL | Homepage `en`/`ar`; VDP none; canonical = own URL |
+| `<html>` | `lang="ar" dir="rtl"` | `lang="ar" dir="rtl"` | `lang="ar" dir="rtl"` |
+| RTL header | Back chevron mirrored; menu at the end | Logo at the start (right), menu/search at the end (left) | Logo at the start (right), language + menu at the end (left) |
+| Sticky CTA bar in RTL | Same 3 actions, order mirrored (Call at the right, WhatsApp at the left) | Same 2 actions, order mirrored ("طلب تجربة القيادة" right, reserve left) | Floating WhatsApp bubble (not transferred — see above) |
+| Car name in Arabic | Transliterated into Arabic in their data ("رولز رويس سبيكتر ستاندارد") | Make/model kept in Latin ("CHEVROLET / AVEO LS") | Title kept in Latin ("BMW 840i M Sport Convertible"), right-aligned |
+| Figures in Arabic | Western digits ("200 كيلومتر", "2024") | Western digits; **bidi defect**: mileage rendered "km79,803" (unit on the wrong side) | Western digits ("209,999") |
+| Currency in Arabic | "AED" in Latin (desktop; mobile showed USD due to US egress) | Dirham symbol in price, "درهم" in text | Dirham symbol |
+| Spec labels | Label and value in the same cell, label first (right) | — | — |
+| Arabic font | Tajawal | none (Urbanist has no Arabic → system fallback) | Cairo |
+| Test-drive CTA wording (AR) | — | "طلب تجربة القيادة" (request a test drive) | — |
+
+### Conclusions for AM Motors (applied)
+
+1. **URLs:** English stays unprefixed, Arabic/Russian get a prefix with the identical path and
+   vehicle ID — the DubiCars/Alba scheme; nothing existing breaks.
+2. **Switcher keeps the page:** homepage → homepage, `/cars` → `/cars`, VDP → same ID (DubiCars,
+   Automall verified). No automatic language redirect (none observed forcing one either).
+3. **Placement:** in the header at the end, like Alba (reachable on the first screen), but as
+   plain text links like DubiCars' footer (both current and other languages shown, no flags, no
+   dropdown). Labels EN · العربية · RU; current language in ink and underlined.
+4. **hreflang:** en / ar / ru + `x-default` → English, self-referencing canonical (DubiCars).
+5. **RTL:** `dir="rtl"` on `<html>`; header, fact lines, spec rows, action order and desktop
+   columns mirror through logical CSS (as all three sites mirror header and sticky bars).
+6. **Mixed names:** our make/model/trim stay exactly as in the Sheet (Latin), like Automall and
+   Alba; no transliteration (it would be a new, unapproved fact). Every Sheet value is a bidi
+   isolate (`<bdi>`) so "48,000 كم", "AED 209,999" and Latin titles never scramble — the
+   Automall "km79,803" defect is the failure we avoid.
+7. **Figures:** Western digits in Arabic (all three sites). Currency stays "AED" (DubiCars); the
+   Dirham symbol/"درهم" is a business choice → open question.
+8. **Font:** Arabic needs a real Arabic face (Automall shows the system-fallback risk). Tajawal
+   and Cairo are what the observed sites use; we choose **Noto Kufi Arabic** (OFL, variable
+   400–700): a Kufi construction with even stroke and open counters that sits with Geologica's
+   firm grotesque, full Arabic coverage, ≈ 40 KB Arabic-only subset, loaded only on `/ar`.
+   Provisional like Geologica (q 14).
+
+Hypotheses (not verified): Dubizzle and Kavak VDP behaviour in Arabic; real iOS/Android rendering
+of Noto Kufi Arabic next to Geologica.
+
 ## Decisions log
 
 | Date | Decision | Evidence | Notes |
@@ -602,3 +666,4 @@ transfer" table (no floating chat bubble, no "Book"/"Reserve", no stacked bars).
 | 2026-09-30 | "Coachwork" accepted as the Phase 4 basis with four edits: Cyrillic-capable font (Geologica; Archivo deferred), no new sorting (source order), media ratio provisional, no gallery infrastructure / no reserved empty spaces | User review, Cyrillic font check | Phase 4 implementation started |
 | 2026-09-30 | Phase 4 implemented per this spec (PR for review) | Browser verification 390×844 / 1440×900 | Not merged; no deployment |
 | 2026-09-30 | Phase 5 conversion actions, sticky bar and general request (see "Phase 5") | Synthesis 3–5, confirmed business decisions | PR for review; no deployment |
+| 2026-09-30 | Phase 7 multilingual: EN (unprefixed) / AR (RTL, `/ar`) / RU (`/ru`), header text switcher, Noto Kufi Arabic companion | Phase 7 benchmark (DubiCars, Automall, Alba) | PR #8 draft; no production deployment |

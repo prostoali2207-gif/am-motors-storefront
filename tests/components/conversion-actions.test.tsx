@@ -40,7 +40,7 @@ afterEach(() => {
 
 describe("available VDP actions", () => {
   it("has exactly three in-page actions: WhatsApp primary, viewing and test drive secondary", () => {
-    render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const links = within(zone()).getAllByRole("link");
     expect(links.map((a) => a.textContent)).toEqual(["Chat on WhatsApp", "Request a viewing", "Request a test drive"]);
     expect(links[0]?.className).toContain("action-primary");
@@ -49,7 +49,7 @@ describe("available VDP actions", () => {
   });
 
   it("prefills each action with its own message, the public title, ID and the current VDP URL", () => {
-    render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const [question, viewing, testDrive] = within(zone()).getAllByRole("link").map(text);
     // After hydration the page's actual origin (jsdom: http://localhost:3000) replaces the server one.
     const url = `${window.location.origin}/cars/TEST-0001`;
@@ -59,7 +59,7 @@ describe("available VDP actions", () => {
   });
 
   it("opens WhatsApp safely in a new context and describes what happens", () => {
-    render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     for (const link of within(zone()).getAllByRole("link")) {
       expect(link.getAttribute("target")).toBe("_blank");
       expect(link.getAttribute("rel")).toBe("noopener noreferrer");
@@ -70,7 +70,7 @@ describe("available VDP actions", () => {
 
   it("appends first-touch attribution from the landing URL, only the values received", () => {
     window.history.pushState({}, "", "/cars/TEST-0001?utm_source=instagram&utm_campaign=yaris_reel&utm_content=reel_a");
-    render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const viewing = text(within(zone()).getByRole("link", { name: "Request a viewing" }));
     expect(viewing).toBe(
       `Hi, I'd like to request a viewing for ${TITLE} (Ref: TEST-0001).\n` +
@@ -82,10 +82,10 @@ describe("available VDP actions", () => {
 
   it("keeps the attribution after internal navigation and refreshes the link at click time", () => {
     window.history.pushState({}, "", "/?utm_source=tiktok&utm_medium=paid_social&fbclid=IwAR0synthetic");
-    render(<GeneralRequest />);
+    render(<GeneralRequest locale="en" />);
     cleanup();
     window.history.pushState({}, "", "/cars/TEST-0001");
-    render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const link = within(zone()).getByRole("link", { name: "Request a test drive" });
     link.addEventListener("click", (event) => event.preventDefault());
     act(() => link.click());
@@ -94,7 +94,7 @@ describe("available VDP actions", () => {
   });
 
   it("adds no attribution block when none was received", () => {
-    render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     for (const link of within(zone()).getAllByRole("link")) {
       expect(text(link)).not.toMatch(/Source|Medium|Campaign|Content|Term|fbclid/);
     }
@@ -112,7 +112,7 @@ describe("available VDP actions", () => {
         disconnect() {}
       },
     );
-    const { container } = render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const bar = stickyBar(container);
     expect(bar.hidden).toBe(true);
     const links = within(bar).getAllByRole("link", { hidden: true });
@@ -148,7 +148,7 @@ describe("sticky bar never covers content", () => {
         disconnect() {}
       },
     );
-    const { container, unmount } = render(<VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
+    const { container, unmount } = render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const bar = stickyBar(container);
     vi.spyOn(bar, "getBoundingClientRect").mockReturnValue({ height: 74.2 } as DOMRect);
     act(() => resize());
@@ -164,7 +164,7 @@ describe("sticky bar never covers content", () => {
 
 describe("sold VDP", () => {
   it("has zero conversion actions and no sticky bar", () => {
-    const { container } = render(<VehicleDetail vehicle={syntheticSold} serverOrigin="https://site.test" />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={syntheticSold} serverOrigin="https://site.test" />);
     expect(container.querySelectorAll("a[href*='wa.me'], [data-inquiry]")).toHaveLength(0);
     expect(container.querySelector("[data-sticky-actions]")).toBeNull();
     expect(screen.queryByRole("region", { name: "Ask about this car" })).toBeNull();
@@ -173,7 +173,7 @@ describe("sold VDP", () => {
 
 describe("general request", () => {
   it("uses the confirmed heading and neutral message", () => {
-    render(<GeneralRequest />);
+    render(<GeneralRequest locale="en" />);
     const section = screen.getByRole("region", { name: "Didn't find what you need?" });
     const link = within(section).getByRole("link", { name: "Chat on WhatsApp" });
     expect(text(link)).toBe(
@@ -185,8 +185,8 @@ describe("general request", () => {
   it("is a separate inquiry from the list and never offers vehicle actions", () => {
     render(
       <>
-        <InventoryList result={{ kind: "empty" }} headingLevel={2} />
-        <GeneralRequest />
+        <InventoryList locale="en" result={{ kind: "empty" }} headingLevel={2} />
+        <GeneralRequest locale="en" />
       </>,
     );
     expect(screen.getAllByRole("link")).toHaveLength(1);
@@ -198,8 +198,8 @@ describe("copy and data guards on rendered actions", () => {
   it("never says Book, Reserve or Confirm", () => {
     const { container } = render(
       <>
-        <VehicleDetail vehicle={syntheticAvailable} serverOrigin="https://site.test" />
-        <GeneralRequest />
+        <VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />
+        <GeneralRequest locale="en" />
       </>,
     );
     const hrefs = [...container.querySelectorAll("a")].map((a) => decodeURIComponent(a.getAttribute("href") ?? ""));
@@ -217,7 +217,7 @@ describe("copy and data guards on rendered actions", () => {
       notes: "PRIVATE-NOTES-MARKER",
       mediaLink: "PRIVATE-MEDIA-LINK-MARKER",
     } as Vehicle;
-    const { container } = render(<VehicleDetail vehicle={leaky} serverOrigin="https://site.test" />);
+    const { container } = render(<VehicleDetail locale="en" vehicle={leaky} serverOrigin="https://site.test" />);
     const hrefs = [...container.querySelectorAll("a[href*='wa.me']")].map((a) =>
       decodeURIComponent(a.getAttribute("href") ?? ""),
     );

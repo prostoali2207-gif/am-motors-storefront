@@ -1,5 +1,7 @@
 /*
  * Phase 4 visual system — "Coachwork" (docs/ux-benchmark.md).
+ * Phase 7: English / Arabic (RTL) / Russian. Layout uses logical properties (inline-start/end)
+ * so `dir="rtl"` mirrors it; Arabic-specific type adjustments are grouped under "Arabic" below.
  * Neutral light palette; NO accent colour until brand assets exist (open question 14).
  * Status of each token (confirmed vs provisional) is recorded in docs/ux-benchmark.md.
  */
@@ -132,7 +134,9 @@ a {
   max-width: calc(var(--max-width) + 2 * var(--gutter));
   margin-inline: auto;
   /* viewport-fit=cover (layout.tsx): keep content clear of notches in landscape. */
-  padding-inline: max(var(--gutter), env(safe-area-inset-left)) max(var(--gutter), env(safe-area-inset-right));
+  /* Physical sides on purpose: safe-area insets are physical, whatever the text direction. */
+  padding-left: max(var(--gutter), env(safe-area-inset-left));
+  padding-right: max(var(--gutter), env(safe-area-inset-right));
 }
 
 main {
@@ -142,7 +146,7 @@ main {
 
 .skip-link {
   position: absolute;
-  left: -999px;
+  inset-inline-start: -999px;
   top: var(--space-2);
   z-index: 10;
   padding: var(--space-2) var(--space-4);
@@ -151,18 +155,33 @@ main {
 }
 
 .skip-link:focus {
-  left: var(--gutter);
+  inset-inline-start: var(--gutter);
 }
 
 .site-header {
   border-bottom: var(--hairline);
 }
 
+/*
+ * One row whenever it fits (EN/AR from 320 px, RU from ~376 px). When the labels need more
+ * room (narrow phones in Russian, large text), the switcher wraps to its own row at the end
+ * instead of shrinking tap targets or causing horizontal scroll.
+ */
 .site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: var(--space-3);
+  min-height: 3.5rem;
+}
+
+/* Wordmark at the start, "Cars" at the end of the main navigation, then the language switcher. */
+.site-nav-main {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  min-height: 3.5rem;
+  gap: var(--space-3);
 }
 
 .wordmark {
@@ -173,12 +192,14 @@ main {
   text-transform: uppercase;
   color: var(--ink);
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .site-nav a {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  white-space: nowrap;
 }
 
 .nav-link {
@@ -186,11 +207,59 @@ main {
   font-weight: 500;
   text-decoration: none;
   padding-inline: var(--space-2);
-  margin-inline-end: calc(-1 * var(--space-2));
 }
 
 .nav-link:hover {
   text-decoration: underline;
+}
+
+/*
+ * Language switcher (Phase 7): EN · العربية · RU as small text links after a hairline, the
+ * current language in ink, the others muted. No flags, no dropdown. Links keep 44 px height.
+ */
+.language-switcher {
+  margin-inline-start: auto;
+  border-inline-start: var(--hairline);
+  padding-inline-start: var(--space-1);
+  margin-inline-end: calc(-1 * var(--space-2));
+}
+
+.language-switcher ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.language-switcher a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  min-width: 2rem;
+  justify-content: center;
+  padding-inline: var(--space-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.language-switcher a:hover {
+  color: var(--ink);
+  text-decoration: underline;
+}
+
+.language-switcher a[aria-current] {
+  color: var(--ink);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+/* Arabic label: Arabic companion face, Kufi needs a touch more size to match the Latin codes. */
+.language-switcher a[lang="ar"] {
+  font-family: var(--font-arabic, Tahoma), Tahoma, sans-serif;
+  font-size: 0.875rem;
 }
 
 .site-footer {
@@ -776,6 +845,33 @@ body:has(.sticky-actions) {
   .status-page {
     padding-top: var(--space-12);
   }
+}
+
+/* ---- Arabic (RTL) ---- */
+
+/*
+ * Arabic text uses Noto Kufi Arabic (Arabic block only, app/ar/layout.tsx); Latin text and
+ * figures on Arabic pages stay in Geologica through the same stack. Letter-spacing and upper
+ * case break Arabic joining, so tracking is removed; titles get more line height for the taller
+ * Arabic forms.
+ */
+html[lang="ar"] {
+  --tracking-title: 0;
+  --tracking-label: 0;
+}
+
+html[lang="ar"] body {
+  font-family: var(--font-arabic), var(--font-sans, Arial), Tahoma, sans-serif;
+}
+
+html[lang="ar"] .label:not(.card-eyebrow):not(.vehicle-eyebrow) {
+  font-size: 0.8125rem;
+  text-transform: none;
+}
+
+html[lang="ar"] :is(.page-title, .vehicle-title, .card-title, .notice-title, .general-request-title) {
+  letter-spacing: 0;
+  line-height: 1.35;
 }
 
 @media (prefers-reduced-motion: reduce) {
