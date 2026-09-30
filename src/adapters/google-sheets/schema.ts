@@ -70,15 +70,11 @@ export type PublicField = keyof typeof PUBLIC_COLUMNS;
 export const PUBLIC_FIELDS = Object.keys(PUBLIC_COLUMNS) as PublicField[];
 
 /**
- * Fields read as numeric effective values (`UNFORMATTED_VALUE`). "AED" and "km" are Sheet
- * number formatting; formatted display strings are never parsed.
+ * Fields whose Sheet cells hold numeric effective values. All public columns are read with
+ * `UNFORMATTED_VALUE`, so these arrive as numbers ("AED" / "km" are only number formatting)
+ * and every other public column arrives as text. Formatted display strings are never parsed.
  */
 export const NUMERIC_FIELDS = ["year", "priceAed", "mileageKm"] as const satisfies readonly PublicField[];
-
-/** Fields read as displayed in the Sheet (`FORMATTED_VALUE`): text "as written". */
-export const TEXT_FIELDS = PUBLIC_FIELDS.filter(
-  (field) => !(NUMERIC_FIELDS as readonly PublicField[]).includes(field),
-);
 
 /**
  * Confirmed `Статус` values. Exact match after trimming; anything else is not public

@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import { loadInventorySnapshot, type LoaderLog } from "@/adapters/google-sheets/loader";
-import { EXPECTED_HEADER, PUBLIC_COLUMNS } from "@/adapters/google-sheets/schema";
+import { EXPECTED_HEADER, NUMERIC_FIELDS, PUBLIC_COLUMNS } from "@/adapters/google-sheets/schema";
 import { InventorySourceError } from "@/inventory/source-error";
-import { FakeSheet, num, PRIVATE_MARKERS, syntheticRow } from "../../support/fake-sheet";
+import { FakeSheet, PRIVATE_MARKERS, syntheticRow } from "../../support/fake-sheet";
 
 const NOW = Date.UTC(2026, 0, 15);
 
@@ -17,8 +17,32 @@ async function load(sheet: FakeSheet, log = recordingLog()) {
   return { snapshot, log };
 }
 
-describe("loadInventorySnapshot", () => {
-  it("reads the Sheet into public vehicles with numeric effective values", async () => {
+describe("loadInventorySnapshot: one batch data read", () => {
+  it("reads all 14 public columns in exactly one batchGet after the header read", async () => {
+    const sheet = new FakeSheet([syntheticRow()]);
+    await load(sheet);
+
+    expect(sheet.batchCalls).toHaveLength(1);
+    expect(sheet.batchCalls[0]).toHaveLength(14);
+    expect(sheet.requestedRanges[0]).toBe("'Машины'!1:1");
+    expect(sheet.requestedColumnNames().sort()).toEqual(Object.values(PUBLIC_COLUMNS).sort());
+  });
+
+  it("reads only the 'Машины' tab and never requests private, server-only or unknown columns", async () => {
+    const header = [...EXPECTED_HEADER, "Test secret column"];
+    const sheet = new FakeSheet([syntheticRow({ "Test secret column": "PRIVATE-NEW-COLUMN-MARKER" })], header);
+    await load(sheet);
+
+    expect(sheet.requestedRanges.every((range) => range.startsWith("'Машины'!"))).toBe(true);
+    const requested = sheet.requestedColumnNames();
+    for (const column of [...Object.keys(PRIVATE_MARKERS), "Test secret column"]) {
+      expect(requested).not.toContain(column);
+    }
+  });
+});
+
+describe("loadInventorySnapshot: values", () => {
+  it("maps a synthetic Sheet into public vehicles", async () => {
     const sheet = new FakeSheet([
       syntheticRow(),
       syntheticRow({ ID: "TEST-0002", Статус: "Продана", "Цена, AED": undefined }),
@@ -47,16 +71,35 @@ describe("loadInventorySnapshot", () => {
     ]);
   });
 
-  it("reads only the 'Машины' tab and only allowlisted columns", async () => {
-    const sheet = new FakeSheet([syntheticRow()]);
-    await load(sheet);
+  it("keeps text cells as strings, as written", async () => {
+    const sheet = new FakeSheet([
+      syntheticRow({ Двигатель: "2.0 Test", Комплектация: "Test 007", ID: "TEST-000123" }),
+    ]);
+    const [vehicle] = (await load(sheet)).snapshot.vehicles;
+    expect(vehicle.engine).toBe("2.0 Test");
+    expect(vehicle.trim).toBe("Test 007");
+    expect(vehicle.id).toBe("TEST-000123");
+  });
 
-    expect(sheet.requestedRanges.every((range) => range.startsWith("'Машины'!"))).toBe(true);
-    const requested = new Set(sheet.requestedColumnNames());
-    expect([...requested].sort()).toEqual(Object.values(PUBLIC_COLUMNS).sort());
-    for (const privateColumn of Object.keys(PRIVATE_MARKERS)) {
-      expect(requested.has(privateColumn)).toBe(false);
-    }
+  it("keeps year, price and mileage as numbers", async () => {
+    const sheet = new FakeSheet([syntheticRow({ Год: 2003, "Цена, AED": 12345.5, "Пробег, км": 0 })]);
+    const [vehicle] = (await load(sheet)).snapshot.vehicles;
+    for (const field of NUMERIC_FIELDS) expect(typeof vehicle[field]).toBe("number");
+    expect([vehicle.year, vehicle.priceAed, vehicle.mileageKm]).toEqual([2003, 12345.5, 0]);
+  });
+
+  it("never parses text in numeric columns", async () => {
+    const sheet = new FakeSheet([syntheticRow({ "Цена, AED": "AED 11,111", "Пробег, км": "22,222 km" })]);
+    const { snapshot, log } = await load(sheet);
+    expect(snapshot.vehicles[0]).toMatchObject({ priceAed: null, mileageKm: null });
+    expect(log.lines[0]).toContain("invalid-price at row(s) 2; invalid-mileage at row(s) 2");
+  });
+
+  it("omits and reports numbers typed into text columns instead of converting them", async () => {
+    const sheet = new FakeSheet([syntheticRow({ Двигатель: 2 })]);
+    const { snapshot, log } = await load(sheet);
+    expect(snapshot.vehicles[0].engine).toBeNull();
+    expect(log.lines[0]).toContain("non-text-value at row(s) 2");
   });
 
   it("never lets private values into the snapshot or the logs", async () => {
@@ -85,13 +128,12 @@ describe("loadInventorySnapshot", () => {
     }
   });
 
-  it("ignores unknown/new columns and tolerates reordered columns", async () => {
+  it("ignores unknown columns and tolerates reordered columns", async () => {
     const header = ["Test secret column", ...[...EXPECTED_HEADER].reverse()];
     const sheet = new FakeSheet([syntheticRow({ "Test secret column": "PRIVATE-NEW-COLUMN-MARKER" })], header);
     const { snapshot, log } = await load(sheet);
 
     expect(snapshot.vehicles).toHaveLength(1);
-    expect(sheet.requestedColumnNames()).not.toContain("Test secret column");
     expect(JSON.stringify(snapshot)).not.toContain("PRIVATE-NEW-COLUMN-MARKER");
     expect(log.lines[0]).toContain("1 unexpected column(s) (not read)");
     expect(log.lines.join("\n")).not.toContain("Test secret column");
@@ -100,12 +142,6 @@ describe("loadInventorySnapshot", () => {
   it("returns an empty snapshot for a header-only sheet", async () => {
     const { snapshot } = await load(new FakeSheet([]));
     expect(snapshot.vehicles).toEqual([]);
-  });
-
-  it("does not parse formatted strings: formatted price text is ignored in favour of the effective value", async () => {
-    const sheet = new FakeSheet([syntheticRow({ "Цена, AED": num(99999, "AED 1") })]);
-    const { snapshot } = await load(sheet);
-    expect(snapshot.vehicles[0].priceAed).toBe(99999);
   });
 
   it("drops duplicate and empty IDs", async () => {
@@ -119,7 +155,9 @@ describe("loadInventorySnapshot", () => {
     expect(snapshot.vehicles.map((v) => v.id)).toEqual(["TEST-0004"]);
     expect(log.lines[0]).toContain("duplicate-id at row(s) 2,3; missing-id at row(s) 4");
   });
+});
 
+describe("loadInventorySnapshot: header drift and concurrent edits", () => {
   it("fails as invalid-data when a public column is missing", async () => {
     const header = EXPECTED_HEADER.filter((name) => name !== "Статус");
     await expect(load(new FakeSheet([syntheticRow()], header))).rejects.toMatchObject({
@@ -129,18 +167,34 @@ describe("loadInventorySnapshot", () => {
     });
   });
 
-  it("fails as source-error when the header changes between reads", async () => {
+  it("fails closed when columns move between the header read and the data read", async () => {
     const sheet = new FakeSheet([syntheticRow()]);
     sheet.onAfterHeader = () => {
       sheet.header = ["Test inserted column", ...EXPECTED_HEADER];
     };
     await expect(load(sheet)).rejects.toMatchObject({ reason: "source-error", code: "header-changed-during-read" });
+    expect(sheet.batchCalls).toHaveLength(1);
   });
 
-  it("fails when formatted and unformatted reads disagree on rows", async () => {
-    const sheet = new FakeSheet([syntheticRow({ ID: { formatted: "TEST-0001", unformatted: "TEST-9999" } })]);
+  it("fails closed when a public column is renamed between the reads", async () => {
+    const sheet = new FakeSheet([syntheticRow()]);
+    sheet.onAfterHeader = () => {
+      sheet.header = EXPECTED_HEADER.map((name) => (name === "Цена, AED" ? "Test price" : name));
+    };
     await expect(load(sheet)).rejects.toBeInstanceOf(InventorySourceError);
-    await expect(load(sheet)).rejects.toMatchObject({ code: "rows-changed-during-read" });
+  });
+
+  it("does not claim to detect row-content edits: values all come from the one data read", async () => {
+    // A row edit between the header read and the batchGet is not detectable by header checks.
+    // The adapter does not pretend otherwise: every field of the vehicle reflects the single
+    // batchGet response (never a mix of two data reads); the freshness window bounds staleness.
+    const sheet = new FakeSheet([syntheticRow()]);
+    sheet.onAfterHeader = () => {
+      sheet.rows = [syntheticRow({ Статус: "Продана", "Цена, AED": 99999 })];
+    };
+    const { snapshot } = await load(sheet);
+    expect(snapshot.vehicles).toEqual([expect.objectContaining({ status: "sold", priceAed: 99999 })]);
+    expect(sheet.batchCalls).toHaveLength(1);
   });
 
   it("propagates reader failures without substituting data", async () => {

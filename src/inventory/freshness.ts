@@ -4,8 +4,8 @@ import type { SnapshotResult } from "@/adapters/google-sheets/sheets-repository"
 import { InventorySourceError } from "./source-error";
 
 /**
- * Inventory freshness policy — PROPOSED, PENDING BUSINESS REVIEW
- * (docs/business-rules.md → Open questions → revalidation window).
+ * Inventory freshness policy — accepted for V1 on 2026-09-30
+ * (docs/business-rules.md → Google Sheets integration; open question 11).
  *
  * - Cached snapshots are revalidated every `INVENTORY_REVALIDATE_SECONDS` (stale-while-
  *   revalidate: the first request after the window still gets the old snapshot while a fresh

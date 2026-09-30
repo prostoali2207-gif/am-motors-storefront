@@ -14,14 +14,17 @@ export const SHEETS_READONLY_SCOPE = "https://www.googleapis.com/auth/spreadshee
 const API_BASE = "https://sheets.googleapis.com/v4/spreadsheets";
 const DEFAULT_TIMEOUT_MS = 10_000;
 
-export type ValueRenderOption = "FORMATTED_VALUE" | "UNFORMATTED_VALUE";
 export type AccessTokenProvider = () => Promise<string>;
 
 export interface SheetsReader {
-  /** First row of the range, as displayed. */
+  /** First row of the range, as displayed (used for the header row only). */
   readRow(range: string): Promise<unknown[]>;
-  /** One array of cells per single-column range, in request order (trailing empties trimmed). */
-  readColumns(ranges: readonly string[], render: ValueRenderOption): Promise<unknown[][]>;
+  /**
+   * One `values.batchGet` request with `UNFORMATTED_VALUE`: returns one array of cells per
+   * single-column range, in request order (trailing empties trimmed). Text cells come back as
+   * strings, numeric cells as numbers; nothing is formatted, so nothing needs parsing.
+   */
+  readColumns(ranges: readonly string[]): Promise<unknown[][]>;
 }
 
 export interface SheetsReaderOptions {
@@ -83,8 +86,11 @@ export function createSheetsReader(options: SheetsReaderOptions): SheetsReader {
       return firstLine(valuesOf(body));
     },
 
-    async readColumns(ranges, render) {
-      const params = new URLSearchParams({ majorDimension: "COLUMNS", valueRenderOption: render });
+    async readColumns(ranges) {
+      const params = new URLSearchParams({
+        majorDimension: "COLUMNS",
+        valueRenderOption: "UNFORMATTED_VALUE",
+      });
       for (const range of ranges) params.append("ranges", range);
       const body = await getJson(`${base}/values:batchGet?${params}`);
 

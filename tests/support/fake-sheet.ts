@@ -1,18 +1,14 @@
-import type { SheetsReader, ValueRenderOption } from "@/adapters/google-sheets/sheets-client";
+import type { SheetsReader } from "@/adapters/google-sheets/sheets-client";
 import { EXPECTED_HEADER } from "@/adapters/google-sheets/schema";
 
 /**
  * SYNTHETIC TEST SHEET. Emulates the Sheets API `values` semantics used by the adapter
- * (A1 column ranges, FORMATTED vs UNFORMATTED values, COLUMNS major dimension, trailing empty
- * cells trimmed) and records every requested range. Never contains real Sheet data.
+ * (A1 column ranges, UNFORMATTED_VALUE effective values, COLUMNS major dimension, trailing
+ * empty cells trimmed) and records every request. Never contains real Sheet data.
  */
 
-/** A cell: plain text (same both ways) or an explicit formatted/unformatted pair. */
-export type FakeCell = string | { readonly formatted: string; readonly unformatted: unknown } | undefined;
-
-export function num(value: number, formatted = String(value)): FakeCell {
-  return { formatted, unformatted: value };
-}
+/** A cell's effective value: string for text cells, number for numeric cells. */
+export type FakeCell = string | number | boolean | undefined;
 
 export type FakeRow = Partial<Record<string, FakeCell>>;
 
@@ -34,6 +30,8 @@ export const PRIVATE_MARKERS: Readonly<Record<string, string>> = {
 
 export class FakeSheet implements SheetsReader {
   readonly requestedRanges: string[] = [];
+  /** Ranges of each `readColumns` (values.batchGet) call, in call order. */
+  readonly batchCalls: string[][] = [];
   header: string[];
   rows: FakeRow[];
   /** Called between the header read and the column reads (to simulate concurrent edits). */
@@ -52,7 +50,8 @@ export class FakeSheet implements SheetsReader {
     return row;
   }
 
-  async readColumns(ranges: readonly string[], render: ValueRenderOption): Promise<unknown[][]> {
+  async readColumns(ranges: readonly string[]): Promise<unknown[][]> {
+    this.batchCalls.push([...ranges]);
     return ranges.map((range) => {
       this.requestedRanges.push(range);
       const match = /^'Машины'!([A-Z]+)1:([A-Z]+)$/.exec(range);
@@ -61,7 +60,7 @@ export class FakeSheet implements SheetsReader {
       const name = this.header[index];
       const cells: unknown[] = [name];
       for (const row of this.rows) {
-        cells.push(cellValue(name === undefined ? undefined : row[name], render));
+        cells.push(name === undefined ? "" : (row[name] ?? ""));
       }
       return trimTrailing(cells);
     });
@@ -83,10 +82,10 @@ export function syntheticRow(overrides: FakeRow = {}): FakeRow {
     Марка: "Testmake",
     Модель: "Fixture Alpha",
     Комплектация: "Synthetic Trim",
-    Год: num(2001),
-    "Цена, AED": num(11111, "AED 11,111"),
+    Год: 2001,
+    "Цена, AED": 11111,
     Статус: "В наличии",
-    "Пробег, км": num(22222, "22,222 km"),
+    "Пробег, км": 22222,
     "Региональная спецификация": "Test spec",
     Цвет: "Test color",
     Двигатель: "Test engine",
@@ -96,12 +95,6 @@ export function syntheticRow(overrides: FakeRow = {}): FakeRow {
     ...PRIVATE_MARKERS,
     ...overrides,
   };
-}
-
-function cellValue(cell: FakeCell, render: ValueRenderOption): unknown {
-  if (cell === undefined) return "";
-  if (typeof cell === "string") return cell;
-  return render === "FORMATTED_VALUE" ? cell.formatted : cell.unformatted;
 }
 
 function trimTrailing(cells: unknown[]): unknown[] {

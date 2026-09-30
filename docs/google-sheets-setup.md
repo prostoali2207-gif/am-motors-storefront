@@ -16,8 +16,9 @@ identity that reads the Sheet.
 | Google Cloud project IAM roles for the service account | **None** |
 | APIs enabled in the project | Google Sheets API (+ IAM Service Account Credentials API and Security Token Service API for `vercel-oidc`) |
 
-The adapter only calls `spreadsheets.values.get` / `values.batchGet` for the header row and
-the 14 allowlisted columns. Private columns are never requested.
+The adapter makes two read-only calls per refresh: `values.get` for the header row, then one
+`values.batchGet` (`UNFORMATTED_VALUE`) for the 14 allowlisted columns. Private columns are
+never requested.
 
 ## Auth modes
 

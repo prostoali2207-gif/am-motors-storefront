@@ -34,13 +34,14 @@ describe("createSheetsReader", () => {
     expect((init.headers as Record<string, string>).Authorization).toBe(`Bearer ${TOKEN}`);
   });
 
-  it("batch-reads columns with the requested render option", async () => {
+  it("batch-reads all ranges in one request with UNFORMATTED_VALUE", async () => {
     const fetchImpl = vi.fn(async () =>
       jsonResponse({ valueRanges: [{ values: [["Год", 2001]] }, { range: "empty" }] }),
     );
-    const columns = await reader(fetchImpl).readColumns(["'Машины'!E1:E", "'Машины'!F1:F"], "UNFORMATTED_VALUE");
+    const columns = await reader(fetchImpl).readColumns(["'Машины'!E1:E", "'Машины'!F1:F"]);
     expect(columns).toEqual([["Год", 2001], []]);
 
+    expect(fetchImpl).toHaveBeenCalledOnce();
     const [requestUrl] = fetchImpl.mock.calls[0] as unknown as [string];
     const url = new URL(requestUrl);
     expect(url.pathname).toBe(`/v4/spreadsheets/${SPREADSHEET}/values:batchGet`);
@@ -93,7 +94,7 @@ describe("createSheetsReader", () => {
     ["values not a matrix", jsonResponse({ valueRanges: [{ values: "x" }] })],
   ])("rejects malformed responses (%s)", async (_label, response) => {
     const fetchImpl = vi.fn(async () => response);
-    await expect(reader(fetchImpl).readColumns(["a"], "FORMATTED_VALUE")).rejects.toMatchObject({
+    await expect(reader(fetchImpl).readColumns(["a"])).rejects.toMatchObject({
       code: "malformed-response",
     });
   });

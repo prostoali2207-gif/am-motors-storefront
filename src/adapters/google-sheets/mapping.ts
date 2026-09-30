@@ -4,7 +4,7 @@ import { PUBLIC_FIELDS, STATUS_MAP, type PublicField } from "./schema";
 
 /**
  * One Sheet row restricted to the allowlisted columns. Values are exactly what the Sheets API
- * returned (formatted text for text columns, effective values for numeric columns).
+ * returned with `UNFORMATTED_VALUE`: strings for text cells, numbers for numeric cells.
  * `rowNumber` is the 1-based Sheet row, used for server-side diagnostics only.
  */
 export interface SourceRow {
@@ -20,7 +20,8 @@ export type RowIssueCode =
   | "missing-model"
   | "invalid-year"
   | "invalid-price"
-  | "invalid-mileage";
+  | "invalid-mileage"
+  | "non-text-value";
 
 export interface RowIssue {
   readonly rowNumber: number;
@@ -100,22 +101,31 @@ export function mapRows(rows: readonly SourceRow[], currentYear: number): Mapped
     const mileage = readNumber(cells.mileageKm, (n) => n >= 0);
     if (mileage.invalid) issues.push({ rowNumber, code: "invalid-mileage" });
 
+    // Optional text: a non-text cell (e.g. a number typed into `Двигатель`) is omitted and
+    // reported, never converted.
+    const optionalText = (value: unknown): string | null => {
+      if (!isEmptyCell(value) && typeof value !== "string") {
+        issues.push({ rowNumber, code: "non-text-value" });
+      }
+      return readText(value);
+    };
+
     // Explicit field-by-field construction. Never spread a source row.
     vehicles.push({
       id,
       status,
       make,
       model,
-      trim: readText(cells.trim),
+      trim: optionalText(cells.trim),
       year,
       priceAed: price.value,
       mileageKm: mileage.value,
-      regionalSpec: readText(cells.regionalSpec),
-      color: readText(cells.color),
-      engine: readText(cells.engine),
-      fuel: readText(cells.fuel),
-      transmission: readText(cells.transmission),
-      drivetrain: readText(cells.drivetrain),
+      regionalSpec: optionalText(cells.regionalSpec),
+      color: optionalText(cells.color),
+      engine: optionalText(cells.engine),
+      fuel: optionalText(cells.fuel),
+      transmission: optionalText(cells.transmission),
+      drivetrain: optionalText(cells.drivetrain),
     });
   }
 
@@ -135,7 +145,7 @@ function isBlankRow(row: SourceRow): boolean {
   return PUBLIC_FIELDS.every((field) => isEmptyCell(row.cells[field]));
 }
 
-/** Text "as written": whitespace-normalized only. Non-text or empty → null. */
+/** Text cell: whitespace-normalized only. Non-string (numbers, booleans) or empty → null. */
 function readText(value: unknown): string | null {
   if (typeof value !== "string") return null;
   const text = value.replace(/\s+/g, " ").trim();

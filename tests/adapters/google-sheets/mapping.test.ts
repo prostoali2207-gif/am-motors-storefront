@@ -155,6 +155,15 @@ describe("mapRows: missing fields", () => {
     });
   });
 
+  it("omits and reports non-text values in optional text fields", () => {
+    const { vehicles, issues } = mapRows([row(2, { engine: 2, color: true })], YEAR);
+    expect(vehicles[0]).toMatchObject({ engine: null, color: null });
+    expect(issues).toEqual([
+      { rowNumber: 2, code: "non-text-value" },
+      { rowNumber: 2, code: "non-text-value" },
+    ]);
+  });
+
   it("drops rows without make or model", () => {
     const { vehicles, issues } = mapRows([row(2, { make: " " }), row(3, { model: undefined })], YEAR);
     expect(vehicles).toEqual([]);

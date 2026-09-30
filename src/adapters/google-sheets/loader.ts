@@ -2,7 +2,7 @@ import type { Vehicle } from "@/domain/vehicle";
 import { InventorySourceError } from "@/inventory/source-error";
 import { checkHeader, columnRange, headerRange } from "./header";
 import { mapRows, type RowIssue, type SourceRow } from "./mapping";
-import { NUMERIC_FIELDS, PUBLIC_COLUMNS, SHEET_TAB, TEXT_FIELDS, type PublicField } from "./schema";
+import { PUBLIC_COLUMNS, PUBLIC_FIELDS, SHEET_TAB, type PublicField } from "./schema";
 import type { SheetsReader } from "./sheets-client";
 
 export interface InventorySnapshot {
@@ -27,12 +27,19 @@ const PREFIX = "[inventory:sheets]";
 /**
  * Reads the "Машины" tab and returns public vehicles.
  *
- * 1. Read the header row; locate the allowlisted columns by exact name.
- * 2. Read only those columns: text columns as displayed, numeric columns as effective values.
- *    `ID` is read in both requests so the two can be checked for row alignment.
- * 3. Verify each column still starts with its expected header and IDs line up; otherwise the
- *    Sheet changed mid-read → error (never mix rows).
+ * 1. Read the header row; locate the 14 allowlisted columns by exact name.
+ * 2. Read exactly those columns in ONE `values.batchGet` with `UNFORMATTED_VALUE`: text cells
+ *    arrive as strings, numeric effective values (year, price, mileage) as numbers. No other
+ *    column is requested and no formatted string is parsed.
+ * 3. Verify every returned column still starts with its expected header. This catches columns
+ *    that moved or were renamed between the header read and the data read → fail closed.
  * 4. Map rows field by field and validate.
+ *
+ * Consistency limits (deliberately not overstated): all row data comes from a single request,
+ * so there is no mixing of values from two separate data reads. Google does not document
+ * `batchGet` as a transactional snapshot, and an edit that only changes row contents (not the
+ * header) is indistinguishable from a normal edit; the next refresh picks it up within the
+ * freshness window.
  *
  * Throws `InventorySourceError` on any source or structure problem. Logs contain counts,
  * row numbers and codes only — never cell values.
@@ -57,28 +64,18 @@ export async function loadInventorySnapshot(
     );
   }
 
-  const rangeOf = (field: PublicField) => columnRange(SHEET_TAB, header.positions[field]);
-  const numericRequest: PublicField[] = ["id", ...NUMERIC_FIELDS];
-
-  const [textColumns, numericColumns] = await Promise.all([
-    reader.readColumns(TEXT_FIELDS.map(rangeOf), "FORMATTED_VALUE"),
-    reader.readColumns(numericRequest.map(rangeOf), "UNFORMATTED_VALUE"),
-  ]);
+  const ranges = PUBLIC_FIELDS.map((field) => columnRange(SHEET_TAB, header.positions[field]));
+  const data = await reader.readColumns(ranges);
 
   const columns = new Map<PublicField, unknown[]>();
-  TEXT_FIELDS.forEach((field, i) => columns.set(field, textColumns[i]));
-  const numericIds = numericColumns[0];
-  NUMERIC_FIELDS.forEach((field, i) => columns.set(field, numericColumns[i + 1]));
-
-  for (const [field, cells] of [...columns, ["id", numericIds] as const]) {
-    const first = cells[0];
+  PUBLIC_FIELDS.forEach((field, i) => {
+    const cells = data[i];
+    const first = cells?.[0];
     if (typeof first !== "string" || first.trim() !== PUBLIC_COLUMNS[field]) {
       throw new InventorySourceError("source-error", "header-changed-during-read");
     }
-  }
-  if (!idsAligned(columns.get("id") ?? [], numericIds)) {
-    throw new InventorySourceError("source-error", "rows-changed-during-read");
-  }
+    columns.set(field, cells);
+  });
 
   const rowCount = Math.max(...[...columns.values()].map((cells) => cells.length)) - 1;
   const rows: SourceRow[] = [];
@@ -99,25 +96,6 @@ export async function loadInventorySnapshot(
   );
 
   return { vehicles: mapped.vehicles, fetchedAt };
-}
-
-function isEmpty(value: unknown): boolean {
-  return value === undefined || value === null || value === "";
-}
-
-/**
- * Formatted and unformatted `ID` columns must describe the same rows. A text ID reads the same
- * both ways; a numeric ID only has to be present in both.
- */
-function idsAligned(formatted: readonly unknown[], unformatted: readonly unknown[]): boolean {
-  const length = Math.max(formatted.length, unformatted.length);
-  for (let i = 0; i < length; i++) {
-    const f = formatted[i];
-    const u = unformatted[i];
-    if (isEmpty(u) !== isEmpty(f)) return false;
-    if (typeof u === "string" && u !== f) return false;
-  }
-  return true;
 }
 
 function formatIssues(issues: readonly RowIssue[]): string {
