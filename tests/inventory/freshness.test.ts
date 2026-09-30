@@ -8,7 +8,7 @@ import { syntheticAvailable } from "../fixtures/vehicles";
 const NOW = 1_000_000_000;
 
 function snapshot(ageMs: number): InventorySnapshot {
-  return { vehicles: [syntheticAvailable], fetchedAt: NOW - ageMs };
+  return { vehicles: [syntheticAvailable], fetchedAt: NOW - ageMs, mediaFolders: [] };
 }
 
 function setup(cached: () => Promise<InventorySnapshot>, fresh: () => Promise<InventorySnapshot>) {
@@ -27,7 +27,12 @@ describe("freshness policy", () => {
 
   it("serves a cached snapshot inside the max age without a direct read", async () => {
     const { read, readFresh } = setup(async () => snapshot(INVENTORY_MAX_AGE_MS), async () => snapshot(0));
-    await expect(read()).resolves.toEqual({ kind: "ok", vehicles: [syntheticAvailable], fetchedAt: NOW - INVENTORY_MAX_AGE_MS });
+    await expect(read()).resolves.toEqual({
+      kind: "ok",
+      vehicles: [syntheticAvailable],
+      fetchedAt: NOW - INVENTORY_MAX_AGE_MS,
+      mediaFolders: [],
+    });
     expect(readFresh).not.toHaveBeenCalled();
   });
 

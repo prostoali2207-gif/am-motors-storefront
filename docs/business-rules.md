@@ -108,6 +108,28 @@ Recorded 2026-09-30. Technical proposals, not business facts; confirm or change 
   ~2 minutes. On-demand revalidation (e.g. a Sheet edit hook calling `revalidateTag`) can
   shorten this later.
 
+## Google Drive media — Phase 3 (technical, pending review)
+
+Recorded 2026-09-30. Technical proposals, not business facts.
+
+- **Source:** only the Drive folder in `Ссылка на фото/видео` (server/source-only). The link and
+  folder ID are parsed server-side (`/drive/folders/<id>`, `/drive/u/<n>/folders/<id>`,
+  `/drive/mobile/folders/<id>`, `/open?id=<id>`); anything else → media unavailable for that
+  vehicle. Only direct children are read (no subfolders, no shortcuts).
+- **Identity:** Drive file ID. File names are not unique (observed) and are never used as
+  identity, published or logged. Byte-identical copies (same `md5Checksum`) are shown once.
+- **Kept:** JPEG, PNG, WebP images (≤ 30 MB source) and videos (`video/*`). Excluded: folders,
+  shortcuts, Google Docs, PDFs, HEIC/HEIF (not decodable by the pipeline), GIF, anything else.
+- **Order (technical fallback, NOT a business rule):** natural file-name order, then Drive
+  upload time, then file ID. The first image is not a declared cover.
+- **Delivery:** images only, through the site's route `/media/<ID>/<opaque id>/<revision>` —
+  downloaded server-side, EXIF/GPS/all metadata stripped, re-encoded as JPEG (max 2048 px),
+  cached by browser/CDN (1 day / 7 days); `next/image` builds responsive sizes from it.
+  Videos: no public delivery yet (not rendered). Listing cards: no media yet.
+- **Customer-facing states:** photos, or neutral "Photos unavailable". No placeholder car image.
+- **Switch:** `MEDIA_SOURCE=google-drive`, off by default. Must stay off on any public
+  deployment until open question 12 is decided (see below).
+
 ## Inquiries and lead qualification — Confirmed
 
 Project chain:
@@ -157,7 +179,25 @@ Ask the user; do not assume answers.
 10. Which sold cars may be shown as social proof, and for how long after sale?
 11. Revalidation window: how quickly must a Sheet status change appear on the site?
     (Accepted for V1 on 2026-09-30: ≤ 2 minutes — 60 s cache, 120 s hard max age.)
-12. Drive media rules: cover image selection, ordering, plates visible or blurred, video allowed.
+12. Drive media rules — **blocking before media goes public** (observed 2026-09-30, metadata
+    only): vehicle folders mix real photos with ad creatives (e.g. a file named as an ad with a
+    payment-terms claim not confirmed in this file, "hero still" artwork, carousels) and
+    duplicate uploads; some folders list no files. The pipeline cannot tell a photo from an ad
+    or a document without interpreting image content, which is not allowed as a commercial
+    fact. Needed decisions:
+    a. Which files in a folder may be published (all? only photos? a convention such as a
+       `site` subfolder or a filename prefix, or an explicit list in the Sheet)?
+    b. Cover image and order (proposal: a new Sheet column, e.g. `Обложка сайта` holding a
+       file name/number, or numeric filename prefixes `01_`, `02_` that the current fallback
+       already honours).
+    c. Plates visible or blurred; people/documents never published — who checks?
+    d. Video on the site: allowed? Then delivery needs a decision (see (e)).
+    e. Video delivery: proxying large `.MOV` originals through serverless functions is not a
+       production option; options are a public video host (e.g. YouTube unlisted) or a
+       transcoded asset store (e.g. Vercel Blob) — external infrastructure, needs approval.
+    f. HEIC photos (iPhone default): convert before upload, or approve a conversion service?
+    g. Cache purge when a photo must be removed urgently (CDN may serve an already-cached URL
+       up to 7 days unless invalidated).
 13. Language(s) for launch: English only, or also Arabic/Russian?
 14. Brand assets: logo, brand colors, fonts — do they exist?
 15. Domain and analytics/ad platforms in use (Meta, Google Ads, TikTok) for Phase 5 attribution.

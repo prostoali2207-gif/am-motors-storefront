@@ -20,6 +20,7 @@ export const syntheticAvailable: Vehicle = {
   fuel: "Test fuel",
   transmission: "Test gearbox",
   drivetrain: "Test drive",
+  media: [],
 };
 
 export const syntheticSold: Vehicle = {
@@ -37,6 +38,7 @@ export const syntheticSold: Vehicle = {
   fuel: null,
   transmission: null,
   drivetrain: null,
+  media: [],
 };
 
 /** An ID longer than the observed `AM-###` pattern — must remain valid. */
@@ -62,4 +64,5 @@ export const syntheticSparse: Vehicle = {
   fuel: null,
   transmission: null,
   drivetrain: null,
+  media: [],
 };

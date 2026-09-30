@@ -4,6 +4,7 @@ import type { Vehicle } from "@/domain/vehicle";
 import { vehicleTitle } from "@/domain/vehicle";
 import { formatMileageKm, formatPriceAed } from "./format";
 import { SoldBadge } from "./sold-badge";
+import { VehicleGallery } from "./vehicle-gallery";
 
 type Fact = { label: string; value: string | null };
 
@@ -30,9 +31,11 @@ export function VehicleDetail({ vehicle }: { vehicle: Vehicle }) {
     (fact): fact is { label: string; value: string } => fact.value !== null && fact.value !== "",
   );
 
+  const title = vehicleTitle(vehicle);
+
   return (
     <article className="vehicle">
-      <h1>{vehicleTitle(vehicle)}</h1>
+      <h1>{title}</h1>
       {vehicle.status === "sold" ? (
         <>
           <SoldBadge />
@@ -44,6 +47,8 @@ export function VehicleDetail({ vehicle }: { vehicle: Vehicle }) {
       {vehicle.status === "available" && vehicle.priceAed !== null ? (
         <p className="price">{formatPriceAed(vehicle.priceAed)}</p>
       ) : null}
+
+      <VehicleGallery media={vehicle.media} title={title} />
 
       {visibleFacts.length > 0 ? (
         <section aria-labelledby="vehicle-facts-heading">

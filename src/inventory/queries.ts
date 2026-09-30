@@ -6,6 +6,7 @@ import { cache } from "react";
 import type {
   InventoryListResult,
   InventoryUnavailable,
+  MediaImageResult,
   VehicleLookupResult,
 } from "@/domain/inventory-result";
 import { getInventoryRepository } from "./index";
@@ -46,3 +47,13 @@ export const getVehicle = cache(async (id: string): Promise<VehicleLookupResult>
   const repo = await repository();
   return safeRead(() => repo.getById(id), "getById");
 });
+
+/** Sanitized image bytes for the `/media/…` route. Not wrapped in `cache`: one read per request. */
+export async function getVehicleImage(
+  vehicleId: string,
+  mediaId: string,
+  revision: string,
+): Promise<MediaImageResult> {
+  const repo = await repository();
+  return safeRead(() => repo.getImage(vehicleId, mediaId, revision), "getImage");
+}

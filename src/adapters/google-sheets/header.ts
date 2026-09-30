@@ -56,6 +56,13 @@ export function checkHeader(headerRow: readonly unknown[]): HeaderCheck {
   };
 }
 
+/** Locates one column by exact header name: its index, or why it cannot be used. */
+export function locateColumn(headerRow: readonly unknown[], column: string): number | "missing" | "duplicate" {
+  const indexes = headerRow.flatMap((cell, index) => (headerName(cell) === column ? [index] : []));
+  if (indexes.length === 0) return "missing";
+  return indexes.length > 1 ? "duplicate" : indexes[0];
+}
+
 /** Zero-based column index → A1 column letters (0 → A, 25 → Z, 26 → AA). */
 export function columnLetter(index: number): string {
   if (!Number.isInteger(index) || index < 0) throw new RangeError("column index out of range");

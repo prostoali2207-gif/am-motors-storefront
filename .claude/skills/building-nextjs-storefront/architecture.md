@@ -130,4 +130,5 @@ Finalized in Phase 2: `INVENTORY_SOURCE`, `GOOGLE_SHEETS_SPREADSHEET_ID`, `GOOGL
 (`vercel-oidc` | `service-account-key`), `GOOGLE_SERVICE_ACCOUNT_EMAIL`,
 `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` (key mode), `GCP_PROJECT_NUMBER`,
 `GCP_WORKLOAD_IDENTITY_POOL_ID`, `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID` (OIDC mode).
-See `docs/google-sheets-setup.md`.
+Phase 3: `MEDIA_SOURCE` (`google-drive` to enable Drive media; unset = off). See
+`docs/google-sheets-setup.md`.

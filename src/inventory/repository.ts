@@ -1,4 +1,4 @@
-import type { InventoryListResult, VehicleLookupResult } from "@/domain/inventory-result";
+import type { InventoryListResult, MediaImageResult, VehicleLookupResult } from "@/domain/inventory-result";
 
 /**
  * The only way the app reads inventory. Implementations return public `Vehicle` objects,
@@ -12,4 +12,9 @@ export interface InventoryRepository {
   listSold(): Promise<InventoryListResult>;
   /** Exact match on the authoritative ID. Non-public or unknown IDs → `not-found`. */
   getById(id: string): Promise<VehicleLookupResult>;
+  /**
+   * A sanitized image of a public vehicle, addressed by the opaque media ID and revision from
+   * its `VehicleMedia`. Anything that is not a current image of that vehicle → `not-found`.
+   */
+  getImage(vehicleId: string, mediaId: string, revision: string): Promise<MediaImageResult>;
 }

@@ -7,9 +7,14 @@
  * server-only columns (VIN, Мин. цена, Заметки, Состояние, links, dates, …) are deliberately
  * absent and must never be added here without a recorded business decision.
  *
- * Not in V1: condition (pending decision), media (Phase 3), and any field the Sheet does not
- * have (body type, interior color, description, options, …).
+ * `media` is resolved server-side from the Drive folder in `Ссылка на фото/видео` and carries
+ * only sanitized `VehicleMedia` (no link, folder ID or Drive file ID).
+ *
+ * Not in V1: condition (pending decision) and any field the Sheet does not have (body type,
+ * interior color, description, options, …).
  */
+
+import type { VehicleMedia } from "./vehicle-media";
 
 /** Confirmed Sheet values: "В наличии" → available, "Продана" → sold. Nothing else is public. */
 export const VEHICLE_STATUSES = ["available", "sold"] as const;
@@ -44,6 +49,8 @@ export interface Vehicle {
   readonly transmission: string | null;
   /** `Привод` */
   readonly drivetrain: string | null;
+  /** Sanitized media from the linked Drive folder; empty = media unavailable. */
+  readonly media: readonly VehicleMedia[];
 }
 
 /** Runtime copy of the allowlist, kept in lockstep with `Vehicle` by the type below. */
@@ -62,6 +69,7 @@ export const PUBLIC_VEHICLE_FIELDS = [
   "fuel",
   "transmission",
   "drivetrain",
+  "media",
 ] as const satisfies readonly (keyof Vehicle)[];
 
 // Compile-time guard: fails if `Vehicle` gains a key that is not in the allowlist.

@@ -75,6 +75,37 @@ Verify each step against <https://vercel.com/docs/oidc/gcp> at setup time.
    `GOOGLE_SERVICE_ACCOUNT_EMAIL`, `GCP_PROJECT_NUMBER`, `GCP_WORKLOAD_IDENTITY_POOL_ID`,
    `GCP_WORKLOAD_IDENTITY_POOL_PROVIDER_ID`. `VERCEL_OIDC_TOKEN` is provided by Vercel.
 
+## Drive media (Phase 3, optional)
+
+Enabled only with `MEDIA_SOURCE=google-drive`. Same service account, one more read-only grant.
+
+| Permission | Value |
+| - | - |
+| Drive access | Each vehicle folder linked in `Ссылка на фото/видео` shared with the service-account email as **Viewer** (sharing the parent folder `AM Motors — Машины` as Viewer covers all current and future vehicle folders inside it) |
+| Additional OAuth scope | `https://www.googleapis.com/auth/drive.readonly` (downloading file content needs more than `drive.metadata.readonly`) |
+| Additional API | **Google Drive API** enabled in the same Google Cloud project |
+| IAM roles | Still none |
+
+Calls: per vehicle `files.get` (folder type) + `files.list` (direct children, fields `id,name,
+mimeType,size,createdTime,md5Checksum,version` only — never owners, permissions or image
+metadata/GPS); listings cached 5 minutes (tag `media`). Per image request (only on a CDN/image
+cache miss): `files.get?alt=media`, re-encoded server-side without metadata.
+
+Steps:
+
+1. APIs & Services → Library → enable **Google Drive API**.
+2. Drive → folder `AM Motors — Машины` (or each vehicle folder) → **Share** → service-account
+   email → **Viewer**, without notification. Note: files uploaded by other people into a shared
+   folder are visible to the service account through the folder share.
+3. Set `MEDIA_SOURCE=google-drive` locally (`.env.local`) and run `npm run smoke:media`
+   (read-only; prints per-vehicle state and counts only, and sanitizes one image in memory).
+4. Do not enable it on a public deployment before open question 12 in
+   `docs/business-rules.md` is decided.
+
+Media failures never make the inventory unavailable: missing/invalid link, inaccessible folder,
+empty folder, only unsupported files or a Drive error only empty that one vehicle's media
+(customer sees "Photos unavailable"; the server logs the vehicle ID, state and counts).
+
 ## Failure behaviour
 
 Missing/invalid env → `unavailable` (`not-configured`); variable names logged, never values.
