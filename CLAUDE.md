@@ -46,8 +46,11 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   `am-motors-storefront` (Hobby account scope), Vercel Authentication on all previews,
   production builds skipped (project "Ignored Build Step" + `vercel.json`
   `git.deploymentEnabled.main = false`). Preview-only env vars; `MEDIA_SOURCE` unset.
-  Google Workload Identity Federation not yet set up (needs a human in Google Cloud Console;
-  steps in `docs/google-sheets-setup.md`).
+  Google Workload Identity Federation set up by the user in Google Cloud (2026-09-30; pool and
+  provider IDs `vercel` per `docs/google-sheets-setup.md`); all seven Preview-only env vars set,
+  Preview redeployed. Live read on the preview not yet verified (the preview is behind Vercel
+  Authentication and must be checked by a signed-in human or a re-authorized Vercel connection).
+  Security issue flagged, not changed: the Sheet is shared "Anyone with the link → Editor".
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.
