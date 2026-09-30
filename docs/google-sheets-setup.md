@@ -14,7 +14,7 @@ identity that reads the Sheet.
 | Sheet access | Link sharing **Restricted** (owner and named staff only); the service-account email added as **Viewer** (read-only) |
 | OAuth scope requested by the app | `https://www.googleapis.com/auth/spreadsheets.readonly` |
 | Google Cloud project IAM roles for the service account | **None** |
-| APIs enabled in the project | Google Sheets API (+ IAM Service Account Credentials API and Security Token Service API for `vercel-oidc`) |
+| APIs enabled in the project | Enabled in the storefront project (confirmed 2026-09-30): Google Sheets API, IAM API, Cloud Resource Manager API, IAM Service Account Credentials API, Security Token Service API. The runtime calls use Google Sheets, IAM Service Account Credentials and Security Token Service (`vercel-oidc`). |
 
 The adapter makes two read-only calls per refresh: `values.get` for the header row, then one
 `values.batchGet` (`UNFORMATTED_VALUE`) for the 14 allowlisted columns. Private columns are
