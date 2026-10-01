@@ -117,3 +117,16 @@ Skills: `protecting-commercial-truth`, `building-nextjs-storefront`, `verifying-
 - `MEDIA_SOURCE` enabled by the user in Preview only (2026-10-01); off in Production.
 - Follow-up (2026-10-01): listing cards show the cover (`01.*`) of vehicles with approved
   `Website/` media; text-only card otherwise (`docs/business-rules.md` → "Website photos").
+
+## Phase 9 — Pre-production hardening (no Production deployment)
+
+Skills: `verifying-storefront`, `building-nextjs-storefront`, `protecting-commercial-truth`
+(`designing-automotive-storefront` only for visual review).
+
+- Security headers on every response and a per-request nonce CSP on pages
+  (`src/lib/security-headers.ts`, `src/proxy.ts`), checked against the Next.js 16 CSP guide.
+- Read-only live data / media audit, SEO and indexing review, browser + Lighthouse QA, cache
+  review (policies unchanged), final leak scan.
+- Launch checklist: `docs/production-readiness.md` (READY / BLOCKERS). Production deployment,
+  Production env vars, the production guard and domains stay untouched until the user approves
+  the launch.

@@ -14,6 +14,7 @@ Preview release:
 - [ ] WhatsApp CTA opens the correct number with the correct car prefilled
 - [ ] Drive media: correct car, correct order, no documents/plates/people per policy, EXIF stripped
 - [ ] Real-device check on at least one iOS Safari and one Android Chrome
+- [ ] Security headers present and browser console shows no CSP violations (`src/lib/security-headers.ts`; the Vercel preview toolbar is intentionally blocked)
 - [ ] Data-unavailable path tested by temporarily breaking credentials on preview
 - [ ] Revalidation window confirmed: a status change in the Sheet appears within it
 - [ ] Results reported with preview URL, commit SHA and anything not verified

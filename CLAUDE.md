@@ -74,12 +74,18 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   `Website/` folders exist yet), no `inaccessible`/`source-error`. Merged (PR #9). Since
   then staff created `Website/` folders for some vehicles and the user set
   `MEDIA_SOURCE=google-drive` in Preview only (Production untouched).
-- Listing card covers (follow-up to Phase 8; PR open, not merged): `/` and `/cars` cards show the
+- Listing card covers (follow-up to Phase 8) **merged** (PR #10): `/` and `/cars` cards show the
   vehicle's first approved `Website/` image (`01.*`) above the eyebrow in the `--media-ratio`
   frame (`contain`, no crop, one image, no carousel); no approved image → text-only card, no
   box. Covers resolved in parallel (6 at a time) through the same 5-minute cached folder
   listing: cold cache ≤ 3 Drive metadata calls per linked vehicle, warm cache 0. Rule:
-  `docs/business-rules.md` → "Website photos".
+  `docs/business-rules.md` → "Website photos". Approved covers are live in Preview
+  (`MEDIA_SOURCE=google-drive`, Preview only); Production untouched.
+- Phase 9 (pre-production hardening; PR open, not merged): HTTP security headers on every
+  response (`next.config.ts` `headers()` from `src/lib/security-headers.ts`) and a per-request
+  nonce Content-Security-Policy with `'strict-dynamic'` on pages (`src/proxy.ts`); first-party
+  sources only, Preview gets the production policy. Launch checklist (READY / BLOCKERS):
+  `docs/production-readiness.md`. Production still forbidden and not configured.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.
@@ -175,7 +181,8 @@ categorical display values), `src/inventory` (repository interface, adapter
 factory, request-time queries), `src/adapters` (data sources), `src/conversion` (WhatsApp
 number, prefill templates), `src/attribution` (first-touch UTM parameters, browser session only),
 `src/components` (sync views + small client islands), `src/app` (per-language route trees +
-`_site` shared route bodies). Tests and synthetic fixtures live only in `tests/`.
+`_site` shared route bodies), `src/proxy.ts` (per-request CSP nonce), `src/lib` (env, origin,
+cache and security-header policies). Tests and synthetic fixtures live only in `tests/`.
 Vitest cannot render async Server Components: keep pages thin and test the sync views.
 
 <!-- BEGIN:nextjs-agent-rules -->

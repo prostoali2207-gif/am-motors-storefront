@@ -137,6 +137,12 @@ Recorded 2026-09-30. Technical proposals, not business facts; confirm or change 
 - Live check 2026-10-01 (Vercel Preview, keyless OIDC, read-only): all 20 vehicle folders are
   readable by the service account; none has a `Website` folder yet → every VDP would show
   "Photos unavailable" even with media enabled.
+- Read-only audit 2026-10-01 (Phase 9, owner's Drive access; counts only): staff have created a
+  `Website` folder in 20 of 22 vehicle folders; 6 contain exactly one approved `01.jpg` (all six
+  vehicles are `В наличии`), the other 14 are empty → "Photos unavailable" / text-only card.
+  Manual content check of the six images: no VIN label, odometer, document, person or phone
+  number; one front-plate blur leaves the lower edge of the characters visible and one image shows
+  a fragment of a background car's plate — flagged to the reviewer (open question 12 c).
 - `MEDIA_SOURCE=google-drive` was enabled by the user in **Preview only** (2026-10-01); it stays
   **off** in Production until the user explicitly enables it.
 - **Listing cards (confirmed by the user 2026-10-01, supersedes the Phase 4 mixed-stock rule):**
