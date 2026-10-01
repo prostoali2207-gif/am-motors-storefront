@@ -114,4 +114,6 @@ Skills: `protecting-commercial-truth`, `building-nextjs-storefront`, `verifying-
 - Live keyless (Vercel OIDC) Drive access verified 2026-10-01 on a Preview with a temporary,
   preview-only read-only diagnostic, removed before review: 20/20 folders accessible, all
   `no-website-folder`.
-- `MEDIA_SOURCE` stays off in Preview/Production until the user enables it.
+- `MEDIA_SOURCE` enabled by the user in Preview only (2026-10-01); off in Production.
+- Follow-up (2026-10-01): listing cards show the cover (`01.*`) of vehicles with approved
+  `Website/` media; text-only card otherwise (`docs/business-rules.md` → "Website photos").

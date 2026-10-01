@@ -145,7 +145,8 @@ Sheet column must be added and classified first.
   `Ссылка на фото/видео` (direct children of `Website/`; no subfolders or shortcuts; the
   vehicle folder's own files are never listed). Missing / duplicate / empty `Website` → no media.
   JPEG/PNG/WebP only; videos never published. See `docs/business-rules.md` → "Website photos".
-  `MEDIA_SOURCE` stays unset in Preview/Production until the user enables it.
+  `MEDIA_SOURCE=google-drive` in Preview only (user, 2026-10-01); unset in Production. Listing
+  cards show only the cover (`01.*`); VDPs show all `Website/` images.
 - Identity = Drive file ID, never the file name.
 - Public model: `Vehicle.media: VehicleMedia[]` — opaque hashed ID, `type`, and for images a
   same-origin `/media/…` path. Never the link, folder ID, file ID, file name, owner or EXIF.

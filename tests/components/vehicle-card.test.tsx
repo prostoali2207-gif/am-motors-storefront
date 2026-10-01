@@ -4,9 +4,16 @@ import { afterEach, describe, expect, it } from "vitest";
 import { InventoryPageHeader } from "@/components/inventory-page-header";
 import { InventoryList } from "@/components/inventory-list";
 import { VehicleCard } from "@/components/vehicle-card";
+import type { VehicleImage } from "@/domain/vehicle-media";
 import { syntheticAvailable, syntheticLongId, syntheticSold, syntheticSparse } from "../fixtures/vehicles";
 
 afterEach(cleanup);
+
+/** Obviously fake same-origin media paths (no file exists). */
+const syntheticMedia: VehicleImage[] = [
+  { id: "TESTMEDIA_COVER_000001", type: "image", src: "/media/TEST-0001/TESTMEDIA_COVER_000001/TESTREV00001" },
+  { id: "TESTMEDIA_SECOND_00002", type: "image", src: "/media/TEST-0001/TESTMEDIA_SECOND_00002/TESTREV00002" },
+];
 
 describe("VehicleCard", () => {
   it("gives the card link the full title while showing make · year as a visual eyebrow", () => {
@@ -26,9 +33,34 @@ describe("VehicleCard", () => {
     ]);
   });
 
-  it("has no image box or placeholder while listings have no media", () => {
+  it("without an approved photo renders the text-only card: no image box or placeholder", () => {
     const { container } = render(<VehicleCard locale="en" vehicle={syntheticAvailable} headingLevel={2} />);
     expect(container.querySelector("img, picture, video, [class*='media'], [class*='frame']")).toBeNull();
+  });
+
+  it("shows exactly one cover (the first image) above the eyebrow, lazy unless asked", () => {
+    const vehicle = { ...syntheticAvailable, media: syntheticMedia };
+    const { container } = render(<VehicleCard locale="en" vehicle={vehicle} headingLevel={2} />);
+    const images = container.querySelectorAll("img");
+    expect(images).toHaveLength(1);
+    expect(images[0].getAttribute("src")).toContain(encodeURIComponent(syntheticMedia[0].src));
+    expect(images[0].getAttribute("alt")).toBe("");
+    expect(images[0].getAttribute("loading")).toBe("lazy");
+    const frame = container.querySelector(".card-media");
+    expect(frame?.nextElementSibling?.classList.contains("card-eyebrow")).toBe(true);
+    expect(container.querySelector("video")).toBeNull();
+  });
+
+  it("loads the first card's cover eagerly", () => {
+    const vehicle = { ...syntheticAvailable, media: syntheticMedia };
+    const { container } = render(<VehicleCard locale="en" vehicle={vehicle} headingLevel={2} eagerCover />);
+    expect(container.querySelector("img")?.getAttribute("loading")).toBe("eager");
+  });
+
+  it("ignores videos: a video-only media list is the text-only card", () => {
+    const vehicle = { ...syntheticAvailable, media: [{ id: "TESTVIDEO", type: "video" as const }] };
+    const { container } = render(<VehicleCard locale="en" vehicle={vehicle} headingLevel={2} />);
+    expect(container.querySelector("img, video, .card-media")).toBeNull();
   });
 
   it("omits missing values instead of filling them in", () => {

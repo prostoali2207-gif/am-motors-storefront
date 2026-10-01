@@ -123,9 +123,11 @@ describe("media guards", () => {
     expect(config).not.toMatch(/drive\.google|googleusercontent|googleapis|dangerouslyAllow|unoptimized/i);
   });
 
-  it("does not render images or video on listing cards (no cover rule yet, no autoloading video)", () => {
+  it("renders at most one cover image on listing cards: first image only, no video, no carousel", () => {
     const card = readFileSync(join(process.cwd(), "src/components/vehicle-card.tsx"), "utf8");
-    expect(card).not.toMatch(/next\/image|<img|<video|\.media\b/);
+    expect(card).toContain("vehicleImages(vehicle.media)[0]");
+    expect(card.match(/<Image\b/g)).toHaveLength(1);
+    expect(card).not.toMatch(/<img|<video|\.media\.map|\.media\[|use client/);
   });
 
   it("does not prefetch VDPs from listing cards (a VDP render resolves Drive media)", () => {
