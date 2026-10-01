@@ -5,7 +5,7 @@ import { createMediaService } from "@/adapters/google-drive-media/media-service"
 import { isPublicMediaToken, publicMediaId } from "@/adapters/google-drive-media/public-media";
 import { loadInventorySnapshot } from "@/adapters/google-sheets/loader";
 import { MEDIA_LINK_COLUMN } from "@/adapters/google-sheets/schema";
-import { GoogleSheetsInventoryRepository } from "@/adapters/google-sheets/sheets-repository";
+import { GoogleSheetsInventoryRepository, mapWithConcurrency } from "@/adapters/google-sheets/sheets-repository";
 import type { Vehicle } from "@/domain/vehicle";
 import type { VehicleImage } from "@/domain/vehicle-media";
 import { FakeDrive, fakeChild, fakeFolderChild, TEST_FOLDER_LINK } from "../../support/fake-drive";
@@ -76,7 +76,7 @@ async function vehicles(repo: GoogleSheetsInventoryRepository): Promise<Vehicle[
   return [...result.vehicles];
 }
 
-/** One vehicle as the VDP reads it (the only read that resolves media). */
+/** One vehicle as the VDP reads it (all approved images). */
 async function vdp(repo: GoogleSheetsInventoryRepository, id: string): Promise<Vehicle> {
   const result = await repo.getById(id);
   if (result.kind !== "ok") throw new Error(`unexpected ${result.kind}`);
@@ -85,30 +85,72 @@ async function vdp(repo: GoogleSheetsInventoryRepository, id: string): Promise<V
 
 const IDS = ["TEST-0001", "TEST-0002", "TEST-0003", "TEST-0004", "TEST-0005", "TEST-0006", "TEST-0007", "TEST-0009", "TEST-0011"];
 
-describe("Drive media: listings never touch Drive", () => {
-  it("listAvailable returns every available vehicle with media [] and makes 0 Drive calls", async () => {
+describe("Drive media: listing covers", () => {
+  it("listAvailable attaches only the cover (01.* first image) of Website/, in source order", async () => {
     const { repo, drive } = setup();
     const all = await vehicles(repo);
     expect(all.map((v) => v.id)).toEqual(IDS);
-    expect(all.every((v) => v.media.length === 0)).toBe(true);
-    expect(drive.calls).toEqual([]);
+    expect(all.map((v) => v.media.length)).toEqual([1, 0, 0, 0, 0, 0, 0, 0, 0]);
+    const cover = all[0].media[0] as VehicleImage;
+    expect(cover.id).toBe(publicMediaId(IMG_A.id));
+    for (const excluded of [IMG_B, VIDEO, ROOT_IMAGE, ROOT_VIDEO]) {
+      expect(cover.id).not.toBe(publicMediaId(excluded.id));
+    }
+    // The cover is the same URL the VDP uses for its first image.
+    expect(cover.src).toBe(((await vdp(repo, "TEST-0001")).media[0] as VehicleImage).src);
+    // Metadata only: listing never downloads image bytes, and never lists a vehicle root folder.
     expect(drive.downloads).toEqual([]);
+    expect(drive.calls.filter((c) => /^list:TESTFOLDERID_(OK|EMPTY|NOWEB|TWOWEB)/.test(c))).toEqual([]);
   });
 
-  it("listSold returns sold vehicles with media [] and makes 0 Drive calls", async () => {
+  it("makes at most 3 metadata calls per vehicle folder (get, Website lookup, Website list)", async () => {
     const { repo, drive } = setup();
+    await vehicles(repo);
+    // No call is repeated, and no vehicle costs more than 3 calls.
+    expect(new Set(drive.calls).size).toBe(drive.calls.length);
+    expect(drive.calls.length).toBeLessThanOrEqual(3 * 7);
+    // Two vehicles have no parsable link: no call at all for them.
+    expect(drive.calls.filter((c) => c.startsWith("get:"))).toHaveLength(7);
+  });
+
+  it("listSold attaches covers the same way", async () => {
+    const { repo } = setup();
     const result = await repo.listSold();
-    expect(result.kind === "ok" && result.vehicles.map((v) => [v.id, v.media])).toEqual([["TEST-0008", []]]);
-    expect(drive.calls).toEqual([]);
-    expect(drive.downloads).toEqual([]);
+    expect(result.kind === "ok" && result.vehicles.map((v) => [v.id, v.media.length])).toEqual([["TEST-0008", 1]]);
   });
 
-  it("repeated listing reads still make 0 Drive calls (no prefetch)", async () => {
-    const { repo, drive } = setup();
-    await vehicles(repo);
-    await repo.listSold();
-    await vehicles(repo);
-    expect(drive.calls).toEqual([]);
+  it("a failing folder empties only that card's cover; the listing keeps every car", async () => {
+    const { repo } = setup();
+    const all = await vehicles(repo);
+    expect(all.find((v) => v.id === "TEST-0003")?.media).toEqual([]);
+    expect(all.every((v) => v.make === "Testmake" && v.priceAed === 11111)).toBe(true);
+  });
+
+  it("without a media service, listings make no Drive calls and carry no media", async () => {
+    const sheet = new FakeSheet([syntheticRow({ [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_OK_000001") })]);
+    const repo = new GoogleSheetsInventoryRepository(async () => ({
+      kind: "ok",
+      ...(await loadInventorySnapshot(sheet, { now: () => NOW, log: quietLog })),
+    }));
+    const result = await repo.listAvailable();
+    expect(result.kind === "ok" && result.vehicles[0].media).toEqual([]);
+  });
+});
+
+describe("mapWithConcurrency", () => {
+  it("keeps input order and never runs more than the limit at once", async () => {
+    let running = 0;
+    let peak = 0;
+    const out = await mapWithConcurrency([5, 1, 4, 2, 3, 0, 6], 3, async (n) => {
+      running += 1;
+      peak = Math.max(peak, running);
+      await new Promise((resolve) => setTimeout(resolve, n));
+      running -= 1;
+      return n * 10;
+    });
+    expect(out).toEqual([50, 10, 40, 20, 30, 0, 60]);
+    expect(peak).toBe(3);
+    await expect(mapWithConcurrency([], 3, async (n: number) => n)).resolves.toEqual([]);
   });
 });
 

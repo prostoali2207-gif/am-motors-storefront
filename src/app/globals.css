@@ -323,6 +323,22 @@ main {
   padding: var(--space-5) 0;
 }
 
+/*
+ * Listing cover: same provisional ratio token as the VDP frames; `contain` keeps the whole car
+ * (letterboxed on --surface-media if a photo has another ratio). Absent when there is no
+ * approved photo — the text-only card is the no-photo state.
+ */
+.card-media {
+  position: relative;
+  aspect-ratio: var(--media-ratio);
+  margin-bottom: var(--space-4);
+  background: var(--surface-media);
+}
+
+.card-media img {
+  object-fit: contain;
+}
+
 .card-eyebrow {
   margin-bottom: var(--space-1);
 }

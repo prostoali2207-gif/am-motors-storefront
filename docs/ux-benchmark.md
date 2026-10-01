@@ -469,10 +469,11 @@ after the list (Phase 5, q 17); sold section below it (q 9/10/18).
    values that exist, in that order.
 5. The whole card is one tap target (title link stretched over the card); ink focus ring.
 
-**Card with media (future, when listing media is approved):** a media frame above the eyebrow;
-the body is unchanged. Frame ratio is a single **provisional** token (starting value 3:2 — a
-common camera ratio, not a business standard); it changes in one place when the real photo
-convention (q 12) is known.
+**Card with media (implemented 2026-10-01, listing covers):** the vehicle's cover (`01.*`) in a
+media frame above the eyebrow; the body is unchanged. Frame ratio is the single **provisional**
+`--media-ratio` token (3:2), `object-fit: contain` on `--surface-media` so the whole car shows
+and nothing is cropped. One image, no carousel; empty `alt` (the heading names the car); first
+card eager/high priority, the rest lazy. No approved photo → the text-only card above, no box.
 
 **VDP `/cars/[id]`, no photos (production state now):**
 1. Header.
@@ -517,12 +518,13 @@ Container max 1280 px, side margins ≥ 48 px, 12 columns, 24 px gaps.
 
 | Element | No approved photos (now) | Approved photography (later) |
 | - | - | - |
-| Card | Typographic card, no media box | Media frame on top (provisional ratio token), same body |
-| Mixed stock | n/a | **Conditional (q 12):** enable listing photos only when every available car has approved photos, or a same-size typographic plate (no car imagery). Never empty boxes or stock/AI images. |
+| Card | Typographic card, no media box | Cover frame on top (provisional ratio token), same body — **implemented 2026-10-01** |
+| Mixed stock | n/a | **Superseded 2026-10-01 (user decision):** cars with an approved cover show it; cars without keep the text-only card. No plates, no empty boxes, no stock/AI images. |
 | VDP | Title block leads; "Photos unavailable" line | Media above the title block; interaction designed with real photos |
 | Framing | — | One provisional ratio token; `object-fit: contain` in the existing component until the photo convention is known |
 
-Listings keep making 0 Drive calls until listing media is explicitly approved.
+Listing covers were approved by the user on 2026-10-01: listings resolve one cover per car
+through the cached folder listing (`docs/business-rules.md` → "Website photos").
 
 ### Tokens — confirmed vs provisional
 

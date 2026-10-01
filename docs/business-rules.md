@@ -137,8 +137,14 @@ Recorded 2026-09-30. Technical proposals, not business facts; confirm or change 
 - Live check 2026-10-01 (Vercel Preview, keyless OIDC, read-only): all 20 vehicle folders are
   readable by the service account; none has a `Website` folder yet → every VDP would show
   "Photos unavailable" even with media enabled.
-- `MEDIA_SOURCE` stays **off** in Preview and Production until explicitly enabled by the user.
-  Listing cards remain photo-free (see `docs/ux-benchmark.md` → mixed-stock rule).
+- `MEDIA_SOURCE=google-drive` was enabled by the user in **Preview only** (2026-10-01); it stays
+  **off** in Production until the user explicitly enables it.
+- **Listing cards (confirmed by the user 2026-10-01, supersedes the Phase 4 mixed-stock rule):**
+  every card on `/` and `/cars` whose vehicle has approved `Website/` media shows that vehicle's
+  cover (the first image in order, `01.*`) above the eyebrow — one image, no carousel. A vehicle
+  without an approved image keeps the text-only card: no empty box, no placeholder. Mixed stock
+  (some cards with photos, some without) is accepted. Nothing from the vehicle root folder, no
+  videos, no unsupported files.
 
 ## Google Drive media — Phase 3 (technical, pending review)
 
@@ -160,17 +166,19 @@ Recorded 2026-09-30. Technical proposals, not business facts.
 - **Delivery:** images only, through the site's route `/media/<ID>/<opaque id>/<revision>` —
   downloaded server-side, EXIF/GPS/all metadata stripped, re-encoded as JPEG (max 2048 px),
   `next/image` builds responsive sizes from it. Videos: never published.
-- **Where media is resolved:** only for one vehicle's VDP (`getById`) and the media route.
-  `/` and `/cars` (listing reads) return `media: []` and make 0 Drive calls; nothing is
-  prefetched. Listing cards show no media.
+- **Where media is resolved:** VDP (`getById`, all approved images), the media route, and
+  listing reads (`/`, `/cars`: cover only, one image per vehicle, for the card). Listing covers
+  use the same cached per-folder resolution (≤ 3 metadata calls per linked vehicle on a cold
+  5-minute cache, 0 when warm; at most 6 vehicles resolved at once; no image bytes). Card links
+  keep `prefetch={false}`, so no VDP is rendered in the background.
 - **Cache (V1, no purge tooling):** `/media` responses `public, max-age=1200, s-maxage=1200`
   and `images.minimumCacheTTL = 1200` (Next 16 caches optimized images for the larger of the
   two and sends that to browsers). Worst case a removed photo can still be served ≈ 1 hour
   (route CDN copy → optimized copy → browser copy, 20 min each). Content-versioned URLs: a
   replaced photo gets a new URL at once. Policy: `src/lib/media-cache-policy.ts`.
 - **Customer-facing states:** photos, or neutral "Photos unavailable". No placeholder car image.
-- **Switch:** `MEDIA_SOURCE=google-drive`, off by default. Stays off in Preview and Production
-  until the user explicitly enables it (Phase 8 publishing rule is implemented).
+- **Switch:** `MEDIA_SOURCE=google-drive`, off by default. Enabled in Preview only by the user
+  (2026-10-01); stays off in Production until the user explicitly enables it.
 
 ## Inquiries and lead qualification — Confirmed
 

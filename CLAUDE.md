@@ -24,12 +24,13 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   `docs/google-sheets-setup.md`). Live read verified on Vercel Preview (Phase 6).
 - Phase 3 (Drive media pipeline) implemented in `src/adapters/google-drive-media` and the
   route `src/app/media/…`, enabled only by `MEDIA_SOURCE=google-drive` (off by default; VDPs
-  show "Photos unavailable"). Publishing rule: Phase 8 below. Only `getById`/the media route resolve media; listings make 0 Drive calls. Photo cache
+  show "Photos unavailable"). Publishing rule: Phase 8 below. VDPs (`getById`) carry all approved images; listing reads carry
+  only each car's cover (`01.*`) for the card (text-only card when none). Photo cache
   policy (~1 h worst case): `src/lib/media-cache-policy.ts`.
 - Phase 4A (live visual benchmark, accepted) and Phase 4 (storefront UX, "Coachwork" direction)
   recorded in `docs/ux-benchmark.md`. Phase 4 **accepted and merged** (PR #5): neutral tokens
   (no accent until brand assets), Geologica self-hosted with Cyrillic (`src/app/fonts/`),
-  inventory-first home and `/cars`, photo-free cards, VDP no-photo state, sold VDP styling. No
+  inventory-first home and `/cars`, typographic cards (cover photo added in Phase 8 follow-up), VDP no-photo state, sold VDP styling. No
   sorting (source order), media ratio provisional (`--media-ratio`).
 - Phase 5 (Conversion & attribution) **accepted and merged** (PR #6): available VDPs get
   WhatsApp (primary) + "Request a viewing" / "Request a test drive" (secondary), all opening
@@ -62,7 +63,7 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   (unknown values shown verbatim; `AED` everywhere, `Ref:` in English in every language); WhatsApp prefills follow the page language (`src/conversion/`). Arabic companion
   font Noto Kufi Arabic (Arabic pages only). Decisions: `docs/business-rules.md` → "Languages —
   Phase 7"; benchmark: `docs/ux-benchmark.md` → "Phase 7".
-- Phase 8 (website photo publishing) **implemented, PR ready for review** (not merged): media
+- Phase 8 (website photo publishing) **accepted and merged** (PR #9): media
   come only from the single `Website/` child folder of each vehicle folder (exact name; missing /
   duplicate / empty → "Photos unavailable"; the vehicle root is never listed); JPEG/PNG/WebP
   only; `01.*` = cover; videos off. Rule: `docs/business-rules.md` → "Website photos". Drive API
@@ -70,8 +71,15 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   read verified on Vercel Preview `a7db21f` (2026-10-01) with a temporary preview-only read-only
   diagnostic (removed before review): `vercel-oidc` works, Drive API works, all 20 vehicle
   folders accessible via the inherited folder share, every vehicle `no-website-folder` (no
-  `Website/` folders exist yet), no `inaccessible`/`source-error`. `MEDIA_SOURCE` still unset in
-  Preview and Production; no `Website/` folders created.
+  `Website/` folders exist yet), no `inaccessible`/`source-error`. Merged (PR #9). Since
+  then staff created `Website/` folders for some vehicles and the user set
+  `MEDIA_SOURCE=google-drive` in Preview only (Production untouched).
+- Listing card covers (follow-up to Phase 8; PR open, not merged): `/` and `/cars` cards show the
+  vehicle's first approved `Website/` image (`01.*`) above the eyebrow in the `--media-ratio`
+  frame (`contain`, no crop, one image, no carousel); no approved image → text-only card, no
+  box. Covers resolved in parallel (6 at a time) through the same 5-minute cached folder
+  listing: cold cache ≤ 3 Drive metadata calls per linked vehicle, warm cache 0. Rule:
+  `docs/business-rules.md` → "Website photos".
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.

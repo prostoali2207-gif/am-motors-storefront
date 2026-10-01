@@ -114,9 +114,10 @@ Enabled only with `MEDIA_SOURCE=google-drive`. Same service account, one more re
 Calls: per vehicle `files.get` (folder type) + one `files.list` for child **folders** named
 `Website` (the vehicle folder's files are never listed) + `files.list` of that one `Website`
 folder's direct children (fields `id,name,mimeType,size,createdTime,md5Checksum,version` only —
-never owners, permissions or image metadata/GPS), only when a VDP (or the media route) needs
-that vehicle — `/` and `/cars`
-make no Drive calls; folder listings cached 5 minutes (tag `media`). Per image request (only
+never owners, permissions or image metadata/GPS), when a VDP, the media route or a listing
+card cover needs that vehicle. `/` and `/cars` resolve every listed vehicle's cover (up to 6
+in parallel); folder listings are cached 5 minutes (tag `media`), so a listing render costs
+≤ 3 calls per linked vehicle on a cold cache and 0 when warm. Per image request (only
 on a CDN/image cache miss): `files.get?alt=media`, re-encoded server-side without metadata;
 responses cached 20 minutes (≈ 1 hour worst case across layers).
 
@@ -136,7 +137,8 @@ Steps:
    vehicle `no-website-folder`; no `inaccessible` or `source-error`; no image to sample yet.
    `npm run smoke:media` exists for a local run but needs `service-account-key` credentials;
    do not create a key just for it.
-5. `MEDIA_SOURCE` stays unset in Preview and Production until the user explicitly enables it.
+5. `MEDIA_SOURCE=google-drive` set by the user in Preview only (2026-10-01); it stays unset in
+   Production until the user explicitly enables it.
 
 Media failures never make the inventory unavailable: missing/invalid link, inaccessible folder,
 empty folder, only unsupported files or a Drive error only empty that one vehicle's media

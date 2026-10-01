@@ -23,9 +23,9 @@ export function InventoryList({
     case "ok":
       return (
         <ul className="inventory" aria-label={t.availableCarsLabel}>
-          {result.vehicles.map((vehicle) => (
+          {result.vehicles.map((vehicle, index) => (
             <li key={vehicle.id}>
-              <VehicleCard vehicle={vehicle} headingLevel={headingLevel} locale={locale} />
+              <VehicleCard vehicle={vehicle} headingLevel={headingLevel} locale={locale} eagerCover={index === 0} />
             </li>
           ))}
         </ul>
