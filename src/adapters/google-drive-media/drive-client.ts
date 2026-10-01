@@ -21,6 +21,11 @@ const DOWNLOAD_TIMEOUT_MS = 25_000;
 /** Upper bound on listed children per folder (5 pages × 1000). */
 const MAX_LIST_PAGES = 5;
 
+/** IDs interpolated into a Drive query (no quote injection). */
+const DRIVE_ID = /^[A-Za-z0-9_-]+$/;
+/** Folder names used in a Drive query must be plain (no quotes or backslashes). */
+const SAFE_QUERY_NAME = /^[A-Za-z0-9 _-]+$/;
+
 const CHILD_FIELDS = "nextPageToken,files(id,name,mimeType,size,createdTime,md5Checksum,version)";
 
 /** A child entry as returned by `files.list` with `CHILD_FIELDS`, validated. */
@@ -45,6 +50,11 @@ export interface DriveReader {
   getFolder(folderId: string): Promise<DriveFolderInfo>;
   /** Direct, non-trashed children of the folder. Not recursive. */
   listChildren(folderId: string): Promise<DriveChild[]>;
+  /**
+   * Direct, non-trashed child FOLDERS of `parentId` whose name matches `name` (Drive query).
+   * Files in the parent are never requested. Callers must still compare the name exactly.
+   */
+  listChildFolders(parentId: string, name: string): Promise<DriveChild[]>;
   /** File content, refused if larger than `maxBytes`. */
   download(fileId: string, maxBytes: number): Promise<Uint8Array>;
 }
@@ -116,6 +126,34 @@ export function createDriveReader(options: DriveReaderOptions): DriveReader {
     return body;
   }
 
+  async function listByQuery(q: string): Promise<DriveChild[]> {
+    const children: DriveChild[] = [];
+    let pageToken: string | undefined;
+    for (let page = 0; page < MAX_LIST_PAGES; page++) {
+      const params = new URLSearchParams({
+        q,
+        fields: CHILD_FIELDS,
+        pageSize: "1000",
+        supportsAllDrives: "true",
+        includeItemsFromAllDrives: "true",
+      });
+      if (pageToken) params.set("pageToken", pageToken);
+      const body = await getJson(`${API_BASE}?${params}`);
+
+      const files = body.files;
+      if (files !== undefined && !Array.isArray(files)) {
+        throw new DriveSourceError("malformed-response", true);
+      }
+      for (const entry of files ?? []) {
+        const child = toChild(entry);
+        if (child) children.push(child);
+      }
+      pageToken = typeof body.nextPageToken === "string" ? body.nextPageToken : undefined;
+      if (!pageToken) return children;
+    }
+    throw new DriveSourceError("too-many-children", false);
+  }
+
   return {
     async getFolder(folderId) {
       const params = new URLSearchParams({ fields: "mimeType,trashed", supportsAllDrives: "true" });
@@ -125,32 +163,16 @@ export function createDriveReader(options: DriveReaderOptions): DriveReader {
     },
 
     async listChildren(folderId) {
-      const children: DriveChild[] = [];
-      let pageToken: string | undefined;
-      for (let page = 0; page < MAX_LIST_PAGES; page++) {
-        const params = new URLSearchParams({
-          // Folder IDs are validated to [A-Za-z0-9_-] before reaching here: no quote injection.
-          q: `'${folderId}' in parents and trashed = false`,
-          fields: CHILD_FIELDS,
-          pageSize: "1000",
-          supportsAllDrives: "true",
-          includeItemsFromAllDrives: "true",
-        });
-        if (pageToken) params.set("pageToken", pageToken);
-        const body = await getJson(`${API_BASE}?${params}`);
+      if (!DRIVE_ID.test(folderId)) throw new DriveSourceError("invalid-id", false);
+      return listByQuery(`'${folderId}' in parents and trashed = false`);
+    },
 
-        const files = body.files;
-        if (files !== undefined && !Array.isArray(files)) {
-          throw new DriveSourceError("malformed-response", true);
-        }
-        for (const entry of files ?? []) {
-          const child = toChild(entry);
-          if (child) children.push(child);
-        }
-        pageToken = typeof body.nextPageToken === "string" ? body.nextPageToken : undefined;
-        if (!pageToken) return children;
-      }
-      throw new DriveSourceError("too-many-children", false);
+    async listChildFolders(parentId, name) {
+      if (!DRIVE_ID.test(parentId)) throw new DriveSourceError("invalid-id", false);
+      if (!SAFE_QUERY_NAME.test(name)) throw new DriveSourceError("invalid-query", false);
+      return listByQuery(
+        `'${parentId}' in parents and trashed = false and mimeType = '${DRIVE_FOLDER_MIME}' and name = '${name}'`,
+      );
     },
 
     async download(fileId, maxBytes) {

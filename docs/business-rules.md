@@ -108,36 +108,58 @@ Recorded 2026-09-30. Technical proposals, not business facts; confirm or change 
   ~2 minutes. On-demand revalidation (e.g. a Sheet edit hook calling `revalidateTag`) can
   shorten this later.
 
-## Website photos — Confirmed 2026-09-30
+## Website photos — Confirmed 2026-09-30, publishing rule confirmed 2026-10-01 (Phase 8)
 
-- **There are no website-ready photos yet.** The current Drive folders linked in
-  `Ссылка на фото/видео` are working source material (raw shots, ad creatives, duplicates),
-  **not** a website media library.
-- `MEDIA_SOURCE` stays **off** by default. Existing files — including ad creatives — are never
-  published automatically.
-- The site shows the neutral "Photos unavailable" state on every VDP until website photos exist.
-- Not defined now (deliberately): which files are publishable, cover/order, video, HEIC,
-  plates/people/documents. When final website photos are ready, a minimal publishing
-  convention is decided separately (open question 12). No Sheet change, no new folders, no CMS
-  until then.
+- The vehicle folders linked in `Ссылка на фото/видео` are working source material (raw shots,
+  ad creatives, documents, duplicates, videos), **not** a website media library. Nothing in a
+  vehicle folder itself is ever published.
+- **Publishing rule (confirmed 2026-10-01):**
+  1. Each vehicle folder may contain one direct child folder named exactly **`Website`**
+     (case-sensitive; `website`, `Website ` or `Website photos` do not count).
+  2. The storefront reads media **only** from that `Website` folder — its direct children. No
+     fallback to the vehicle folder, no recursion into folders inside `Website`.
+  3. No `Website` folder, more than one `Website` folder, an empty `Website` folder, or one with
+     no supported image → that vehicle fails closed: "Photos unavailable".
+  4. Files: **JPEG, PNG, WebP** only (≤ 30 MB). HEIC, GIF, RAW/DNG-as-other-type, PDFs, Google
+     Docs, shortcuts and videos are ignored. Byte-identical copies are shown once.
+  5. Order by file name: `01.*` = **cover**, then `02.*`, `03.*` … (natural order: `9` before
+     `10`; ties by upload time, then file ID).
+  6. **The human publishing action is placing an approved image into `Website/`.** Never place
+     there: files from the vehicle root folder as-is without review, videos, ad creatives /
+     collages / overlays (e.g. "CASH ONLY"), VIN labels or any document, odometer photos,
+     people, readable vehicle plates, third-party dealer signs or phone numbers. The pipeline
+     cannot judge image content; this check is the reviewer's responsibility.
+  7. One approved exterior photo is enough to publish media. No placeholder or duplicated
+     padding.
+  8. **Videos remain off** (not published, not rendered).
+- Removal: delete or move an image out of `Website/`. Pages stop referencing it within ~5 min
+  (folder listing cache); a cached copy can be served for up to ≈ 1 hour (no purge tooling in V1).
+- Live check 2026-10-01 (Vercel Preview, keyless OIDC, read-only): all 20 vehicle folders are
+  readable by the service account; none has a `Website` folder yet → every VDP would show
+  "Photos unavailable" even with media enabled.
+- `MEDIA_SOURCE` stays **off** in Preview and Production until explicitly enabled by the user.
+  Listing cards remain photo-free (see `docs/ux-benchmark.md` → mixed-stock rule).
 
 ## Google Drive media — Phase 3 (technical, pending review)
 
 Recorded 2026-09-30. Technical proposals, not business facts.
 
-- **Source:** only the Drive folder in `Ссылка на фото/видео` (server/source-only). The link and
-  folder ID are parsed server-side (`/drive/folders/<id>`, `/drive/u/<n>/folders/<id>`,
+- **Source:** only the `Website` child folder of the Drive folder in `Ссылка на фото/видео`
+  (Phase 8; see "Website photos" above). The link and folder ID are parsed server-side
+  (`/drive/folders/<id>`, `/drive/u/<n>/folders/<id>`,
   `/drive/mobile/folders/<id>`, `/open?id=<id>`); anything else → media unavailable for that
-  vehicle. Only direct children are read (no subfolders, no shortcuts).
+  vehicle. In the vehicle folder only child *folders* named `Website` are queried (its files are
+  never listed); then only the direct children of that one `Website` folder are read (no
+  subfolders, no shortcuts).
 - **Identity:** Drive file ID. File names are not unique (observed) and are never used as
   identity, published or logged. Byte-identical copies (same `md5Checksum`) are shown once.
-- **Kept:** JPEG, PNG, WebP images (≤ 30 MB source) and videos (`video/*`). Excluded: folders,
+- **Kept:** JPEG, PNG, WebP images (≤ 30 MB source). Excluded: videos (Phase 8: off), folders,
   shortcuts, Google Docs, PDFs, HEIC/HEIF (not decodable by the pipeline), GIF, anything else.
-- **Order (technical fallback, NOT a business rule):** natural file-name order, then Drive
-  upload time, then file ID. The first image is not a declared cover.
+- **Order (confirmed Phase 8):** natural file-name order (`01.*` = cover), then Drive upload
+  time, then file ID.
 - **Delivery:** images only, through the site's route `/media/<ID>/<opaque id>/<revision>` —
   downloaded server-side, EXIF/GPS/all metadata stripped, re-encoded as JPEG (max 2048 px),
-  `next/image` builds responsive sizes from it. Videos: no public delivery yet (not rendered).
+  `next/image` builds responsive sizes from it. Videos: never published.
 - **Where media is resolved:** only for one vehicle's VDP (`getById`) and the media route.
   `/` and `/cars` (listing reads) return `media: []` and make 0 Drive calls; nothing is
   prefetched. Listing cards show no media.
@@ -147,8 +169,8 @@ Recorded 2026-09-30. Technical proposals, not business facts.
   (route CDN copy → optimized copy → browser copy, 20 min each). Content-versioned URLs: a
   replaced photo gets a new URL at once. Policy: `src/lib/media-cache-policy.ts`.
 - **Customer-facing states:** photos, or neutral "Photos unavailable". No placeholder car image.
-- **Switch:** `MEDIA_SOURCE=google-drive`, off by default. Stays off (see "Website photos —
-  Confirmed" above) until website photos exist and open question 12 is decided.
+- **Switch:** `MEDIA_SOURCE=google-drive`, off by default. Stays off in Preview and Production
+  until the user explicitly enables it (Phase 8 publishing rule is implemented).
 
 ## Inquiries and lead qualification — Confirmed
 
@@ -299,23 +321,11 @@ Ask the user; do not assume answers.
 10. Which sold cars may be shown as social proof, and for how long after sale?
 11. Revalidation window: how quickly must a Sheet status change appear on the site?
     (Accepted for V1 on 2026-09-30: ≤ 2 minutes — 60 s cache, 120 s hard max age.)
-12. Website photo publishing convention — **deferred by business decision (2026-09-30)**:
-    no website-ready photos exist yet (see "Website photos — Confirmed"). Decide only when
-    final website photos are ready. Background (observed 2026-09-30, metadata only): current
-    folders mix real photos with ad creatives (e.g. a file named as an ad with a payment-terms
-    claim not confirmed in this file, "hero still" artwork, carousels), duplicate uploads and
-    empty folders; the pipeline cannot tell a photo from an ad or a document without
-    interpreting image content, which is not allowed. Topics to settle then, minimally:
-    a. Which files are publishable (e.g. a dedicated folder or filename convention, or an
-       explicit list in the Sheet).
-    b. Cover image and order (numeric filename prefixes `01_`, `02_` already work with the
-       current technical order).
-    c. Plates visible or blurred; people/documents never published — who checks?
-    d. Video on the site at all; if yes, delivery (public video host or a transcoded asset
-       store — external infrastructure, needs approval; serverless proxying of `.MOV`
-       originals is not an option).
-    e. HEIC photos: convert before upload, or approve a conversion step.
-    f. Urgent removal: V1 caches bound it to ≈ 1 hour; faster removal needs purge tooling.
+12. ~~Website photo publishing convention~~ — confirmed 2026-10-01 (see "Website photos"):
+    dedicated `Website/` folder, `01.*` = cover, JPEG/PNG/WebP, videos off, human review before
+    placing a file. Still open: (c) who is the named reviewer; plates — rule is "no readable
+    plates", blur tooling not chosen; (d) video delivery; (e) HEIC conversion (convert before
+    upload); (f) faster removal than ≈ 1 hour needs purge tooling.
 13. ~~Language(s) for launch~~ — confirmed 2026-09-30: English (default), Arabic, Russian
     (see "Languages — Phase 7").
 14. Brand assets: logo, brand colors, fonts — do they exist?

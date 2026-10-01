@@ -140,20 +140,20 @@ Sheet column must be added and classified first.
 
 ## Media policy
 
-- **Confirmed 2026-09-30:** no website-ready photos exist yet; the current Drive folders are
-  working source material, not a website library. Media stays off (`MEDIA_SOURCE` unset) and
-  nothing is published automatically; VDPs show "Photos unavailable". See
-  `docs/business-rules.md` → "Website photos".
-- Only files in the Drive folder referenced by `Ссылка на фото/видео` (direct children; no
-  subfolders or shortcuts). Identity = Drive file ID, never the file name.
+- **Publishing rule confirmed 2026-10-01 (Phase 8):** media come only from the single direct
+  child folder named exactly `Website` inside the Drive folder referenced by
+  `Ссылка на фото/видео` (direct children of `Website/`; no subfolders or shortcuts; the
+  vehicle folder's own files are never listed). Missing / duplicate / empty `Website` → no media.
+  JPEG/PNG/WebP only; videos never published. See `docs/business-rules.md` → "Website photos".
+  `MEDIA_SOURCE` stays unset in Preview/Production until the user enables it.
+- Identity = Drive file ID, never the file name.
 - Public model: `Vehicle.media: VehicleMedia[]` — opaque hashed ID, `type`, and for images a
   same-origin `/media/…` path. Never the link, folder ID, file ID, file name, owner or EXIF.
-- Order is a technical fallback (natural name → upload time → file ID) until the business
-  defines cover/order (open question 12); nothing may claim a file is the cover.
+- Order: file name (`01.*` = cover) → upload time → file ID.
 - Strip EXIF/GPS metadata from published images (done by the media route's re-encode).
-- Exclude files that show documents, plates (business decision), people or paperwork, and ad
-  creatives with commercial claims. This cannot be automated without image interpretation, so
-  media stays disabled until website photos exist and open question 12 is decided.
+- Content review is human: placing a file into `Website/` is the publishing action. Never
+  documents/VIN labels, odometer photos, readable plates, people, third-party dealer signs or
+  phone numbers, ad creatives / overlays / collages. The pipeline does not interpret images.
 - No stock, AI-generated or other-vehicle images as fallbacks.
 
 ## Adding or changing a field

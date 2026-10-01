@@ -18,7 +18,7 @@ import type { InventoryRepository } from "./repository";
 /** Bump when the cached snapshot shape or mapping rules change, to drop old cache entries. */
 const SNAPSHOT_CACHE_VERSION = "sheets-v2";
 /** Bump when the cached folder listing shape or classification/ordering rules change. */
-const MEDIA_CACHE_VERSION = "drive-media-v1";
+const MEDIA_CACHE_VERSION = "drive-media-v2-website";
 
 /**
  * Folder listings (metadata only, never file bytes) are cached for 5 minutes, tag `media`.
@@ -90,7 +90,8 @@ function createSheetsRepository(
 
 function createDriveMediaService(getAccessToken: () => Promise<string>): VehicleMediaService {
   const reader = createDriveReader({ getAccessToken });
-  // Transient Drive errors are thrown by `resolveFolderMedia` and are therefore not cached.
+  // Only the vehicle's `Website/` folder is listed. Transient Drive errors are thrown by
+  // `resolveFolderMedia` and are therefore not cached.
   const resolveFolder = unstable_cache(
     (folderId: string) => resolveFolderMedia(reader, { kind: "folder", folderId }),
     [MEDIA_CACHE_VERSION],

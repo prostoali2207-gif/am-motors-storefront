@@ -23,11 +23,8 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   server env (`INVENTORY_SOURCE=google-sheets`, see `.env.example` and
   `docs/google-sheets-setup.md`). Live read verified on Vercel Preview (Phase 6).
 - Phase 3 (Drive media pipeline) implemented in `src/adapters/google-drive-media` and the
-  route `src/app/media/…`, enabled only by `MEDIA_SOURCE=google-drive` (off by default). Live
-  Drive read not verified (media is off). Business decision 2026-09-30:
-  no website-ready photos exist yet — media stays off, VDPs show "Photos unavailable", and
-  publishing rules wait for final photos (`docs/business-rules.md` → "Website photos").
-  Only `getById`/the media route resolve media; listings make 0 Drive calls. Photo cache
+  route `src/app/media/…`, enabled only by `MEDIA_SOURCE=google-drive` (off by default; VDPs
+  show "Photos unavailable"). Publishing rule: Phase 8 below. Only `getById`/the media route resolve media; listings make 0 Drive calls. Photo cache
   policy (~1 h worst case): `src/lib/media-cache-policy.ts`.
 - Phase 4A (live visual benchmark, accepted) and Phase 4 (storefront UX, "Coachwork" direction)
   recorded in `docs/ux-benchmark.md`. Phase 4 **accepted and merged** (PR #5): neutral tokens
@@ -56,7 +53,7 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   review accepted the current visual direction for this phase. Sheet link sharing is
   Restricted (owner, named staff, service account as Viewer). Not run: real iOS Safari and
   Android Chrome devices; live cache propagation after a genuine Sheet status change.
-- Phase 7 (multilingual) **implemented, PR #8 ready for review** (not merged): English (default, original unprefixed
+- Phase 7 (multilingual) **accepted and merged** (PR #8): English (default, original unprefixed
   URLs), Arabic (RTL, `/ar…`), Russian (`/ru…`); no browser-language redirect; header switcher
   EN · العربية · RU keeps the same page / vehicle ID. Per-language root layouts `src/app/(en)`,
   `src/app/ar`, `src/app/ru` (one-line route files) share `src/app/_site` (route bodies,
@@ -65,6 +62,16 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   (unknown values shown verbatim; `AED` everywhere, `Ref:` in English in every language); WhatsApp prefills follow the page language (`src/conversion/`). Arabic companion
   font Noto Kufi Arabic (Arabic pages only). Decisions: `docs/business-rules.md` → "Languages —
   Phase 7"; benchmark: `docs/ux-benchmark.md` → "Phase 7".
+- Phase 8 (website photo publishing) **implemented, PR ready for review** (not merged): media
+  come only from the single `Website/` child folder of each vehicle folder (exact name; missing /
+  duplicate / empty → "Photos unavailable"; the vehicle root is never listed); JPEG/PNG/WebP
+  only; `01.*` = cover; videos off. Rule: `docs/business-rules.md` → "Website photos". Drive API
+  enabled and `AM Motors — Машины` shared with the service account (2026-10-01). Live keyless
+  read verified on Vercel Preview `a7db21f` (2026-10-01) with a temporary preview-only read-only
+  diagnostic (removed before review): `vercel-oidc` works, Drive API works, all 20 vehicle
+  folders accessible via the inherited folder share, every vehicle `no-website-folder` (no
+  `Website/` folders exist yet), no `inaccessible`/`source-error`. `MEDIA_SOURCE` still unset in
+  Preview and Production; no `Website/` folders created.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.

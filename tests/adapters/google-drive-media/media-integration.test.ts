@@ -8,7 +8,7 @@ import { MEDIA_LINK_COLUMN } from "@/adapters/google-sheets/schema";
 import { GoogleSheetsInventoryRepository } from "@/adapters/google-sheets/sheets-repository";
 import type { Vehicle } from "@/domain/vehicle";
 import type { VehicleImage } from "@/domain/vehicle-media";
-import { FakeDrive, fakeChild, TEST_FOLDER_LINK } from "../../support/fake-drive";
+import { FakeDrive, fakeChild, fakeFolderChild, TEST_FOLDER_LINK } from "../../support/fake-drive";
 import { FakeSheet, PRIVATE_MARKERS, syntheticRow } from "../../support/fake-sheet";
 
 const NOW = Date.UTC(2026, 0, 15);
@@ -17,8 +17,11 @@ const quietLog = { info: () => {}, warn: () => {} };
 const IMG_A = fakeChild({ mimeType: "image/jpeg", name: "SECRET-FILENAME-A.jpg", id: "TESTFILEID_IMAGE_AAAA" });
 const IMG_B = fakeChild({ mimeType: "image/png", name: "SECRET-FILENAME-A.jpg", id: "TESTFILEID_IMAGE_BBBB" });
 const VIDEO = fakeChild({ mimeType: "video/quicktime", name: "SECRET-FILENAME-V.mov", id: "TESTFILEID_VIDEO_CCCC" });
+/** Files in a vehicle ROOT folder (raw shots, ad creatives): must never be published. */
+const ROOT_IMAGE = fakeChild({ mimeType: "image/jpeg", name: "01.jpg", id: "TESTFILEID_ROOTIMG_DD" });
+const ROOT_VIDEO = fakeChild({ mimeType: "video/mp4", name: "SECRET-FILENAME-R.mp4", id: "TESTFILEID_ROOTVID_EE" });
 
-/** Five synthetic vehicles covering each media state; one Sheet, one Drive. */
+/** Synthetic vehicles covering each media state; one Sheet, one Drive. */
 function setup(options: { log?: (m: string) => void } = {}) {
   const sheet = new FakeSheet([
     syntheticRow({ ID: "TEST-0001", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_OK_000001") }),
@@ -28,19 +31,34 @@ function setup(options: { log?: (m: string) => void } = {}) {
     syntheticRow({ ID: "TEST-0005", [MEDIA_LINK_COLUMN]: undefined }),
     syntheticRow({ ID: "TEST-0006", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_EMPTY_006") }),
     syntheticRow({ ID: "TEST-0007", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_DOCS_0007") }),
+    syntheticRow({ ID: "TEST-0009", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_NOWEB_009") }),
+    syntheticRow({ ID: "TEST-0011", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_TWOWEB_11") }),
     syntheticRow({ ID: "TEST-0008", Статус: "Продана", [MEDIA_LINK_COLUMN]: TEST_FOLDER_LINK("TESTFOLDERID_OK_000001") }),
   ]);
   const drive = new FakeDrive(
     {
       TESTFOLDERID_OK_000001: {
         kind: "folder",
+        children: [ROOT_IMAGE, ROOT_VIDEO, fakeFolderChild("TESTFOLDERID_WEB_00001")],
+      },
+      TESTFOLDERID_WEB_00001: {
+        kind: "folder",
         children: [IMG_B, VIDEO, IMG_A, fakeChild({ mimeType: DRIVE_FOLDER_MIME, size: null })],
       },
       TESTFOLDERID_FLAKY_003: { kind: "error", error: new DriveSourceError("http-5xx", true) },
-      TESTFOLDERID_EMPTY_006: { kind: "folder", children: [] },
-      TESTFOLDERID_DOCS_0007: { kind: "folder", children: [fakeChild({ mimeType: "application/pdf" })] },
+      TESTFOLDERID_EMPTY_006: { kind: "folder", children: [ROOT_IMAGE, fakeFolderChild("TESTFOLDERID_WEB_EMPTY6")] },
+      TESTFOLDERID_WEB_EMPTY6: { kind: "folder", children: [] },
+      TESTFOLDERID_DOCS_0007: { kind: "folder", children: [fakeFolderChild("TESTFOLDERID_WEB_DOCS07")] },
+      TESTFOLDERID_WEB_DOCS07: { kind: "folder", children: [fakeChild({ mimeType: "application/pdf" }), ROOT_VIDEO] },
+      TESTFOLDERID_NOWEB_009: { kind: "folder", children: [ROOT_IMAGE, ROOT_VIDEO] },
+      TESTFOLDERID_TWOWEB_11: {
+        kind: "folder",
+        children: [fakeFolderChild("TESTFOLDERID_WEB_DUP_A"), fakeFolderChild("TESTFOLDERID_WEB_DUP_B")],
+      },
+      TESTFOLDERID_WEB_DUP_A: { kind: "folder", children: [IMG_A] },
+      TESTFOLDERID_WEB_DUP_B: { kind: "folder", children: [IMG_B] },
     },
-    { [IMG_A.id]: new Uint8Array([0xa]), [IMG_B.id]: new Uint8Array([0xb]) },
+    { [IMG_A.id]: new Uint8Array([0xa]), [IMG_B.id]: new Uint8Array([0xb]), [ROOT_IMAGE.id]: new Uint8Array([0xd]) },
   );
   const sanitize = vi.fn(async (bytes: Uint8Array) => ({ bytes: new Uint8Array([...bytes, 0xff]), contentType: "image/jpeg" as const }));
   const log = options.log ?? (() => {});
@@ -65,7 +83,7 @@ async function vdp(repo: GoogleSheetsInventoryRepository, id: string): Promise<V
   return result.vehicle;
 }
 
-const IDS = ["TEST-0001", "TEST-0002", "TEST-0003", "TEST-0004", "TEST-0005", "TEST-0006", "TEST-0007"];
+const IDS = ["TEST-0001", "TEST-0002", "TEST-0003", "TEST-0004", "TEST-0005", "TEST-0006", "TEST-0007", "TEST-0009", "TEST-0011"];
 
 describe("Drive media: listings never touch Drive", () => {
   it("listAvailable returns every available vehicle with media [] and makes 0 Drive calls", async () => {
@@ -95,37 +113,49 @@ describe("Drive media: listings never touch Drive", () => {
 });
 
 describe("Drive media: per-vehicle resolution", () => {
-  it("getById calls Drive only for that vehicle's own folder", async () => {
+  it("getById calls Drive only for that vehicle's own folder and its Website/ child", async () => {
     const { repo, drive } = setup();
     await vdp(repo, "TEST-0001");
-    expect(drive.calls).toEqual(["get:TESTFOLDERID_OK_000001", "list:TESTFOLDERID_OK_000001"]);
+    expect(drive.calls).toEqual([
+      "get:TESTFOLDERID_OK_000001",
+      "folders:TESTFOLDERID_OK_000001",
+      "list:TESTFOLDERID_WEB_00001",
+    ]);
     await vdp(repo, "TEST-0006");
-    expect(drive.calls.slice(2)).toEqual(["get:TESTFOLDERID_EMPTY_006", "list:TESTFOLDERID_EMPTY_006"]);
+    expect(drive.calls.slice(3)).toEqual([
+      "get:TESTFOLDERID_EMPTY_006",
+      "folders:TESTFOLDERID_EMPTY_006",
+      "list:TESTFOLDERID_WEB_EMPTY6",
+    ]);
+    // The vehicle root folder itself is never listed.
+    expect(drive.calls.filter((c) => c.startsWith("list:TESTFOLDERID_OK") || c.startsWith("list:TESTFOLDERID_EMPTY"))).toEqual([]);
     expect(drive.downloads).toEqual([]); // listing a folder never downloads files
   });
 
-  it("attaches sanitized media to the vehicle whose folder is readable", async () => {
+  it("attaches only Website/ images to the vehicle: no root files, no videos", async () => {
     const { repo } = setup();
     const first = await vdp(repo, "TEST-0001");
-    // Technical fallback order: natural name, then createdTime, then file ID (names collide).
-    expect(first.media.map((m) => m.type)).toEqual(["image", "image", "video"]);
-    expect(first.media.map((m) => m.id)).toEqual([IMG_A, IMG_B, VIDEO].map((f) => publicMediaId(f.id)));
+    // Filename order, then createdTime, then file ID (names collide here).
+    expect(first.media.map((m) => m.type)).toEqual(["image", "image"]);
+    expect(first.media.map((m) => m.id)).toEqual([IMG_A, IMG_B].map((f) => publicMediaId(f.id)));
+    for (const excluded of [VIDEO, ROOT_IMAGE, ROOT_VIDEO]) {
+      expect(first.media.map((m) => m.id)).not.toContain(publicMediaId(excluded.id));
+    }
     for (const item of first.media) expect(isPublicMediaToken(item.id, 22)).toBe(true);
     const image = first.media[0] as VehicleImage;
     expect(image.src).toMatch(/^\/media\/TEST-0001\/[A-Za-z0-9_-]{22}\/[A-Za-z0-9_-]{12}$/);
-    expect("src" in first.media[2]).toBe(false); // videos have no public delivery yet
   });
 
-  it("a denied, failing, empty, docs-only, invalid or missing folder only empties that vehicle's media", async () => {
+  it("denied, failing, missing/duplicate/empty/docs-only Website, invalid or missing link only empty that vehicle's media", async () => {
     const { repo } = setup();
     const all = [];
     for (const id of IDS) all.push(await vdp(repo, id));
-    expect(all.map((v) => v.media.length)).toEqual([3, 0, 0, 0, 0, 0, 0]);
+    expect(all.map((v) => v.media.length)).toEqual([2, 0, 0, 0, 0, 0, 0, 0, 0]);
     // Inventory facts are unaffected by media problems, and the listing still has every car.
     expect(all.every((v) => v.make === "Testmake" && v.priceAed === 11111)).toBe(true);
     expect((await vehicles(repo)).map((v) => v.id)).toEqual(IDS);
     // A failing folder elsewhere does not break a readable one.
-    expect((await vdp(repo, "TEST-0001")).media).toHaveLength(3);
+    expect((await vdp(repo, "TEST-0001")).media).toHaveLength(2);
   });
 
   it("reports the server-side state per vehicle without folder IDs, file IDs, names or links", async () => {
@@ -139,6 +169,8 @@ describe("Drive media: per-vehicle resolution", () => {
     expect(text).toContain("TEST-0005: missing-link");
     expect(text).toContain("TEST-0006: empty");
     expect(text).toContain("TEST-0007: no-supported-media");
+    expect(text).toContain("TEST-0009: no-website-folder");
+    expect(text).toContain("TEST-0011: duplicate-website-folder");
     expect(text).not.toMatch(/TESTFOLDERID|TESTFILEID|SECRET-FILENAME|drive\.google|WhatsApp/);
   });
 
@@ -212,15 +244,17 @@ describe("Drive media: controlled image delivery", () => {
     expect(drive.downloads).toEqual([IMG_A.id]);
   });
 
-  it("refuses media of another vehicle, stale revisions, videos, unknown and non-public vehicles", async () => {
+  it("refuses media of another vehicle, stale revisions, videos, root files, unknown and non-public vehicles", async () => {
     const { repo, drive } = setup();
     const { mediaId, revision } = await firstImage(repo);
-    const vehicle = await vdp(repo, "TEST-0001");
-    const videoId = vehicle.media[2].id;
+    const videoId = publicMediaId(VIDEO.id);
 
     await expect(repo.getImage("TEST-0002", mediaId, revision)).resolves.toEqual({ kind: "not-found" });
     await expect(repo.getImage("TEST-0001", mediaId, "AAAAAAAAAAAA")).resolves.toEqual({ kind: "not-found" });
     await expect(repo.getImage("TEST-0001", videoId, revision)).resolves.toEqual({ kind: "not-found" });
+    // A file from the vehicle ROOT folder is never servable, even with a correctly derived ID.
+    await expect(repo.getImage("TEST-0001", publicMediaId(ROOT_IMAGE.id), revision)).resolves.toEqual({ kind: "not-found" });
+    await expect(repo.getImage("TEST-0009", publicMediaId(ROOT_IMAGE.id), revision)).resolves.toEqual({ kind: "not-found" });
     await expect(repo.getImage("TEST-9999", mediaId, revision)).resolves.toEqual({ kind: "not-found" });
     // A raw Drive file ID is not accepted as a media ID.
     await expect(repo.getImage("TEST-0001", IMG_A.id, revision)).resolves.toEqual({ kind: "not-found" });

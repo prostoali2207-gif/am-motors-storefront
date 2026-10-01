@@ -48,7 +48,7 @@ export function createMediaService(options: MediaServiceOptions): VehicleMediaSe
     const c = media.counts;
     log(
       `${PREFIX} vehicle ${vehicleId}: ${media.state}${code ? ` (${code})` : ""}; ` +
-        `images ${c.images}, videos ${c.videos}, subfolders ${c.subfolders}, ` +
+        `Website/ images ${c.images}, ignored videos ${c.videos}, subfolders ${c.subfolders}, ` +
         `unsupported ${c.unsupported}, duplicates ${c.duplicates}, oversized ${c.oversized}`,
     );
   }
@@ -65,7 +65,7 @@ export function createMediaService(options: MediaServiceOptions): VehicleMediaSe
     try {
       const media = await resolveFolder(ref.folderId);
       backoffUntil.delete(ref.folderId);
-      if (media.state !== "ok" || media.counts.unsupported + media.counts.oversized + media.counts.subfolders > 0) {
+      if (media.state !== "ok" || media.counts.videos + media.counts.unsupported + media.counts.oversized + media.counts.subfolders > 0) {
         report(vehicleId, media);
       }
       return media;
@@ -89,7 +89,6 @@ export function createMediaService(options: MediaServiceOptions): VehicleMediaSe
 
       const file = media.files.find(
         (f) =>
-          f.kind === "image" &&
           publicMediaId(f.fileId) === mediaId &&
           mediaRevision(f.contentVersion) === revision,
       );

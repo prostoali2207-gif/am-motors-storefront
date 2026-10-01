@@ -7,8 +7,8 @@ import { messages, type Messages } from "@/i18n/messages";
 /**
  * VDP photos — deliberately simple until real approved website photos exist.
  *
- * - Images only; videos have no public delivery path yet and are not rendered.
- * - Order is the technical fallback order; nothing here marks an image as the cover.
+ * - Images only (from the vehicle's `Website/` Drive folder); videos are never rendered.
+ * - Order follows the confirmed filename rule; the first image (`01.*`) is the cover.
  * - No photos → one neutral "Photos unavailable" line. Never a stock, AI-generated or substitute
  *   image of a car, and no empty image box.
  * - Frames use the PROVISIONAL `--media-ratio` token (globals.css), not a confirmed photo
