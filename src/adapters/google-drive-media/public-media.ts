@@ -11,14 +11,13 @@ import type { MediaFile } from "./folder-media";
  *   not be reached from it.
  * - `src`: `/media/<vehicle ID>/<id>/<rev>` on this site. `rev` changes when the file content
  *   changes, so responses can be cached long without serving replaced photos.
- * - Videos carry no URL: delivery is pending a decision.
+ * - Only images from the vehicle's `Website/` folder reach this point; videos are never
+ *   published (confirmed 2026-10-01).
  */
 export function toVehicleMedia(vehicleId: string, files: readonly MediaFile[]): VehicleMedia[] {
   return files.map((file) => {
     const id = publicMediaId(file.fileId);
-    return file.kind === "image"
-      ? { id, type: "image", src: mediaPath(vehicleId, id, mediaRevision(file.contentVersion)) }
-      : { id, type: "video" };
+    return { id, type: "image", src: mediaPath(vehicleId, id, mediaRevision(file.contentVersion)) };
   });
 }
 

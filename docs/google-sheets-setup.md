@@ -111,24 +111,30 @@ Enabled only with `MEDIA_SOURCE=google-drive`. Same service account, one more re
 | Additional API | **Google Drive API** enabled in the same Google Cloud project |
 | IAM roles | Still none |
 
-Calls: per vehicle `files.get` (folder type) + `files.list` (direct children, fields `id,name,
-mimeType,size,createdTime,md5Checksum,version` only — never owners, permissions or image
-metadata/GPS), only when a VDP (or the media route) needs that vehicle — `/` and `/cars`
+Calls: per vehicle `files.get` (folder type) + one `files.list` for child **folders** named
+`Website` (the vehicle folder's files are never listed) + `files.list` of that one `Website`
+folder's direct children (fields `id,name,mimeType,size,createdTime,md5Checksum,version` only —
+never owners, permissions or image metadata/GPS), only when a VDP (or the media route) needs
+that vehicle — `/` and `/cars`
 make no Drive calls; folder listings cached 5 minutes (tag `media`). Per image request (only
 on a CDN/image cache miss): `files.get?alt=media`, re-encoded server-side without metadata;
 responses cached 20 minutes (≈ 1 hour worst case across layers).
 
 Steps:
 
-1. APIs & Services → Library → enable **Google Drive API**.
-2. Drive → folder `AM Motors — Машины` (or each vehicle folder) → **Share** → service-account
-   email → **Viewer**, without notification. Note: files uploaded by other people into a shared
+1. APIs & Services → Library → enable **Google Drive API** — done by the user 2026-10-01.
+2. Drive → folder `AM Motors — Машины` → **Share** → service-account email → **Viewer**,
+   without notification — done by the user 2026-10-01 (covers all current and future vehicle
+   folders and their `Website` subfolders). Files uploaded by other people into the shared
    folder are visible to the service account through the folder share.
-3. Set `MEDIA_SOURCE=google-drive` locally (`.env.local`) and run `npm run smoke:media`
-   (read-only; prints per-vehicle state and counts only, and sanitizes one image in memory).
-4. Business decision 2026-09-30: there are no website-ready photos yet. Keep
-   `MEDIA_SOURCE` unset everywhere except a local smoke test until final website photos exist
-   and open question 12 is decided.
+3. Publishing (Phase 8, `docs/business-rules.md` → "Website photos"): staff create a folder
+   named exactly `Website` inside a vehicle folder and place approved images `01.jpg` (cover),
+   `02.jpg`, … in it. Nothing else in the vehicle folder is ever read as media.
+4. Verification without a JSON key: the keyless `vercel-oidc` path is verified on a Vercel
+   Preview (Phase 8 used a temporary, preview-only read-only diagnostic that was removed again).
+   `npm run smoke:media` exists for a local run but needs `service-account-key` credentials;
+   do not create a key just for it.
+5. `MEDIA_SOURCE` stays unset in Preview and Production until the user explicitly enables it.
 
 Media failures never make the inventory unavailable: missing/invalid link, inaccessible folder,
 empty folder, only unsupported files or a Drive error only empty that one vehicle's media

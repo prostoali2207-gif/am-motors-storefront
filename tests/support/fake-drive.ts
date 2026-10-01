@@ -42,6 +42,19 @@ export class FakeDrive implements DriveReader {
     return [...folder.children];
   }
 
+  /**
+   * Emulates the Drive query `mimeType = folder and name = '<name>'`. Matches names
+   * case-insensitively on purpose, so tests prove the adapter itself compares names exactly.
+   */
+  async listChildFolders(parentId: string, name: string): Promise<DriveChild[]> {
+    this.calls.push(`folders:${parentId}`);
+    const folder = this.folders[parentId];
+    if (!folder || folder.kind !== "folder") throw new DriveSourceError("http-404", false);
+    return folder.children.filter(
+      (child) => child.mimeType === DRIVE_FOLDER_MIME && child.name.toLowerCase() === name.toLowerCase(),
+    );
+  }
+
   async download(fileId: string, maxBytes: number): Promise<Uint8Array> {
     this.downloads.push(fileId);
     const bytes = this.files[fileId];
@@ -65,6 +78,11 @@ export function fakeChild(overrides: Partial<DriveChild> & Pick<DriveChild, "mim
     version: "1",
     ...overrides,
   };
+}
+
+/** A synthetic child folder entry (e.g. the vehicle's `Website` folder). */
+export function fakeFolderChild(id: string, name = "Website"): DriveChild {
+  return fakeChild({ mimeType: DRIVE_FOLDER_MIME, id, name, size: null, md5Checksum: null });
 }
 
 export const TEST_FOLDER_LINK = (folderId: string) => `https://drive.google.com/drive/folders/${folderId}?usp=sharing`;

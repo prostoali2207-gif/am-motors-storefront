@@ -45,6 +45,31 @@ describe("createDriveReader: metadata requests", () => {
     expect(list.searchParams.get("includeItemsFromAllDrives")).toBe("true");
   });
 
+  it("queries only child FOLDERS with the given name — parent files are never requested", async () => {
+    const { calls, fetchImpl } = fakeFetch(() =>
+      json({ files: [{ id: "TESTFOLDER_WEB", name: "Website", mimeType: "application/vnd.google-apps.folder" }] }),
+    );
+    const reader = createDriveReader({ getAccessToken: token, fetchImpl });
+    const folders = await reader.listChildFolders("TESTFOLDER_0001", "Website");
+    expect(folders.map((f) => f.id)).toEqual(["TESTFOLDER_WEB"]);
+    expect(calls).toHaveLength(1);
+    expect(calls[0].url.searchParams.get("q")).toBe(
+      "'TESTFOLDER_0001' in parents and trashed = false and " +
+        "mimeType = 'application/vnd.google-apps.folder' and name = 'Website'",
+    );
+  });
+
+  it("refuses unsafe IDs or names in a query without calling Drive", async () => {
+    const { calls, fetchImpl } = fakeFetch(() => json({ files: [] }));
+    const reader = createDriveReader({ getAccessToken: token, fetchImpl });
+    await expect(reader.listChildren("x' or name != '")).rejects.toMatchObject({ code: "invalid-id", transient: false });
+    await expect(reader.listChildFolders("x' or '1'='1", "Website")).rejects.toMatchObject({ code: "invalid-id" });
+    await expect(reader.listChildFolders("TESTFOLDER_0001", "W' or name != '")).rejects.toMatchObject({
+      code: "invalid-query",
+    });
+    expect(calls).toEqual([]);
+  });
+
   it("follows pagination", async () => {
     let page = 0;
     const { fetchImpl } = fakeFetch(() => {

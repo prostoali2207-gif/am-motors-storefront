@@ -1,18 +1,16 @@
 import type { DriveChild } from "./drive-client";
 
 /**
- * TECHNICAL FALLBACK ORDER — pending business review (docs/business-rules.md, open question 12).
+ * PHOTO ORDER — confirmed 2026-10-01 (docs/business-rules.md → "Website photos"): staff name
+ * the files in `Website/` `01.*`, `02.*`, `03.*`…; `01.*` is the cover. Applied to `Website/`
+ * images only, deterministically, without reading image content or guessing intent:
  *
- * The business has not defined cover selection or photo order. Until it does, media is sorted
- * deterministically and neutrally, without reading image content or guessing intent:
- *
- *   1. file name, natural order ("2" before "10"), code-point based (no locale dependence);
+ *   1. file name, natural order ("2" before "10", "01" before "02"), code-point based (no
+ *      locale dependence) — numbered files sort before lettered ones;
  *   2. Drive `createdTime` (upload time), earliest first;
  *   3. Drive file ID — final tie-breaker, because names are NOT unique.
  *
- * Why name first: it is the only lever the business already controls without new tooling
- * (e.g. prefixing files `01_`, `02_`). Nothing here designates a cover: the first item is only
- * first in this order. Names are never interpreted (no "hero", "cover" or "ad" keyword logic).
+ * Names are never interpreted beyond ordering (no "hero", "cover" or "ad" keyword logic).
  */
 export function compareTechnicalFallback(a: DriveChild, b: DriveChild): number {
   return (
