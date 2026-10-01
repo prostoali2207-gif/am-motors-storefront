@@ -38,6 +38,9 @@ Data and media (read-only check of the live Sheet and Drive, 2026-10-01)
   `01.jpg` (cover), 14 `Website/` folders are empty, 2 sold cars have none. Root-folder files are
   never listed (tested; a planted root image never appears in output). Cover order is
   deterministic (natural file name → upload time → file ID).
+- The two cover defects found in the Phase 9 content check (a partly readable plate on one cover,
+  a background car's plate on another) were fixed in the authoritative Drive by the user
+  (reported 2026-10-01: plates fully blurred, no characters readable).
 
 SEO and routing
 - Self-referencing canonical + `hreflang` en / ar / ru / `x-default` on home, `/cars` and VDPs,
@@ -70,9 +73,7 @@ Quality
    verified locally only; confirm on the PR's Preview that pages render, covers load and the
    browser console shows no CSP errors (expected exception: the Vercel preview toolbar script,
    which is intentionally not allowed).
-6. **Website photo review** (open question 12 c): name the reviewer; one approved cover's plate
-   blur leaves the lower edge of the characters visible and one shows part of a background car's
-   plate — re-check or re-blur before launch.
+6. **Name the Website photo reviewer** (open question 12 c).
 7. **Production switches at launch, by the user only**: Production env vars (inventory and, if
    wanted, `MEDIA_SOURCE`), removing the production guard, domain. Not done in Phase 9.
 
