@@ -66,8 +66,12 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   come only from the single `Website/` child folder of each vehicle folder (exact name; missing /
   duplicate / empty → "Photos unavailable"; the vehicle root is never listed); JPEG/PNG/WebP
   only; `01.*` = cover; videos off. Rule: `docs/business-rules.md` → "Website photos". Drive API
-  enabled and `AM Motors — Машины` shared with the service account (2026-10-01). `MEDIA_SOURCE`
-  still unset in Preview and Production.
+  enabled and `AM Motors — Машины` shared with the service account (2026-10-01). Live keyless
+  read verified on Vercel Preview `a7db21f` (2026-10-01) with a temporary preview-only read-only
+  diagnostic (removed before review): `vercel-oidc` works, Drive API works, all 20 vehicle
+  folders accessible via the inherited folder share, every vehicle `no-website-folder` (no
+  `Website/` folders exist yet), no `inaccessible`/`source-error`. `MEDIA_SOURCE` still unset in
+  Preview and Production; no `Website/` folders created.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.

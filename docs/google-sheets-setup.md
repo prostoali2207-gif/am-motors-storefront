@@ -130,8 +130,10 @@ Steps:
 3. Publishing (Phase 8, `docs/business-rules.md` → "Website photos"): staff create a folder
    named exactly `Website` inside a vehicle folder and place approved images `01.jpg` (cover),
    `02.jpg`, … in it. Nothing else in the vehicle folder is ever read as media.
-4. Verification without a JSON key: the keyless `vercel-oidc` path is verified on a Vercel
-   Preview (Phase 8 used a temporary, preview-only read-only diagnostic that was removed again).
+4. Verification without a JSON key — **passed 2026-10-01** on Vercel Preview `a7db21f` with a
+   temporary, preview-only read-only diagnostic (removed before review): auth `vercel-oidc`,
+   `MEDIA_SOURCE` unset; all 20 vehicle folders accessible to the service account; every
+   vehicle `no-website-folder`; no `inaccessible` or `source-error`; no image to sample yet.
    `npm run smoke:media` exists for a local run but needs `service-account-key` credentials;
    do not create a key just for it.
 5. `MEDIA_SOURCE` stays unset in Preview and Production until the user explicitly enables it.

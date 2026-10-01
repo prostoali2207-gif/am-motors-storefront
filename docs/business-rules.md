@@ -134,6 +134,9 @@ Recorded 2026-09-30. Technical proposals, not business facts; confirm or change 
   8. **Videos remain off** (not published, not rendered).
 - Removal: delete or move an image out of `Website/`. Pages stop referencing it within ~5 min
   (folder listing cache); a cached copy can be served for up to ≈ 1 hour (no purge tooling in V1).
+- Live check 2026-10-01 (Vercel Preview, keyless OIDC, read-only): all 20 vehicle folders are
+  readable by the service account; none has a `Website` folder yet → every VDP would show
+  "Photos unavailable" even with media enabled.
 - `MEDIA_SOURCE` stays **off** in Preview and Production until explicitly enabled by the user.
   Listing cards remain photo-free (see `docs/ux-benchmark.md` → mixed-stock rule).
 

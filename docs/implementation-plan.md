@@ -111,6 +111,7 @@ Skills: `protecting-commercial-truth`, `building-nextjs-storefront`, `verifying-
 - Adapter reads only the single `Website/` child folder of each vehicle folder (exact name,
   fail closed on missing/duplicate/empty), images only (JPEG/PNG/WebP), `01.*` = cover; videos
   off; parent-folder files never listed.
-- Live keyless (Vercel OIDC) Drive access verified on a Preview with a temporary, preview-only
-  read-only diagnostic that is removed before review.
+- Live keyless (Vercel OIDC) Drive access verified 2026-10-01 on a Preview with a temporary,
+  preview-only read-only diagnostic, removed before review: 20/20 folders accessible, all
+  `no-website-folder`.
 - `MEDIA_SOURCE` stays off in Preview/Production until the user enables it.
