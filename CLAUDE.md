@@ -86,6 +86,11 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   nonce Content-Security-Policy with `'strict-dynamic'` on pages (`src/proxy.ts`); first-party
   sources only, Preview gets the production policy. Launch checklist (READY / BLOCKERS):
   `docs/production-readiness.md`. Production still forbidden and not configured.
+- VDP photo gallery (PR open, not merged): `src/components/vehicle-gallery.tsx` (server) +
+  `photo-viewer.tsx` (client island): one photo viewport, native swipe (scroll snap), Previous /
+  Next, `1 / N` counter, thumbnail rail, full-screen `<dialog>` (Escape, arrows, focus return,
+  scroll lock); one photo → no controls; no photos → "Photos unavailable". Lead/rest split
+  removed. Evidence: `docs/ux-benchmark.md` → "VDP photo gallery (2026-10-04)".
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.

@@ -471,8 +471,9 @@ main {
 
 /*
  * Mobile: one column. The two layout wrappers dissolve so their children can be ordered:
- * lead photo → title block → actions → remaining photos / "Photos unavailable" → specification.
- * Keyboard order is unchanged by this (the photos contain no focusable elements).
+ * photo viewer → title block → actions → "Photos unavailable" (no photos) → specification.
+ * Keyboard order still matches what is seen: the only item moved out of DOM order, the
+ * "Photos unavailable" line, has no focusable content.
  */
 .vehicle {
   display: flex;
@@ -557,27 +558,229 @@ main {
   padding-bottom: var(--space-6);
 }
 
-/* Synthetic/approved media state: simple sequence, provisional ratio, nothing cropped. */
-.gallery {
-  list-style: none;
-  padding: 0;
-  display: grid;
-  gap: var(--space-2);
+/*
+ * VDP photo viewer (photo-viewer.tsx). Photography first: one viewport in the provisional
+ * --media-ratio frame, `contain` (nothing cropped). Controls are small, flat and neutral (canvas
+ * squares, no blur, gradient or animation) so they recede in front of the photo. Swipe is native
+ * horizontal scroll snapping; vertical pans stay with the page.
+ */
+.photo-viewer {
   margin-inline: calc(-1 * var(--gutter));
 }
 
-.gallery-rest {
-  padding-bottom: var(--space-8);
+.photo-stage {
+  position: relative;
 }
 
-.gallery-frame {
+.photo-track {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  overscroll-behavior-x: contain;
+  scrollbar-width: none;
+}
+
+.photo-track::-webkit-scrollbar {
+  display: none;
+}
+
+.photo-slide {
   position: relative;
+  flex: 0 0 100%;
   aspect-ratio: var(--media-ratio);
   background: var(--surface-media);
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
-.gallery-frame img {
+.photo-open {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+}
+
+/* Inside the scroller an outside ring would be clipped. */
+.photo-open:focus-visible {
+  outline-offset: -4px;
+}
+
+.photo-slide img {
   object-fit: contain;
+}
+
+/* 44 × 44 flat squares on the photo's inline edges. */
+.photo-step {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  color: var(--ink);
+  background: var(--canvas);
+  border: 1px solid var(--rule);
+  border-radius: 0;
+  cursor: pointer;
+}
+
+.photo-step-previous,
+.photo-step-next {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+}
+
+.photo-step-previous {
+  inset-inline-start: var(--space-2);
+}
+
+.photo-step-next {
+  inset-inline-end: var(--space-2);
+}
+
+/* The chevron points to inline-end; the previous control and RTL mirror it. */
+.photo-step-previous .photo-icon {
+  scale: -1 1;
+}
+
+html[dir="rtl"] .photo-step-next .photo-icon {
+  scale: -1 1;
+}
+
+html[dir="rtl"] .photo-step-previous .photo-icon {
+  scale: 1 1;
+}
+
+.photo-counter {
+  position: absolute;
+  inset-block-end: var(--space-2);
+  inset-inline-end: var(--space-2);
+  padding: 0 var(--space-2);
+  font-size: 0.8125rem;
+  line-height: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  background: var(--canvas);
+  pointer-events: none;
+}
+
+/* Thumbnail rail: scrolls inside itself, never widens the page. */
+.photo-thumbs {
+  display: flex;
+  gap: var(--space-2);
+  margin: 0;
+  padding: var(--space-2) var(--gutter);
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.photo-thumbs::-webkit-scrollbar {
+  display: none;
+}
+
+.photo-thumb {
+  position: relative;
+  display: block;
+  width: 4.5rem;
+  height: 3rem;
+  padding: 0;
+  border: 0;
+  background: var(--surface-media);
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.photo-thumb img {
+  object-fit: cover;
+}
+
+/* Selected: full strength and a 2 px ink frame drawn inside the button. */
+.photo-thumb[aria-current="true"] {
+  opacity: 1;
+}
+
+.photo-thumb[aria-current="true"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--ink);
+}
+
+.photo-thumb:hover {
+  opacity: 1;
+}
+
+/* Full-screen viewer: modal <dialog> in the top layer (above the sticky action bar). */
+.lightbox {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: var(--canvas);
+  background: var(--ink);
+  overflow: hidden;
+}
+
+.lightbox[open] {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ink focus rings would vanish on the dark viewer. */
+.lightbox :focus-visible {
+  outline-color: var(--canvas);
+}
+
+.lightbox::backdrop {
+  background: var(--ink);
+}
+
+.lightbox-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: max(var(--space-2), env(safe-area-inset-top)) max(var(--gutter), env(safe-area-inset-right))
+    var(--space-2) max(var(--gutter), env(safe-area-inset-left));
+}
+
+.lightbox-bar .photo-counter {
+  position: static;
+}
+
+.lightbox-stage {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.lightbox .photo-track {
+  height: 100%;
+}
+
+.lightbox .photo-track:focus-visible {
+  outline-offset: -4px;
+}
+
+.lightbox .photo-slide {
+  aspect-ratio: auto;
+  height: 100%;
+  background: transparent;
 }
 
 /* ---- Conversion actions (Phase 5) ---- */
@@ -736,8 +939,12 @@ body:has(.sticky-actions) {
     column-gap: var(--space-6);
   }
 
-  .gallery {
+  .photo-viewer {
     margin-inline: 0;
+  }
+
+  .photo-thumbs {
+    padding-inline: 0;
   }
 }
 
@@ -853,8 +1060,7 @@ body:has(.sticky-actions) {
     line-height: 1.5rem;
   }
 
-
-  .gallery {
+  .photo-viewer {
     margin-top: var(--space-4);
   }
 
