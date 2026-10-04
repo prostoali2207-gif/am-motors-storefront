@@ -60,8 +60,15 @@ export interface Messages {
 
   readonly photosHeading: string;
   readonly photosUnavailable: string;
-  readonly morePhotos: string;
   readonly photoAlt: (title: string, position: number, count: number) => string;
+  /** Gallery controls (accessible names). */
+  readonly previousPhoto: string;
+  readonly nextPhoto: string;
+  readonly openPhotosFullscreen: string;
+  readonly closePhotos: string;
+  readonly photoThumbnails: string;
+  /** Spoken counter and thumbnail name; the visible counter is the figures "1 / N". */
+  readonly photoPosition: (position: number, count: number) => string;
 
   readonly actionsHeading: string;
   readonly chatOnWhatsApp: string;
@@ -128,8 +135,13 @@ const en: Messages = {
 
   photosHeading: "Photos",
   photosUnavailable: "Photos unavailable",
-  morePhotos: "More photos",
   photoAlt: (title, position, count) => `${title}, photo ${position} of ${count}`,
+  previousPhoto: "Previous photo",
+  nextPhoto: "Next photo",
+  openPhotosFullscreen: "Open photos full screen",
+  closePhotos: "Close photos",
+  photoThumbnails: "Choose a photo",
+  photoPosition: (position, count) => `Photo ${position} of ${count}`,
 
   actionsHeading: "Ask about this car",
   chatOnWhatsApp: "Chat on WhatsApp",
@@ -198,8 +210,13 @@ const ar: Messages = {
 
   photosHeading: "الصور",
   photosUnavailable: "الصور غير متوفرة",
-  morePhotos: "المزيد من الصور",
   photoAlt: (title, position, count) => `${title}، الصورة ${position} من ${count}`,
+  previousPhoto: "الصورة السابقة",
+  nextPhoto: "الصورة التالية",
+  openPhotosFullscreen: "عرض الصور بملء الشاشة",
+  closePhotos: "إغلاق الصور",
+  photoThumbnails: "اختر صورة",
+  photoPosition: (position, count) => `الصورة ${position} من ${count}`,
 
   actionsHeading: "استفسر عن هذه السيارة",
   chatOnWhatsApp: "تواصل عبر واتساب",
@@ -265,8 +282,13 @@ const ru: Messages = {
 
   photosHeading: "Фото",
   photosUnavailable: "Фото недоступны",
-  morePhotos: "Ещё фото",
   photoAlt: (title, position, count) => `${title}, фото ${position} из ${count}`,
+  previousPhoto: "Предыдущее фото",
+  nextPhoto: "Следующее фото",
+  openPhotosFullscreen: "Открыть фото на весь экран",
+  closePhotos: "Закрыть фото",
+  photoThumbnails: "Выберите фото",
+  photoPosition: (position, count) => `Фото ${position} из ${count}`,
 
   actionsHeading: "Спросить об этом автомобиле",
   chatOnWhatsApp: "Написать в WhatsApp",

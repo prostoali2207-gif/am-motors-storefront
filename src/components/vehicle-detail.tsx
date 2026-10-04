@@ -38,9 +38,10 @@ function specification(vehicle: Vehicle, locale: Locale): Fact[] {
  * VDP body. Available vehicles get the conversion actions (WhatsApp, request a viewing / test
  * drive); sold vehicles get none.
  *
- * Layout: `vehicle-main` (photos, title block) and `vehicle-panel` (actions, specification).
+ * Layout: `vehicle-main` (photo viewer, title block) and `vehicle-panel` (actions, specification).
  * Desktop: two columns, the panel on the right. Mobile: both wrappers dissolve into one column
- * ordered title block → actions → photos line → specification (globals.css).
+ * ordered photo viewer → title block → actions → specification (globals.css). With photos, the
+ * single viewer leads the page; without, the "Photos unavailable" line follows the actions.
  *
  * `serverOrigin` is the request origin for the VDP URL in WhatsApp messages (null if unknown).
  * `locale` selects the interface language; RTL mirroring comes from `dir` on <html> and logical CSS.
@@ -71,7 +72,7 @@ export function VehicleDetail({
       </p>
 
       <div className="vehicle-main">
-        {hasPhotos ? <VehicleGallery media={vehicle.media} title={title} part="lead" locale={locale} /> : null}
+        {hasPhotos ? <VehicleGallery media={vehicle.media} title={title} locale={locale} /> : null}
 
         <header className="vehicle-heading">
           <p className="label vehicle-eyebrow" aria-hidden="true">
@@ -100,11 +101,7 @@ export function VehicleDetail({
           <FactLine facts={keyFacts(vehicle, locale)} className="vehicle-facts" />
         </header>
 
-        {hasPhotos ? (
-          <VehicleGallery media={vehicle.media} title={title} part="rest" locale={locale} />
-        ) : (
-          <VehicleGallery media={vehicle.media} title={title} locale={locale} />
-        )}
+        {hasPhotos ? null : <VehicleGallery media={vehicle.media} title={title} locale={locale} />}
       </div>
 
       <div className="vehicle-panel">

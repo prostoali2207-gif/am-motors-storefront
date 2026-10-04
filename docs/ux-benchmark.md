@@ -491,7 +491,9 @@ card eager/high priority, the rest lazy. No approved photo → the text-only car
 the first approved image in the provisional-ratio frame above the title block (eager, high
 fetch priority) and the remaining images as a simple sequence after the summary facts (lazy),
 so the title and price never drop below a stack of photos. **No lightbox, full-screen viewer or swipe system in Phase 4**;
-gallery interaction is designed and tested when real approved photos exist.
+gallery interaction is designed and tested when real approved photos exist. **Superseded
+2026-10-04** by the VDP photo gallery (see "VDP photo gallery (2026-10-04)"): one viewport, no
+photos after the summary.
 
 **Phase 5 insertion points (spec only — no reserved empty space in Phase 4 UI):**
 - In-page action group goes directly after the fact line (mobile) / above the specification
@@ -509,9 +511,9 @@ Container max 1280 px, side margins ≥ 48 px, 12 columns, 24 px gaps.
   3-column card grid (≈ 411 px each), column gap 24, row gap 48; first two rows above the fold.
 - **VDP, no photos:** back link; **cols 1–7:** eyebrow, H1 56/58, price 40/44 tabular, fact line,
   "Photos unavailable" line; **cols 8–12:** "Specification" ruled list.
-- **VDP with media (synthetic):** first image in cols 1–7 above the title block, remaining
-  images after the summary in the same column; the specification stays in cols 8–12. A sticky gallery/panel layout is deferred with the gallery
-  interaction work.
+- **VDP with media:** one photo viewport + thumbnail rail in cols 1–7 above the title block
+  (2026-10-04, see "VDP photo gallery"); the specification stays in cols 8–12. A sticky
+  gallery/panel layout is still not adopted.
 - Sold VDP: Sold chip in place of price; no actions.
 
 ### No-photo vs future-photo behaviour
@@ -596,6 +598,56 @@ transfer" table (no floating chat bubble, no "Book"/"Reserve", no stacked bars).
   Not on sold or not-found VDPs.
 - Links open WhatsApp in a new browsing context (`target=_blank`, `noopener noreferrer`).
 
+## VDP photo gallery (2026-10-04)
+
+Question: with real approved `Website/` photos arriving (several per car), how should the VDP
+show them without a long vertical stack, and how do strong UAE car sites let people move
+between photos on mobile and desktop?
+
+### Evidence
+
+| Reference | Page | Viewport | Date | Mechanic | Status |
+| - | - | - | - | - | - |
+| DubiCars | Listing card | m | 2026-09-30 | Photo with a visible counter "1 / 19" and dots | Observed (this file, above) |
+| DubiCars | VDP | m+d | 2026-10-04 | Cover image + thumbnails, several angles of the car | Reported by the user 2026-10-04 |
+| DubiCars | Dealer listings / VDP | m | 2026-10-04 | Explicit counters such as "1 / 16", "1 / 17" | Reported by the user 2026-10-04 |
+| DubiCars | VDP | — | 2026-10-04 | Server HTML of a VDP contains a `thumbnails` gallery element | Observed (static HTML only) |
+| CARS24 UAE | VDP | d | 2026-09-30 | Gallery left + thumbnails, right sticky panel | Observed (this file, above) |
+| CARS24 UAE | VDP | m+d | 2026-10-04 | Next.js app; photos grouped (Exterior / Interior, …) | Reported by the user 2026-10-04 |
+| CarSwitch | VDP | m | 2026-09-30 | Gallery with a photo counter ("20") at the top of the VDP | Observed (this file, above) |
+| Kavak UAE | VDP | m | 2026-09-30 | Gallery "1 / 29" first, then title and price | Observed (this file, above) |
+
+Access note (2026-10-04): this session could not re-open the reference VDPs in a browser
+(headless Chromium rejected the egress proxy certificate; TLS verification was not disabled).
+Their galleries are client-rendered, so static HTML shows no counters or groups. The rows
+marked "Reported by the user" are the user's own observations of that date, not re-verified
+here; they agree with the 2026-09-30 observations above.
+
+### Conclusions (applied)
+
+1. **One viewport, not a stack.** Every reference opens the VDP on a single photo area with a
+   counter; none lists all photos vertically. Gallery → title/price/facts → actions
+   (vdp-anatomy order; DubiCars, Kavak, CarSwitch).
+2. **Counter "1 / N"** on the photo (DubiCars, Kavak). Figures stay left-to-right in Arabic.
+3. **Thumbnail rail under the photo** (DubiCars, CARS24 desktop) — on mobile too, as a
+   horizontal rail that scrolls inside itself, so a 10–20-photo set stays reachable without a
+   grid. Selected thumbnail: full strength + 2 px ink frame; others dimmed.
+4. **Swipe** is native horizontal scroll snapping (vertical page scrolling is untouched);
+   Previous / Next as 44 × 44 flat canvas squares at the photo's inline edges; they wrap at the
+   ends. Arrow keys follow the screen (mirrored in RTL).
+5. **Full screen on tap** (modal `<dialog>`: Close, Previous / Next, counter, swipe, Escape,
+   arrows; page behind does not scroll; focus returns to the photo). Dark ink surround so the
+   photo, not the UI, carries the screen.
+6. **Not transferred:** grouping by Exterior / Interior (CARS24) — our `Website/` convention has
+   no category and file names are not published, so groups would be invented; marketing slides
+   inside the gallery (Elite, see above); video tabs (videos stay off); dots in addition to the
+   counter; autoplay; zoom animations.
+7. **One photo:** the photo and full screen only — no counter, arrows or rail. **No photos:**
+   the existing "Photos unavailable" line, unchanged.
+
+Hypotheses (not verified): real iOS Safari / Android Chrome swipe feel; behaviour with 20+
+real photos of mixed ratios; whether thumbnails should hide on very small stock sets.
+
 ## Phase 7 — multilingual benchmark (2026-09-30)
 
 Question: how do strong UAE car sites switch between English and Arabic, and what happens to
@@ -669,3 +721,4 @@ of Noto Kufi Arabic next to Geologica.
 | 2026-09-30 | Phase 4 implemented per this spec (PR for review) | Browser verification 390×844 / 1440×900 | Not merged; no deployment |
 | 2026-09-30 | Phase 5 conversion actions, sticky bar and general request (see "Phase 5") | Synthesis 3–5, confirmed business decisions | PR for review; no deployment |
 | 2026-09-30 | Phase 7 multilingual: EN (unprefixed) / AR (RTL, `/ar`) / RU (`/ru`), header text switcher, Noto Kufi Arabic companion | Phase 7 benchmark (DubiCars, Automall, Alba) | PR #8 draft; no production deployment |
+| 2026-10-04 | VDP photo gallery: one viewport, swipe, Previous / Next, counter, thumbnail rail, full-screen dialog; lead/rest photo split removed | DubiCars, CARS24, Kavak, CarSwitch (see "VDP photo gallery") | PR for review; no production deployment |

@@ -63,6 +63,27 @@ describe("VehicleDetail", () => {
     expect(container.querySelector("button, form, a[href^='tel:']")).toBeNull();
   });
 
+  it("with photos: gallery first, then title, price and actions; only gallery controls are buttons", () => {
+    const media = [1, 2].map((n) => ({
+      id: `TESTMEDIA000000000000${n}`,
+      type: "image" as const,
+      src: `/media/TEST-0001/TESTMEDIA000000000000${n}/TESTREV0000${n}`,
+    }));
+    const { container } = render(
+      <VehicleDetail locale="en" vehicle={{ ...syntheticAvailable, media }} serverOrigin="https://site.test" />,
+    );
+    const order = [...container.querySelectorAll(".photo-viewer, h1, .vehicle-price, .vehicle-actions")].map(
+      (el) => el.classList[0],
+    );
+    expect(order).toEqual(["photo-viewer", "vehicle-title", "vehicle-price", "vehicle-actions"]);
+    for (const button of container.querySelectorAll("button")) {
+      expect(button.closest(".photo-viewer")).not.toBeNull();
+    }
+    const zone = screen.getByRole("region", { name: "Ask about this car" });
+    expect(within(zone).getAllByRole("link")).toHaveLength(3);
+    expect(container.querySelector("form, a[href^='tel:']")).toBeNull();
+  });
+
   it("marks a sold vehicle as sold and offers no viewing or test-drive requests", () => {
     render(<VehicleDetail locale="en" vehicle={syntheticSold} />);
     expect(screen.getByText("Sold")).toBeDefined();

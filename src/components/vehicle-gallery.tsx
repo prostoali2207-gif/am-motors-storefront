@@ -1,92 +1,62 @@
-import Image from "next/image";
-
 import { vehicleImages, type VehicleMedia } from "@/domain/vehicle-media";
-import type { Locale } from "@/i18n/locales";
-import { messages, type Messages } from "@/i18n/messages";
+import { LOCALE_CONFIG, type Locale } from "@/i18n/locales";
+import { messages } from "@/i18n/messages";
+import { PhotoViewer, type ViewerPhoto } from "./photo-viewer";
 
 /**
- * VDP photos — deliberately simple until real approved website photos exist.
+ * VDP photos.
  *
  * - Images only (from the vehicle's `Website/` Drive folder); videos are never rendered.
- * - Order follows the confirmed filename rule; the first image (`01.*`) is the cover.
+ * - Order follows the confirmed filename rule; the first image (`01.*`) is the cover and the
+ *   photo shown first.
  * - No photos → one neutral "Photos unavailable" line. Never a stock, AI-generated or substitute
  *   image of a car, and no empty image box.
+ * - Photos → one interactive viewer (`PhotoViewer`): a single photo viewport, swipe / previous /
+ *   next, counter and thumbnail rail when there is more than one photo, full-screen view on tap.
+ *   Only same-origin `/media/…` paths and pre-built strings cross into the client island.
  * - Frames use the PROVISIONAL `--media-ratio` token (globals.css), not a confirmed photo
  *   standard; `object-fit: contain` so nothing is cropped while the framing convention is unknown.
- * - No lightbox, swipe or full-screen viewer yet: gallery interaction is designed and tested once
- *   approved photos exist.
- *
- * `part` lets the VDP keep its title and price near the top: the first image leads the page
- * ("lead"), the remaining ones follow the summary as a plain sequence ("rest").
  */
 export function VehicleGallery({
   media,
   title,
-  part = "all",
   locale,
 }: {
   media: readonly VehicleMedia[];
   title: string;
-  part?: "all" | "lead" | "rest";
   locale: Locale;
 }) {
   const t = messages(locale);
   const images = vehicleImages(media);
-  const start = part === "rest" ? 1 : 0;
-  const end = part === "lead" ? 1 : images.length;
-  const shown = images.slice(start, end);
-
-  if (part === "rest") {
-    return shown.length === 0 ? null : (
-      <ul className="gallery gallery-rest" aria-label={t.morePhotos}>
-        {shown.map((image, offset) => (
-          <Frame key={image.id} src={image.src} index={start + offset} count={images.length} title={title} t={t} />
-        ))}
-      </ul>
-    );
-  }
+  const count = images.length;
+  const photos: ViewerPhoto[] = images.map((image, index) => ({
+    id: image.id,
+    src: image.src,
+    alt: t.photoAlt(title, index + 1, count),
+    position: t.photoPosition(index + 1, count),
+  }));
 
   return (
     <section className="vehicle-photos" aria-labelledby="vehicle-photos-heading">
       <h2 id="vehicle-photos-heading" className="visually-hidden">
         {t.photosHeading}
       </h2>
-      {images.length === 0 ? (
+      {count === 0 ? (
         <p className="media-unavailable">{t.photosUnavailable}</p>
       ) : (
-        <ul className="gallery">
-          {shown.map((image, offset) => (
-            <Frame key={image.id} src={image.src} index={start + offset} count={images.length} title={title} t={t} />
-          ))}
-        </ul>
+        <PhotoViewer
+          photos={photos}
+          dir={LOCALE_CONFIG[locale].dir}
+          labels={{
+            heading: t.photosHeading,
+            previous: t.previousPhoto,
+            next: t.nextPhoto,
+            open: t.openPhotosFullscreen,
+            close: t.closePhotos,
+            thumbnails: t.photoThumbnails,
+          }}
+        />
       )}
     </section>
-  );
-}
-
-function Frame({
-  src,
-  index,
-  count,
-  title,
-  t,
-}: {
-  src: string;
-  index: number;
-  count: number;
-  title: string;
-  t: Messages;
-}) {
-  return (
-    <li className="gallery-frame">
-      <Image
-        src={src}
-        alt={t.photoAlt(title, index + 1, count)}
-        fill
-        sizes="(min-width: 64rem) 46rem, 100vw"
-        loading={index === 0 ? "eager" : "lazy"}
-        fetchPriority={index === 0 ? "high" : undefined}
-      />
-    </li>
   );
 }
