@@ -1,8 +1,31 @@
-# Production readiness (Phase 9)
+# Production readiness (Phase 9 → launch)
 
-Status on 2026-10-01. **Production is not deployed and must not be until the user explicitly
-approves the launch.** Production builds stay skipped (`vercel.json` + Vercel "Ignored Build
-Step"); no Production env vars and no domain are configured. Update this file when an item changes.
+Status on 2026-10-05 (launch PR). **Production is not deployed and must not be until the user
+explicitly approves the launch.** The launch PR removes the repository production guard
+(`vercel.json` `git.deploymentEnabled.main = false`); once it is merged, a push to `main` can
+build Production unless the Vercel project's "Ignored Build Step" still skips it. Starting the
+Production deployment (merging, changing the Ignored Build Step, promoting) is done by the user
+only. Update this file when an item changes.
+
+## Launch configuration (reported by the user, 2026-10-05)
+
+- **Production env vars are set in Vercel** (Production scope, server-side, never
+  `NEXT_PUBLIC_`), alongside the existing Preview-only ones.
+- **Google Workload Identity provider** (pool/provider `vercel`) attribute condition now allows
+  this Vercel project's `preview` **and** `production` environments (still only this owner and
+  project ID).
+- **`storefront-sheets-reader`** has a separate Workload Identity User principal per environment:
+  the `…:environment:preview` subject and the `…:environment:production` subject
+  (see `docs/google-sheets-setup.md` for the subject format). No JSON key.
+- **Domain:** launch temporarily on `am-motors-storefront.vercel.app`; no purchased domain yet.
+  Canonical/`hreflang` URLs are built from the visitor's origin, so nothing is hard-coded.
+- **PR #12 (VDP photo gallery) is merged** into `main`.
+- Repository production guard removed in this PR (`vercel.json` keeps only `$schema`). No
+  application code changed.
+
+Not verified from this environment: the Vercel and Google Cloud settings above (no access to
+the dashboards here); a live Production read. Verify on the first Production deployment:
+`/`, `/cars` and a VDP render real inventory, covers load, no CSP errors in the console.
 
 ## READY — verified
 
@@ -58,24 +81,27 @@ Quality
 
 ## BLOCKERS — need a user/business decision or a physical device
 
-1. **Final production domain** (open question 15). Needed for: the Vercel domain setup; making the
-   custom domain the only host that serves pages (redirect the production `*.vercel.app` alias to
-   it, otherwise canonical URLs self-reference two hosts); confirming HSTS on that domain (Vercel
-   sends it on `*.vercel.app`; `includeSubDomains`/`preload` must not be added before the domain
-   owner agrees); a sitemap, if wanted (needs absolute URLs).
+1. **Final production domain** (open question 15) — **deferred, not blocking the temporary
+   launch** on `am-motors-storefront.vercel.app`. When a domain is bought: Vercel domain setup;
+   make the custom domain the only host that serves pages (redirect the `*.vercel.app` alias to
+   it, otherwise canonical URLs self-reference two hosts); confirm HSTS on that domain
+   (`includeSubDomains`/`preload` only with the domain owner's agreement); a sitemap, if wanted
+   (needs absolute URLs).
 2. **Sold VDP indexing** (open question 9): sold VDPs are currently indexable, like available
    ones. Decide `index` vs `noindex` and how long they stay online.
 3. **Native-speaker review** of Arabic and Russian interface copy and WhatsApp templates (open
    question 19).
 4. **Real iOS Safari check** on the Preview (not available in this environment; Android Chrome
    was checked by the user).
-5. **Real-data Preview pass after this PR** (Vercel Authentication): the Phase 9 headers/CSP were
-   verified locally only; confirm on the PR's Preview that pages render, covers load and the
-   browser console shows no CSP errors (expected exception: the Vercel preview toolbar script,
-   which is intentionally not allowed).
+5. **Real-data Preview pass of the Phase 9 headers/CSP and the PR #12 gallery**: verified
+   locally only in this environment; confirm on a Preview or the first Production deployment that
+   pages render, covers and galleries load and the console shows no CSP errors (expected
+   exception on Previews: the Vercel toolbar script, intentionally not allowed).
 6. **Name the Website photo reviewer** (open question 12 c).
-7. **Production switches at launch, by the user only**: Production env vars (inventory and, if
-   wanted, `MEDIA_SOURCE`), removing the production guard, domain. Not done in Phase 9.
+7. **Production switches at launch** — env vars and Google Workload Identity done by the user
+   (above); repository guard removed by the launch PR. Remaining, **by the user only**: merge the
+   launch PR, allow Production builds in the Vercel project ("Ignored Build Step"), start the
+   Production deployment. Confirm whether `MEDIA_SOURCE=google-drive` is set in Production.
 
 ## Not blocking launch (decide later)
 
