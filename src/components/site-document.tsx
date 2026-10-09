@@ -7,6 +7,7 @@ import { AttributionCapture } from "./attribution-capture";
 import { LanguageSwitcher } from "./language-switcher";
 
 import "@/app/globals.css";
+import "@/app/night-shift.css";
 
 /**
  * The document shared by the three per-language root layouts: `<html lang dir>`, header,
@@ -36,7 +37,7 @@ export function SiteDocument({
             <nav className="site-nav-main" aria-label={t.mainNavLabel}>
               {/* Provisional text wordmark until brand assets are confirmed (open question 14). */}
               <Link className="wordmark" href={localizedPath(locale, { kind: "home" })} lang="en" dir="ltr">
-                AM Motors
+                <span>AM</span><i className="ns-wordmark-bar" aria-hidden="true" /><span>MOTORS</span>
               </Link>
               <Link className="nav-link" href={localizedPath(locale, { kind: "cars" })}>
                 {t.navCars}
@@ -45,7 +46,7 @@ export function SiteDocument({
             <LanguageSwitcher locale={locale} />
           </div>
         </header>
-        <main id="main" className="shell">
+        <main id="main" className="shell ns-main">
           {children}
         </main>
         <footer className="site-footer">

@@ -1,0 +1,245 @@
+/* AM Motors / Night Shift. Dark automotive storefront, real inventory/media only. */
+:root {
+  color-scheme: dark;
+  --ns-bg: #111518;
+  --ns-pane: #192025;
+  --ns-raised: #202a2f;
+  --ns-rule: #354047;
+  --ns-type: #f5f4ed;
+  --ns-secondary: #a6b0b5;
+  --ns-dim: #87949a;
+  --ns-lime: #e6f05c;
+  --ns-gutter: clamp(20px, 3.75vw, 56px);
+  --canvas: var(--ns-bg);
+  --surface-media: var(--ns-pane);
+  --ink: var(--ns-type);
+  --muted: var(--ns-secondary);
+  --rule: var(--ns-rule);
+  --interactive: var(--ns-lime);
+  --tracking-title: -0.055em;
+  --tracking-label: 0.08em;
+}
+html { background: var(--ns-bg); }
+body { background: var(--ns-bg); color: var(--ns-type); line-height: 1.5; }
+a, button { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 3px solid var(--ns-lime); outline-offset: 3px; }
+main.ns-main.shell { max-width: none; width: 100%; padding: 0 0 52px; }
+.ns-main :where(.figure, .ns-row-price, .ns-feature-price, .ns-stock-count) { font-variant-numeric: tabular-nums; }
+
+/* Brand */
+.site-header { background: var(--ns-bg); border-bottom: 1px solid var(--ns-rule); }
+.site-header .site-nav.shell { max-width: none; min-height: 76px; padding-inline: var(--ns-gutter); gap: 16px; }
+.site-nav-main { gap: 20px; justify-content: space-between; }
+.site-header .wordmark {
+  display: inline-flex; gap: 6px; align-items: center;
+  font-size: clamp(20px, 2vw, 28px); line-height: 1;
+  font-weight: 900; letter-spacing: -0.075em; text-transform: none;
+}
+.ns-wordmark-bar { flex: 0 0 16px; width: 16px; height: 4px; background: var(--ns-lime); transform: skewX(-24deg); }
+.site-nav .nav-link { font-size: 11px; font-weight: 780; letter-spacing: .09em; text-transform: uppercase; }
+.site-nav .nav-link:hover, .language-switcher a:hover { color: var(--ns-lime); }
+.language-switcher { border-color: var(--ns-rule); }
+.language-switcher a[aria-current] { color: var(--ns-lime); text-decoration-color: var(--ns-lime); }
+.site-footer { border-color: var(--ns-rule); }
+.site-footer .shell { max-width: none; padding-inline: var(--ns-gutter); }
+.site-footer .wordmark { font-size: 13px; color: var(--ns-secondary); }
+
+/* Inventory statement */
+.ns-mast {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto;
+  gap: 30px; align-items: end;
+  padding: clamp(34px, 4.5vw, 66px) var(--ns-gutter) clamp(24px, 3.2vw, 44px);
+  border-bottom: 1px solid var(--ns-rule);
+}
+.ns-eyebrow { display: flex; align-items: center; gap: 14px; color: var(--ns-lime); font-size: 10px; line-height: 1.5; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.ns-eyebrow::before { content: ""; width: 24px; height: 2px; background: currentColor; }
+.ns-mast-heading { margin: 22px 0 0; font-size: clamp(64px, 9.2vw, 144px); line-height: .83; letter-spacing: -.092em; font-weight: 900; text-transform: uppercase; text-wrap: balance; }
+.ns-mast-heading em { font-style: normal; color: var(--ns-lime); }
+.ns-stock-count { display: flex; gap: 9px; align-items: end; margin-bottom: 5px; }
+.ns-stock-count strong { color: var(--ns-lime); font-size: clamp(56px, 7.8vw, 120px); line-height: .79; letter-spacing: -.085em; }
+.ns-stock-count span { color: var(--ns-secondary); font-size: 10px; line-height: 1.35; letter-spacing: .11em; text-transform: uppercase; font-weight: 750; padding-bottom: 4px; }
+
+/* Split catalog + feature */
+.ns-shop { display: grid; grid-template-columns: minmax(370px, 42%) minmax(0, 1fr); max-width: 1900px; margin: 0 auto; align-items: start; }
+.ns-index { min-width: 0; border-inline-end: 1px solid var(--ns-rule); padding-inline-start: var(--ns-gutter); }
+.ns-index-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 53px; padding-block: 15px 14px; padding-inline: 0 20px; border-bottom: 1px solid var(--ns-rule); color: var(--ns-secondary); }
+.ns-index-top h2 { margin: 0; font-size: 11px; line-height: 1.3; color: var(--ns-type); letter-spacing: .105em; text-transform: uppercase; font-weight: 800; }
+.ns-index-top span { font-size: 11px; letter-spacing: .065em; font-variant-numeric: tabular-nums; }
+.ns-filters { display: flex; align-items: center; gap: 8px; padding-block: 14px; padding-inline: 0 18px; overflow-x: auto; border-bottom: 1px solid var(--ns-rule); scrollbar-width: none; }
+.ns-filters::-webkit-scrollbar { display: none; }
+.ns-filters button { min-height: 44px; flex: 0 0 auto; border: 1px solid var(--ns-rule); border-radius: 0; background: transparent; color: var(--ns-secondary); padding: 8px 12px; font-size: 11px; line-height: 1; font-weight: 790; text-transform: uppercase; cursor: pointer; }
+.ns-filters button:hover { color: var(--ns-type); border-color: var(--ns-type); }
+.ns-filters button[aria-pressed="true"] { background: var(--ns-lime); color: var(--ns-bg); border-color: var(--ns-lime); }
+.ns-index-list { list-style: none; margin: 0; padding: 0; }
+.ns-index-list li { border-bottom: 1px solid var(--ns-rule); }
+.ns-index-entry { position: relative; display: flex; align-items: stretch; }
+.ns-index-list li.ns-selected { background: #1d2b2d; border-bottom-color: #526454; }
+.ns-select { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: start; gap: 13px; flex: 1; min-width: 0; min-height: 122px; border: 0; padding-block: 21px; padding-inline: 0 13px; background: transparent; color: var(--ns-type); text-align: start; cursor: pointer; }
+.ns-select:hover { background: rgba(255,255,255,.025); }
+.ns-row-number { color: var(--ns-dim); font-size: 10px; font-weight: 770; padding-top: 6px; font-variant-numeric: tabular-nums; }
+.ns-row-description { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ns-row-eyebrow { color: var(--ns-secondary); font-size: 10px; font-weight: 780; letter-spacing: .10em; text-transform: uppercase; }
+.ns-row-model { font-size: clamp(20px, 2.1vw, 30px); line-height: 1.12; font-weight: 820; letter-spacing: -.055em; overflow-wrap: anywhere; }
+.ns-selected .ns-row-model { color: var(--ns-lime); }
+.ns-row-facts { color: var(--ns-secondary); font-size: 11px; line-height: 1.55; white-space: normal; }
+.ns-row-price { font-size: clamp(13px, 1.1vw, 16px); line-height: 1.5; white-space: nowrap; font-weight: 790; }
+.ns-row-go { align-self: start; display: grid; place-items: center; width: 44px; height: 48px; margin-block-start: 10px; margin-inline-start: 9px; font-size: 16px; color: var(--ns-secondary); border: 1px solid transparent; text-decoration: none; }
+.ns-row-go:hover { color: var(--ns-lime); border-color: var(--ns-rule); }
+
+/* Selected vehicle */
+.ns-feature { position: sticky; top: 0; min-width: 0; background: var(--ns-pane); scroll-margin-top: 8px; }
+.ns-feature-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 53px; padding: 14px 24px; font-size: 11px; font-weight: 800; line-height: 1.25; letter-spacing: .12em; text-transform: uppercase; }
+.ns-feature-top strong { color: var(--ns-lime); }
+.ns-feature-image { position: relative; min-height: 340px; height: min(60vw, 600px); background: #202729; isolation: isolate; overflow: hidden; }
+.ns-feature-image img { object-fit: cover; object-position: center; }
+.ns-feature-gradient { position: absolute; inset: 40% 0 0; pointer-events: none; background: linear-gradient(0deg, rgba(6,12,16,.91) 0%, rgba(8,13,17,.5) 40%, transparent 100%); z-index: 1; }
+.ns-missing-photo { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ns-secondary); font-size: 14px; }
+.ns-feature-info { position: absolute; z-index: 2; inset-inline: clamp(20px, 3vw, 44px); bottom: clamp(18px, 3vw, 40px); color: white; pointer-events: none; }
+.ns-feature-info p { color: #dce3e5; text-transform: uppercase; font-size: 10px; line-height: 1.4; letter-spacing: .115em; font-weight: 800; }
+.ns-feature-info h2 { margin: 10px 0 7px; font-size: clamp(37px, 5.6vw, 78px); font-weight: 900; letter-spacing: -.077em; line-height: .95; overflow-wrap: anywhere; }
+.ns-feature-price { font-size: clamp(22px, 3vw, 37px); font-weight: 780; letter-spacing: -.04em; line-height: 1.1; }
+.ns-feature-actions { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 14px clamp(20px, 3vw, 38px); background: var(--ns-bg); border-bottom: 1px solid var(--ns-rule); }
+.ns-action-primary, .ns-action-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 52px; padding: 12px 20px; border: 1px solid var(--ns-rule); text-align: center; text-decoration: none; font-size: 12px; font-weight: 840; text-transform: uppercase; letter-spacing: .015em; }
+.ns-action-primary { background: var(--ns-lime); border-color: var(--ns-lime); color: var(--ns-bg); }
+.ns-action-primary:hover { background: #f2ff81; }
+.ns-action-secondary { color: var(--ns-type); border-color: #465158; background: transparent; }
+.ns-action-secondary:hover { border-color: var(--ns-lime); color: var(--ns-lime); }
+.ns-feature-bottom { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px clamp(20px, 3vw, 38px); background: var(--ns-bg); color: var(--ns-secondary); font-size: 11px; font-variant-numeric: tabular-nums; }
+.ns-arrows { display: flex; gap: 8px; }
+.ns-arrows button { width: 45px; height: 44px; border: 1px solid #465158; border-radius: 0; background: transparent; color: var(--ns-type); font-size: 20px; cursor: pointer; }
+.ns-arrows button:not(:disabled):hover { color: var(--ns-lime); border-color: var(--ns-lime); }
+.ns-arrows button:disabled { opacity: .4; cursor: default; }
+
+/* True missing/empty source states and general request */
+.ns-main > .page-header, .ns-main > .notice, .ns-main > .status-page { margin-inline: var(--ns-gutter); }
+.ns-main > .page-header { padding-block: 40px; }
+.ns-main > .page-header .page-title { color: var(--ns-type); }
+.ns-main .general-request { margin: 50px var(--ns-gutter) 0; padding: clamp(25px, 4vw, 45px); background: #1a2226; border: 1px solid var(--ns-rule); }
+.ns-main .general-request-title { font-size: clamp(24px, 3vw, 40px); font-weight: 850; letter-spacing: -.055em; }
+.ns-main .general-request-text { color: var(--ns-secondary); }
+.ns-main .general-request-action { display: inline-flex; min-width: min(100%, 260px); color: var(--ns-bg); background: var(--ns-lime); border-color: var(--ns-lime); font-weight: 750; text-transform: uppercase; }
+
+/* Keep original VDP gallery, semantics, WhatsApp and sticky bar */
+.ns-main .vehicle { max-width: 1700px; margin: 0 auto; padding: 0 var(--ns-gutter) 40px; }
+.ns-main .vehicle .back-link { min-height: 59px; display: flex; align-items: center; padding: 0; border-bottom: 1px solid var(--ns-rule); }
+.ns-main .vehicle .back-link a { color: var(--ns-secondary); text-transform: uppercase; font-size: 11px; font-weight: 800; letter-spacing: .08em; }
+.ns-main .vehicle .back-link a:hover { color: var(--ns-lime); }
+.ns-main .vehicle-heading { padding: 27px 0 28px; }
+.ns-main .vehicle-eyebrow { color: var(--ns-lime); }
+.ns-main .vehicle-title { color: var(--ns-type); font-weight: 850; font-size: clamp(38px, 4.7vw, 75px); letter-spacing: -.075em; line-height: 1; }
+.ns-main .vehicle-price { color: var(--ns-lime); font-size: clamp(28px, 3.3vw, 48px); font-weight: 830; letter-spacing: -.055em; margin-top: 16px; }
+.ns-main .vehicle-facts { color: var(--ns-secondary); margin-top: 16px; font-size: 13px; }
+.ns-main .vehicle-photos { min-width: 0; }
+.ns-main .photo-viewer { margin-inline: 0; background: #1e262a; }
+.ns-main .photo-stage { min-width: 0; }
+.ns-main .photo-slide { aspect-ratio: 3 / 2; background: #20272b; }
+.ns-main .photo-slide img { object-fit: contain; }
+.ns-main .photo-step { color: var(--ns-type); background: var(--ns-bg); border-color: var(--ns-rule); }
+.ns-main .photo-counter { background: var(--ns-bg); color: var(--ns-type); }
+.ns-main .photo-thumb { background: #222b31; }
+.ns-main .photo-thumb[aria-current="true"]::after { border-color: var(--ns-lime); }
+.ns-main .vehicle-actions { margin: 0; padding: 22px; border: 1px solid var(--ns-rule); background: var(--ns-pane); }
+.ns-main .vehicle-actions .action { margin: 0; border-radius: 0; text-decoration: none; }
+.ns-main .vehicle-actions .action-primary { color: var(--ns-bg); background: var(--ns-lime); border-color: var(--ns-lime); font-weight: 780; }
+.ns-main .vehicle-actions .action-primary:hover { background: #f2ff81; }
+.ns-main .vehicle-actions .action-secondary { color: var(--ns-type); border-color: #647076; background: transparent; }
+.ns-main .vehicle-actions .action-secondary:hover { color: var(--ns-lime); border-color: var(--ns-lime); }
+.ns-main .action-hint { color: var(--ns-secondary); font-size: 12px; }
+.ns-main .vehicle-spec { border: 1px solid var(--ns-rule); padding: 24px 23px 10px; background: var(--ns-pane); margin-top: 14px; }
+.ns-main .spec-heading { color: var(--ns-lime); margin-bottom: 16px; }
+.ns-main .spec-row { border-color: var(--ns-rule); }
+.ns-main .spec dt { color: var(--ns-secondary); }
+.ns-main .spec dd { color: var(--ns-type); }
+.ns-main .vehicle-sold { color: var(--ns-type); }
+.ns-main .badge-sold { color: var(--ns-bg); background: var(--ns-lime); border-color: var(--ns-lime); }
+.ns-main .vehicle .media-unavailable { color: var(--ns-secondary); }
+.ns-main .lightbox { background: #0d1013; }
+.ns-main .lightbox .photo-slide { background: transparent; }
+.ns-main .lightbox .photo-slide img { object-fit: contain; }
+.ns-main .lightbox-bar { background: #0d1013; }
+
+@media (min-width: 960px) {
+  .ns-main .vehicle { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(340px, .82fr); gap: 0 clamp(28px, 4vw, 62px); align-items: start; }
+  .ns-main .vehicle .back-link { grid-column: 1 / -1; }
+  .ns-main .vehicle-main, .ns-main .vehicle-panel { display: flex; flex-direction: column; min-width: 0; }
+  .ns-main .vehicle-main { grid-column: 1; }
+  .ns-main .vehicle-panel { grid-column: 2; position: sticky; top: 24px; padding-top: 22px; }
+  .ns-main .vehicle-main > .vehicle-photos:first-child { order: 1; }
+  .ns-main .vehicle-heading { order: 2; }
+  .ns-main .vehicle-actions { order: 1; }
+  .ns-main .vehicle-spec { order: 2; }
+}
+@media (max-width: 959px) {
+  .site-header .site-nav.shell { min-height: 65px; }
+  .ns-mast { grid-template-columns: minmax(0, 1fr) auto; padding-block: 39px 28px; }
+  .ns-mast-heading { font-size: clamp(49px, 12vw, 76px); margin-top: 17px; }
+  .ns-stock-count strong { font-size: clamp(48px, 8vw, 80px); }
+  .ns-shop { display: flex; flex-direction: column; }
+  .ns-feature { position: relative; top: auto; order: 1; width: 100%; }
+  .ns-feature-image { height: auto; min-height: 0; aspect-ratio: 1.10 / 1; }
+  .ns-feature-info h2 { font-size: clamp(33px, 6.5vw, 58px); }
+  .ns-index { order: 2; width: 100%; border-inline-end: 0; padding: 14px var(--ns-gutter) 0; }
+  .ns-index-top { padding-inline-end: 0; }
+  .ns-filters { padding-inline-end: 0; }
+  .ns-select { min-height: 104px; }
+  .ns-main .vehicle { display: flex; flex-direction: column; }
+  .ns-main .vehicle-main, .ns-main .vehicle-panel { display: contents; }
+  .ns-main .vehicle-main > .vehicle-photos:first-child { order: 1; }
+  .ns-main .vehicle-heading { order: 2; }
+  .ns-main .vehicle-actions { order: 3; }
+  .ns-main .vehicle-main > .vehicle-photos:last-child { order: 4; }
+  .ns-main .vehicle-spec { order: 5; }
+  .ns-main .vehicle .back-link { order: 0; }
+  .ns-main .vehicle .vehicle-photos { width: 100%; }
+  .ns-main .vehicle-actions, .ns-main .vehicle-spec { width: 100%; }
+}
+@media (max-width: 640px) {
+  .site-header .site-nav.shell { min-height: 64px; gap: 2px 7px; }
+  .site-header .wordmark { font-size: 21px; }
+  .ns-wordmark-bar { width: 13px; flex-basis: 13px; }
+  .site-nav .nav-link { font-size: 10px; padding-inline: 4px; }
+  .language-switcher { padding-inline-start: 2px; margin-inline-end: 0; }
+  .language-switcher a { min-width: 28px; padding-inline: 5px; font-size: 11px; }
+  .ns-mast { gap: 12px; padding: 35px var(--ns-gutter) 22px; }
+  .ns-eyebrow { font-size: 9px; }
+  .ns-mast-heading { font-size: clamp(47px, 12vw, 60px); line-height: .89; letter-spacing: -.085em; }
+  .ns-mast-heading span, .ns-mast-heading em { display: block; }
+  .ns-stock-count strong { font-size: 58px; }
+  .ns-stock-count span { font-size: 8px; line-height: 1.2; padding-bottom: 1px; }
+  .ns-feature-top { min-height: 46px; padding: 12px var(--ns-gutter); font-size: 10px; }
+  .ns-feature-image { aspect-ratio: 1 / .91; }
+  .ns-feature-info { inset-inline: var(--ns-gutter); bottom: 19px; }
+  .ns-feature-info h2 { font-size: clamp(31px, 9vw, 43px); }
+  .ns-feature-price { font-size: 25px; }
+  .ns-feature-actions { padding: 12px var(--ns-gutter); grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+  .ns-action-primary, .ns-action-secondary { min-height: 53px; padding: 12px 10px; font-size: 11px; }
+  .ns-feature-bottom { padding-inline: var(--ns-gutter); }
+  .ns-index { padding-top: 12px; }
+  .ns-select { grid-template-columns: 23px minmax(0,1fr) auto; gap: 9px; padding-block: 19px; }
+  .ns-row-price { font-size: 12px; }
+  .ns-row-model { font-size: 23px; }
+  .ns-row-go { width: 44px; margin-inline-end: 0; font-size: 16px; }
+  .ns-main .vehicle { padding-inline: var(--ns-gutter); }
+  .ns-main .vehicle-title { font-size: clamp(39px, 10.5vw, 55px); }
+  .ns-main .vehicle-actions { padding: 16px; }
+  .ns-main .vehicle-spec { padding: 21px 17px; }
+  .ns-main .vehicle .back-link { min-height: 49px; }
+  .ns-main .photo-slide { aspect-ratio: 4 / 3; }
+  .ns-main .general-request { margin-block-start: 35px; padding: 24px 20px; }
+}
+@media (max-width: 365px) {
+  .site-header .wordmark { font-size: 18px; }
+  .ns-mast-heading { font-size: 43px; }
+  .ns-row-model { font-size: 20px; }
+  .ns-select { grid-template-columns: 18px minmax(0,1fr) auto; gap: 7px; }
+  .ns-row-price { font-size: 11px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .ns-shop *, .ns-shop *::before, .ns-shop *::after { animation: none !important; transition: none !important; }
+}
+html[dir="rtl"] .ns-mast-heading { text-transform: none; letter-spacing: 0; line-height: 1.11; font-size: clamp(42px, 7.5vw, 100px); }
+html[dir="rtl"] .ns-row-model, html[dir="rtl"] .ns-feature-info h2 { letter-spacing: 0; line-height: 1.2; }
+html[dir="rtl"] .ns-eyebrow, html[dir="rtl"] .ns-index-top h2, html[dir="rtl"] .ns-feature-top { letter-spacing: 0; }
+html[dir="rtl"] .ns-arrows button { transform: scaleX(-1); }
+@media(max-width:640px) { html[dir="rtl"] .ns-mast-heading { font-size: 37px; } }

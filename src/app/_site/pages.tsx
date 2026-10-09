@@ -6,6 +6,7 @@ import { GeneralRequest } from "@/components/general-request";
 import { InventoryList } from "@/components/inventory-list";
 import { InventoryPageHeader } from "@/components/inventory-page-header";
 import { InventoryUnavailable } from "@/components/inventory-unavailable";
+import { NightShiftShowroom } from "@/components/night-shift-showroom";
 import { VehicleDetail } from "@/components/vehicle-detail";
 import { vehicleTitle } from "@/domain/vehicle";
 import type { Locale } from "@/i18n/locales";
@@ -27,8 +28,18 @@ export function homePage(locale: Locale) {
     const result = await listAvailableVehicles();
     return (
       <>
-        <InventoryPageHeader title={messages(locale).homeTitle} result={result} locale={locale} />
-        <InventoryList result={result} headingLevel={2} locale={locale} />
+        {result.kind === "ok" && result.vehicles.length > 0 ? (
+          <NightShiftShowroom
+            vehicles={result.vehicles}
+            locale={locale}
+            serverOrigin={siteOrigin(await headers())}
+          />
+        ) : (
+          <>
+            <InventoryPageHeader title={messages(locale).homeTitle} result={result} locale={locale} />
+            <InventoryList result={result} headingLevel={2} locale={locale} />
+          </>
+        )}
         {/* General-request inquiry where browsing ends: after the list, the empty or the unavailable state. */}
         <GeneralRequest locale={locale} />
       </>
@@ -47,8 +58,18 @@ export function carsPage(locale: Locale) {
     const result = await listAvailableVehicles();
     return (
       <>
-        <InventoryPageHeader title={messages(locale).carsTitle} result={result} locale={locale} />
-        <InventoryList result={result} headingLevel={2} locale={locale} />
+        {result.kind === "ok" && result.vehicles.length > 0 ? (
+          <NightShiftShowroom
+            vehicles={result.vehicles}
+            locale={locale}
+            serverOrigin={siteOrigin(await headers())}
+          />
+        ) : (
+          <>
+            <InventoryPageHeader title={messages(locale).carsTitle} result={result} locale={locale} />
+            <InventoryList result={result} headingLevel={2} locale={locale} />
+          </>
+        )}
         {/* General-request inquiry where browsing ends: after the list, the empty or the unavailable state. */}
         <GeneralRequest locale={locale} />
       </>
