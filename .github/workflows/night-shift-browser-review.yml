@@ -1,0 +1,36 @@
+name: Night Shift browser review
+on:
+  push:
+    branches: [main]
+    paths:
+      - src/components/night-shift-showroom.tsx
+      - src/app/night-shift-photo-cards.css
+      - tests/e2e/night-shift-browser-smoke.mjs
+      - .github/workflows/night-shift-browser-review.yml
+permissions:
+  contents: read
+jobs:
+  visual-and-conversion:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium for Playwright QA
+        run: |
+          npm install --no-save --package-lock=false playwright@1.56.1
+          npx playwright install --with-deps chromium
+      - name: Test mobile and desktop production rendering
+        run: node tests/e2e/night-shift-browser-smoke.mjs
+      - name: Upload visual QA screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: night-shift-browser-screenshots
+          path: artifacts/night-shift-browser/
+          if-no-files-found: warn
+          retention-days: 7
