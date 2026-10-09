@@ -25,3 +25,17 @@ The user chose direction B (Night Shift) from two independently developed HTML p
 - Preview Vercel route smoke must cover `/`, `/cars`, `/ru`, `/ar`, localized VDPs, sold/nonpublic states.
 - Visual device checks still recommended at 320, 390, 768, 1440px, including scroll, line wrapping, and safe-area CTA. Browser screenshots were not obtained during this initial installation; avoid asserting those checks passed.
 - Changes must not alter the Google adapters or public data model. Production release should follow validation.
+
+
+## Photo-first inventory correction (2026-10-09)
+
+User feedback after reviewing the production phone screenshot: requiring a tap on a text row to update the separate image panel was unnecessary. **Approved interaction change:** visitors should scroll vertically through large individual cards, each showing its own available car photograph, price and facts immediately, as in the former concept A, but keeping Night Shift's dark palette and editorial typography.
+
+- Remove the selected-car/preview/arrow pattern on all breakpoints. On phones render one generous vehicle photo card per row; on desktop two columns of full product cards.
+- The cover, visible name, public price, key facts, car-specific WhatsApp link and details link belong to **each** card. The image and title open the true vehicle detail URL.
+- Photos come solely from approved Google Drive `Website/` covers already provided by the media adapter. Pending photos are shown as a short truthful unavailable note; never invent or reuse other cars or a fake photo.
+- Preserve filtering by make and server-supplied order; count all currently available vehicles, never a hardcoded 14.
+- Localized English/Arabic (RTL)/Russian labels, source-of-truth status, no sold cards, origin-based WhatsApp prefill and UTM attribution remain unchanged.
+- No carousel, swipe trap or intermediate selection on phones. Scrolling the page is the sole way to browse available vehicle cards.
+- Cover images have deliberately bounded aspect ratio and load lazily except the first visible card. Preserve a sensible crop and no horizontal overflow at 320/360/390/768/1440.
+- Existing VDP gallery and sticky WhatsApp/viewing/test-drive flows are out of scope.
