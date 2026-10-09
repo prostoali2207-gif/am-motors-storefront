@@ -45,8 +45,9 @@ export function NightShiftShowroom({
   const t = copy[locale];
   const common = messages(locale);
   const [make, setMake] = useState<string | null>(null);
-  const makes = [...new Set(vehicles.map((vehicle) => vehicle.make))];
-  const filtered = make === null ? vehicles : vehicles.filter((vehicle) => vehicle.make === make);
+  const available = vehicles.filter((vehicle) => vehicle.status === "available");
+  const makes = [...new Set(available.map((vehicle) => vehicle.make))];
+  const filtered = make === null ? available : available.filter((vehicle) => vehicle.make === make);
 
   return (
     <section className="ns-storefront" aria-label={common.availableCarsLabel}>
@@ -55,20 +56,20 @@ export function NightShiftShowroom({
           <p className="ns-eyebrow">{t.eyebrow}</p>
           <h1 className="ns-mast-heading"><span>{t.first}</span> <em>{t.second}</em></h1>
         </div>
-        <div className="ns-stock-count" aria-label={common.availableCount(vehicles.length)}>
-          <strong>{vehicles.length}</strong><span>{t.count}</span>
+        <div className="ns-stock-count" aria-label={common.availableCount(available.length)}>
+          <strong>{available.length}</strong><span>{t.count}</span>
         </div>
       </header>
 
       <div className="ns-catalog">
         <div className="ns-catalog-heading">
           <h2 id="ns-inventory-heading">{t.catalogue}</h2>
-          <span>{filtered.length} / {vehicles.length}</span>
+          <span>{filtered.length} / {available.length}</span>
         </div>
 
         <div className="ns-filters" role="group" aria-label={t.catalogue}>
           <button type="button" aria-pressed={make === null} onClick={() => setMake(null)}>
-            {t.all} / {vehicles.length}
+            {t.all} / {available.length}
           </button>
           {makes.map((option) => (
             <button key={option} type="button" aria-pressed={make === option}
@@ -76,7 +77,7 @@ export function NightShiftShowroom({
           ))}
         </div>
 
-        <ul className="ns-photo-grid" aria-label={common.availableCarsLabel} aria-labelledby="ns-inventory-heading">
+        <ul className="ns-photo-grid" aria-label={common.availableCarsLabel}>
           {filtered.map((vehicle, index) => {
             const title = vehicleTitle(vehicle);
             const cover = vehicleImages(vehicle.media)[0];
