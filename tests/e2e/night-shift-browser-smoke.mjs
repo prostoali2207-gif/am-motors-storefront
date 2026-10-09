@@ -49,6 +49,22 @@ try {
     assert((await page.locator(".ns-card-whatsapp").first().getAttribute("href"))?.includes("wa.me/971503432337"));
     assert.equal(errors.length, 0, "JavaScript errors: " + errors.join("; "));
 
+    // The page renders server-side before Next/Image has downloaded its optimized
+    // same-origin JPEGs. Verify the *pixels* really load, including lazy covers,
+    // before we claim that the photo-first catalog works or take screenshots.
+    const covers = page.locator(".ns-photo-card-media img");
+    for (let imageIndex = 0; imageIndex < await covers.count(); imageIndex += 1) {
+      const image = covers.nth(imageIndex);
+      await image.scrollIntoViewIfNeeded();
+      await page.waitForFunction(
+        (element) => element instanceof HTMLImageElement && element.complete && element.naturalWidth > 0,
+        await image.elementHandle(),
+        { timeout: 60000 },
+      );
+    }
+    await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
+    await page.waitForTimeout(200);
+
     await page.screenshot({ path: output + "/catalog-" + width + ".png" });
     if (width === 390 || width === 1440) {
       await page.screenshot({ path: output + "/catalog-full-" + width + ".png", fullPage: true });
@@ -63,6 +79,14 @@ try {
       assert(vdp, "No VDP path after filtering");
       await page.goto(base + vdp, { waitUntil: "domcontentloaded" });
       assert.equal(await page.locator(".vehicle").count(), 1);
+      const leadPhoto = page.locator(".photo-slide img").first();
+      if (await leadPhoto.count()) {
+        await page.waitForFunction(
+          (element) => element instanceof HTMLImageElement && element.complete && element.naturalWidth > 0,
+          await leadPhoto.elementHandle(),
+          { timeout: 60000 },
+        );
+      }
       await page.screenshot({ path: output + "/vdp-390.png" });
     }
     await page.close();
