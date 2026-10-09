@@ -8,6 +8,7 @@ import { LanguageSwitcher } from "./language-switcher";
 
 import "@/app/globals.css";
 import "@/app/night-shift.css";
+import "@/app/night-shift-photo-cards.css";
 
 /**
  * The document shared by the three per-language root layouts: `<html lang dir>`, header,
