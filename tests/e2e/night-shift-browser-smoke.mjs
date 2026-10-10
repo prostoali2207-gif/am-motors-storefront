@@ -61,6 +61,9 @@ try {
         await image.elementHandle(),
         { timeout: 60000 },
       );
+      // Vercel's broken /_next/image lambda must never be on the request path.
+      const imagePath = await image.evaluate((element) => new URL(element.currentSrc).pathname);
+      assert(imagePath.startsWith("/media/"), "Cover is not served directly from /media/: " + imagePath);
     }
     await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
     await page.waitForTimeout(200);
@@ -86,6 +89,8 @@ try {
           await leadPhoto.elementHandle(),
           { timeout: 60000 },
         );
+        const imagePath = await leadPhoto.evaluate((element) => new URL(element.currentSrc).pathname);
+        assert(imagePath.startsWith("/media/"), "VDP image is not served directly from /media/: " + imagePath);
       }
       await page.screenshot({ path: output + "/vdp-390.png" });
     }
