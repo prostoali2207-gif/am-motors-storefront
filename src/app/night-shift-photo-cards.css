@@ -1,6 +1,6 @@
 /* Night Shift / photo-first catalogue.
    A vertical native-scroll inventory: no preview selection or horizontal vehicle carousel.
-   Single-column phone, two-column desktop. Approved Website/ covers only. */
+   Single-column phone, two-column tablet, three-column desktop, four-column wide desktop. Approved Website/ covers only. */
 
 .ns-catalog{
   max-width:1660px;
@@ -227,6 +227,23 @@ html[dir="rtl"] .ns-card-whatsapp,html[dir="rtl"] .ns-card-view{font-size:12px;}
   .ns-photo-grid{gap:19px;}
   .ns-photo-card-details{padding:18px 17px 19px;}
   .ns-photo-card-headline{gap:9px;}
+  .ns-photo-card-headline h3{font-size:26px;}
+  .ns-photo-card-price{font-size:21px;}
+}
+/* Desktop catalog density: three cars on laptops, four on wide screens.
+   Narrower screens retain the approved one-/two-column layout. */
+@media(min-width:1200px){
+  .ns-photo-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:24px;}
+  .ns-photo-card-details{padding:20px 22px;}
+  .ns-photo-card-headline h3{font-size:clamp(24px,2.15vw,30px);}
+  .ns-photo-card-price{font-size:clamp(20px,1.65vw,24px);}
+  .ns-photo-card-facts{margin:12px 0 16px;}
+  .ns-card-whatsapp,.ns-card-view{min-height:48px;padding:11px 10px;font-size:11px;}
+}
+@media(min-width:1600px){
+  .ns-photo-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:22px;}
+  .ns-photo-card-details{padding-inline:20px;}
+  .ns-photo-card-headline{column-gap:12px;}
   .ns-photo-card-headline h3{font-size:26px;}
   .ns-photo-card-price{font-size:21px;}
 }
