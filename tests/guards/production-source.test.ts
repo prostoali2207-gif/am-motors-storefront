@@ -116,11 +116,14 @@ describe("media guards", () => {
     expect(offenders.map((f) => f.path)).toEqual([]);
   });
 
-  it("allows next/image to load only the site's own media route", () => {
+  it("serves only sanitized same-origin /media images, without the broken Vercel optimizer", () => {
     const config = readFileSync(join(process.cwd(), "next.config.ts"), "utf8");
     expect(config).toContain(`localPatterns: [{ pathname: "/media/**", search: "" }]`);
     expect(config).toContain("remotePatterns: []");
-    expect(config).not.toMatch(/drive\.google|googleusercontent|googleapis|dangerouslyAllow|unoptimized/i);
+    // Vercel currently crashes on /_next/image. The direct /media route checks vehicle
+    // ownership and publishes sanitized, resized JPEGs without private Drive identifiers.
+    expect(config).toContain("unoptimized: true");
+    expect(config).not.toMatch(/drive\.google|googleusercontent|googleapis|dangerouslyAllow/i);
   });
 
   it("renders at most one cover image on listing cards: first image only, no video, no carousel", () => {
