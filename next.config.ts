@@ -11,6 +11,11 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] }];
   },
   images: {
+    // Production Vercel's Next image optimizer intermittently crashes with MODULE_NOT_FOUND
+    // for .next/server/pages/_next/image.js. Serve the already sanitized/resized JPEGs
+    // directly from /media instead. This avoids the failing optimizer and an extra request.
+    // Revisit only after verifying the optimizer is repaired in Vercel.
+    unoptimized: true,
     // Vehicle images are served only by the site's own media route (sanitized, same-origin).
     // No remote hosts: raw Drive URLs are never image sources. Exact empty query only.
     localPatterns: [{ pathname: "/media/**", search: "" }],
