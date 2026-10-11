@@ -20,7 +20,7 @@ describe("first-party responsive image loader", () => {
     for (const src of [
       "https://drive.google.com/file/d/private",
       "https://example.org/photo.jpg",
-      "/media/TEST-0001/SECRET_DRIVE_FILE_ID/BBBBBBBBBBBB",
+      "/media/TEST-0001/SECRET_DRIVE_FILE_ID/BBBBBBBBBBBB?unexpected=1",
       "/media/TEST-0001/AAAAAAAAAAAAAAAAAAAAAA/BBBBBBBBBBBB?another=1",
     ]) {
       expect(() => mediaImageLoader({ src, width: 640 })).toThrow();
