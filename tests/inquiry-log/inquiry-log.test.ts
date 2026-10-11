@@ -135,6 +135,7 @@ describe("handoffRow", () => {
       "2026-10-11T10:00:00.000Z",
       "G-7K3M9P",
       "handoff_initiated",
+      "unverified_client_report",
       "gclid",
       GCLID,
       "TEST-0001",
@@ -160,7 +161,7 @@ describe("createSheetsHandoffWriter", () => {
     expect(await writer.append(["a"])).toEqual({ ok: true });
     const [url, init] = fetchImpl.mock.calls[0] as unknown as [string, RequestInit];
     expect(url).toBe(
-      `https://sheets.googleapis.com/v4/spreadsheets/${LOG_SHEET}/values/Handoffs!A%3AM:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
+      `https://sheets.googleapis.com/v4/spreadsheets/${LOG_SHEET}/values/Handoffs!A%3AN:append?valueInputOption=RAW&insertDataOption=INSERT_ROWS`,
     );
     expect(init.method).toBe("POST");
     expect(JSON.parse(String(init.body))).toEqual({ majorDimension: "ROWS", values: [["a"]] });
@@ -199,8 +200,11 @@ describe("createRateLimiter", () => {
 
 describe("isSameOrigin", () => {
   const headers = (entries: Record<string, string>) => new Headers(entries);
-  it("trusts Sec-Fetch-Site when present, else requires Origin to equal the reached origin", () => {
-    expect(isSameOrigin(headers({ "sec-fetch-site": "same-origin" }))).toBe(true);
+  it("requires Origin equal to the reached origin; Sec-Fetch-Site, if sent, must be same-origin", () => {
+    // A forged Sec-Fetch-Site alone is not enough (the review's spoof case).
+    expect(isSameOrigin(headers({ "sec-fetch-site": "same-origin" }))).toBe(false);
+    expect(isSameOrigin(headers({ "sec-fetch-site": "same-origin", origin: "https://shop.test", host: "shop.test" }))).toBe(true);
+    expect(isSameOrigin(headers({ "sec-fetch-site": "same-origin", origin: "https://evil.test", host: "shop.test" }))).toBe(false);
     expect(isSameOrigin(headers({ "sec-fetch-site": "cross-site", origin: "https://shop.test" , host: "shop.test" }))).toBe(false);
     expect(isSameOrigin(headers({ origin: "https://shop.test", host: "shop.test" }))).toBe(true);
     expect(isSameOrigin(headers({ origin: "https://evil.test", host: "shop.test" }))).toBe(false);
@@ -218,6 +222,7 @@ describe("handleInquiryRefRequest", () => {
       writer: () => ({ append }),
       vehicleAvailability: async () => "available",
       rateLimiter: createRateLimiter({ perKey: 100, total: 100, windowMs: 60_000 }),
+      dailyBudget: createRateLimiter({ perKey: 1_000, total: 1_000, windowMs: 86_400_000 }),
       now: () => new Date("2026-10-11T10:00:00.000Z"),
       log,
       ...overrides,
@@ -229,7 +234,13 @@ describe("handleInquiryRefRequest", () => {
     const text = typeof body === "string" ? body : JSON.stringify(body);
     return new Request("https://shop.test/api/inquiry-ref", {
       method: "POST",
-      headers: { "sec-fetch-site": "same-origin", "content-type": "text/plain;charset=UTF-8", ...extraHeaders },
+      headers: {
+        "sec-fetch-site": "same-origin",
+        origin: "https://shop.test",
+        host: "shop.test",
+        "content-type": "text/plain;charset=UTF-8",
+        ...extraHeaders,
+      },
       body: text,
     });
   }
@@ -283,6 +294,40 @@ describe("handleInquiryRefRequest", () => {
     const ip = { "x-forwarded-for": "203.0.113.7" };
     expect((await handleInquiryRefRequest(post(VALID, ip), deps)).status).toBe(204);
     expect((await handleInquiryRefRequest(post(VALID, ip), deps)).status).toBe(429);
+  });
+
+  it("rejects forged-looking requests: no Origin, foreign Origin, forged ref/click shapes", async () => {
+    const { deps, append } = setup();
+    const noOrigin = new Request("https://shop.test/api/inquiry-ref", {
+      method: "POST",
+      headers: { "sec-fetch-site": "same-origin", host: "shop.test" },
+      body: JSON.stringify(VALID),
+    });
+    expect((await handleInquiryRefRequest(noOrigin, deps)).status).toBe(403);
+    expect((await handleInquiryRefRequest(post(VALID, { origin: "https://evil.test" }), deps)).status).toBe(403);
+    expect((await handleInquiryRefRequest(post({ ...VALID, ref: "G-AAAAAA\n=CMD()" }), deps)).status).toBe(400);
+    expect((await handleInquiryRefRequest(post({ ...VALID, click: { type: "gclid", value: "=IMPORTXML(1)" } }), deps)).status).toBe(400);
+    expect((await handleInquiryRefRequest(post({ ...VALID, extra: "x".repeat(MAX_HANDOFF_BYTES) }), deps)).status).toBe(413);
+    expect(append).not.toHaveBeenCalled();
+  });
+
+  it("stops writing once the per-instance daily budget is spent, without counting rejected requests", async () => {
+    const { deps, append, log } = setup({
+      dailyBudget: createRateLimiter({ perKey: 2, total: 2, windowMs: 86_400_000 }),
+      vehicleAvailability: async (id) => (id === "TEST-0001" ? "available" : "not-available"),
+    });
+    expect((await handleInquiryRefRequest(post({ ...VALID, vehicleId: "TEST-SOLD" }), deps)).status).toBe(422);
+    expect((await handleInquiryRefRequest(post(VALID), deps)).status).toBe(204);
+    expect((await handleInquiryRefRequest(post(VALID), deps)).status).toBe(204);
+    expect((await handleInquiryRefRequest(post(VALID), deps)).status).toBe(429);
+    expect(append).toHaveBeenCalledTimes(2);
+    expect(log).toHaveBeenCalledWith("daily-budget-exhausted");
+  });
+
+  it("records every row as an unverified client report", async () => {
+    const { deps, append } = setup();
+    await handleInquiryRefRequest(post(VALID), deps);
+    expect(append.mock.calls[0]?.[0][3]).toBe("unverified_client_report");
   });
 
   it("logs only fixed codes when the append fails — never request values", async () => {

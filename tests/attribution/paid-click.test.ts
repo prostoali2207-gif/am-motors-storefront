@@ -8,11 +8,13 @@ import {
   parsePaidClick,
 } from "@/attribution/paid-click";
 import {
-  capturePaidSession,
-  currentPaidSession,
-  markHandoffOnce,
+  capturePaidClick,
+  currentPaidClick,
+  handoffKey,
   PAID_CLICK_STORAGE_KEY,
+  paidHandoff,
   resetAttributionMemoryForTests,
+  setHandoffReported,
   setInquiryRefsEnabled,
 } from "@/attribution/session-attribution";
 
@@ -73,36 +75,74 @@ describe("inquiry reference", () => {
 });
 
 describe("paid session store", () => {
-  it("stores nothing while the feature is off (default)", () => {
-    expect(capturePaidSession(`?gclid=${GCLID}`)).toBeNull();
+  it("stores nothing and creates no reference while the feature is off (default)", () => {
+    window.history.pushState({}, "", `/cars/TEST-0001?gclid=${GCLID}`);
+    expect(capturePaidClick(`?gclid=${GCLID}`)).toBeNull();
+    expect(paidHandoff(handoffKey("question", "TEST-0001"))).toBeNull();
     expect(window.sessionStorage.getItem(PAID_CLICK_STORAGE_KEY)).toBeNull();
   });
 
-  it("keeps the first Google click of the session with one reference", () => {
+  it("keeps the first Google click of the session (first touch)", () => {
     setInquiryRefsEnabled(true);
-    const first = capturePaidSession(`?gclid=${GCLID}`);
-    expect(first?.click).toEqual({ type: "gclid", value: GCLID });
-    expect(isInquiryRef(first?.ref)).toBe(true);
-    expect(capturePaidSession("?gclid=Cj0KCQsyntheticOTHER0002")).toEqual(first);
-    expect(capturePaidSession("")).toEqual(first);
-    expect(JSON.parse(window.sessionStorage.getItem(PAID_CLICK_STORAGE_KEY) ?? "null")).toEqual(first);
+    expect(capturePaidClick(`?gclid=${GCLID}`)).toEqual({ type: "gclid", value: GCLID });
+    expect(capturePaidClick("?gclid=Cj0KCQsyntheticOTHER0002")).toEqual({ type: "gclid", value: GCLID });
+    expect(capturePaidClick("")).toEqual({ type: "gclid", value: GCLID });
   });
 
-  it("has no paid session without a click ID", () => {
+  it("gives each action its own reference: same click → two cars / intents → distinct refs; repeat → same ref", () => {
+    setInquiryRefsEnabled(true);
+    window.history.pushState({}, "", `/cars/TEST-0001?gclid=${GCLID}`);
+    const carA = paidHandoff(handoffKey("question", "TEST-0001"));
+    const carB = paidHandoff(handoffKey("question", "TEST-0002"));
+    const carAViewing = paidHandoff(handoffKey("viewing", "TEST-0001"));
+    const general = paidHandoff(handoffKey("general", null));
+    const refs = [carA, carB, carAViewing, general].map((h) => h?.ref);
+    for (const ref of refs) expect(isInquiryRef(ref)).toBe(true);
+    expect(new Set(refs).size).toBe(4);
+    for (const h of [carA, carB, carAViewing, general]) expect(h?.click).toEqual({ type: "gclid", value: GCLID });
+    expect(paidHandoff(handoffKey("question", "TEST-0001"))?.ref).toBe(carA?.ref);
+  });
+
+  it("keeps references and delivery state across reloads of the same tab (sessionStorage)", () => {
+    setInquiryRefsEnabled(true);
+    window.history.pushState({}, "", `/?gclid=${GCLID}`);
+    const key = handoffKey("question", "TEST-0001");
+    const first = paidHandoff(key);
+    setHandoffReported(key, true);
+    resetAttributionMemoryForTests();
+    setInquiryRefsEnabled(true);
+    window.history.pushState({}, "", "/cars/TEST-0001");
+    expect(paidHandoff(key)).toEqual({ click: first?.click, ref: first?.ref, reported: true });
+    setHandoffReported(key, false);
+    expect(paidHandoff(key)?.reported).toBe(false);
+  });
+
+  it("has no paid click without a click ID", () => {
     setInquiryRefsEnabled(true);
     window.history.pushState({}, "", "/cars?utm_source=google&utm_medium=cpc");
-    expect(currentPaidSession()).toBeNull();
+    expect(currentPaidClick()).toBeNull();
+    expect(paidHandoff(handoffKey("question", "TEST-0001"))).toBeNull();
   });
 
-  it("drops tampered storage and starts from the URL", () => {
+  it("drops tampered stored references and keeps only valid ones", () => {
     setInquiryRefsEnabled(true);
-    window.sessionStorage.setItem(PAID_CLICK_STORAGE_KEY, JSON.stringify({ click: { type: "gclid", value: GCLID }, ref: "X" }));
-    expect(capturePaidSession("")).toBeNull();
+    window.sessionStorage.setItem(
+      PAID_CLICK_STORAGE_KEY,
+      JSON.stringify({
+        click: { type: "gclid", value: GCLID },
+        handoffs: { "question|TEST-0001": { ref: "X", reported: true }, "viewing|TEST-0001": { ref: "G-7K3M9P", reported: "yes" } },
+      }),
+    );
+    expect(paidHandoff("viewing|TEST-0001")).toEqual({ click: { type: "gclid", value: GCLID }, ref: "G-7K3M9P", reported: false });
+    const fresh = paidHandoff("question|TEST-0001");
+    expect(fresh?.ref).not.toBe("X");
+    expect(isInquiryRef(fresh?.ref)).toBe(true);
   });
 
-  it("reports each handoff key once", () => {
-    expect(markHandoffOnce("G-ABCDEF|question|AM-1")).toBe(true);
-    expect(markHandoffOnce("G-ABCDEF|question|AM-1")).toBe(false);
-    expect(markHandoffOnce("G-ABCDEF|viewing|AM-1")).toBe(true);
+  it("bounds the number of references per session; beyond it the link works without one", () => {
+    setInquiryRefsEnabled(true);
+    window.history.pushState({}, "", `/?gclid=${GCLID}`);
+    for (let i = 0; i < 50; i++) expect(paidHandoff(handoffKey("question", `TEST-${i}`))).not.toBeNull();
+    expect(paidHandoff(handoffKey("question", "TEST-OVER"))).toBeNull();
   });
 });

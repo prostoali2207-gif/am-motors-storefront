@@ -23,6 +23,7 @@ export const HANDOFF_COLUMNS = [
   "received_at_utc",
   "inquiry_ref",
   "event",
+  "verification",
   "click_id_type",
   "click_id",
   "vehicle_ref",
@@ -36,6 +37,8 @@ export function handoffRow(handoff: Handoff, receivedAt: Date): string[] {
     receivedAt.toISOString(),
     handoff.ref,
     "handoff_initiated",
+    // Client-reported: headers and click IDs can be forged; never evidence of a paid click.
+    "unverified_client_report",
     handoff.click.type,
     handoff.click.value,
     handoff.vehicleId ?? "",
@@ -91,7 +94,7 @@ export function createSheetsHandoffWriter(options: {
   };
 }
 
-/** 1 → A, 13 → M (enough for this fixed, short column list). */
+/** 1 → A, 14 → N (enough for this fixed, short column list). */
 function columnLetter(count: number): string {
   return String.fromCharCode("A".charCodeAt(0) + count - 1);
 }

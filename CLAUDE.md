@@ -97,7 +97,8 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   deployment remain the user's switches. Status: `docs/production-readiness.md`.
 - Inquiry reference attribution (issue #19; open PR, **OFF by default, pending owner approval**):
   Google click IDs kept first-touch in the tab session, never in the prefill; the customer sees
-  only `Inquiry: G-XXXXXX`; `POST /api/inquiry-ref` appends one `handoff_initiated` row to a
+  only `Inquiry: G-XXXXXX`, one per WhatsApp action; `POST /api/inquiry-ref` appends one
+  `handoff_initiated` (unverified client report) row to a
   separate log spreadsheet via a separate service account (`src/inquiry-log/`). Off unless
   `INQUIRY_LOG=google-sheets`. Details and setup: `docs/inquiry-attribution.md`.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase

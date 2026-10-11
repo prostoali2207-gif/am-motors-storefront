@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 
-import { currentAttribution, currentPaidSession, setInquiryRefsEnabled } from "@/attribution/session-attribution";
+import { currentAttribution, currentPaidClick, setInquiryRefsEnabled } from "@/attribution/session-attribution";
 
 /**
  * Records first-touch attribution from the landing URL for this tab session. Renders nothing,
@@ -15,7 +15,7 @@ export function AttributionCapture({ inquiryRefs = false }: { inquiryRefs?: bool
   useEffect(() => {
     setInquiryRefsEnabled(inquiryRefs);
     currentAttribution();
-    currentPaidSession();
+    currentPaidClick();
   }, [inquiryRefs]);
   return null;
 }

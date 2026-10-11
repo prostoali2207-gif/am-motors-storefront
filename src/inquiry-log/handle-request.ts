@@ -21,7 +21,10 @@ export interface InquiryRefDeps {
   readonly config: InquiryLogConfig;
   readonly writer: () => HandoffLogWriter;
   readonly vehicleAvailability: (id: string) => Promise<VehicleAvailability>;
+  /** Per client and per instance, short window. */
   readonly rateLimiter: RateLimiter;
+  /** Per instance, per day: a hard brake on total appends (cost/quota/pollution). */
+  readonly dailyBudget: RateLimiter;
   readonly now: () => Date;
   readonly log?: (code: string) => void;
 }
@@ -71,6 +74,12 @@ export async function handleInquiryRefRequest(request: Request, deps: InquiryRef
     if (availability === "not-available") return empty(422);
   }
 
+  // Spent only for requests that would really be written.
+  if (!deps.dailyBudget.allow("all", now.getTime())) {
+    log("daily-budget-exhausted");
+    return empty(429);
+  }
+
   const result = await deps.writer().append(handoffRow(handoff, now));
   if (!result.ok) {
     log(`append-failed ${result.code}`);
@@ -80,13 +89,17 @@ export async function handleInquiryRefRequest(request: Request, deps: InquiryRef
 }
 
 /**
- * Only the site's own pages may write. `Sec-Fetch-Site: same-origin` is sent by current browsers
- * (including on `sendBeacon`); otherwise the `Origin` must equal the origin the request reached.
- * Neither header → rejected.
+ * Browser same-origin check: `Origin` must be present and equal the origin the request reached,
+ * and `Sec-Fetch-Site`, when sent, must be `same-origin`.
+ *
+ * This only filters other websites' pages. It is NOT authentication: any HTTP client can forge
+ * both headers and any click ID. Every row is therefore recorded as `unverified_client_report`;
+ * abuse is bounded by rate limits here plus a platform firewall rule required before enabling
+ * (docs/inquiry-attribution.md), and nothing in the log counts until Sales sees a real message.
  */
 export function isSameOrigin(headers: Pick<Headers, "get">): boolean {
   const fetchSite = headers.get("sec-fetch-site");
-  if (fetchSite !== null) return fetchSite === "same-origin";
+  if (fetchSite !== null && fetchSite !== "same-origin") return false;
   const origin = headers.get("origin");
   const own = siteOrigin(headers);
   return origin !== null && own !== null && origin.toLowerCase() === own;

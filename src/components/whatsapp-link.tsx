@@ -3,27 +3,40 @@
 import { useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
 
 import { sendHandoffBeacon } from "@/attribution/handoff-beacon";
-import { currentAttribution, currentPaidSession } from "@/attribution/session-attribution";
+import { currentAttribution, currentPaidClick, handoffKey, paidHandoff } from "@/attribution/session-attribution";
 import { inquiryMessage, type Inquiry } from "@/conversion/inquiry-message";
 import { whatsAppUrl } from "@/conversion/whatsapp";
 
-function browserHref(inquiry: Inquiry): string {
-  // `currentPaidSession()` is null unless the server enabled inquiry references (issue #19) and
-  // this tab landed from a Google ad click; then only the short reference enters the message.
-  const paid = currentPaidSession();
-  return whatsAppUrl(inquiryMessage(inquiry, window.location.origin, currentAttribution(), paid?.ref ?? null));
+function actionOf(inquiry: Inquiry) {
+  const vehicleId = inquiry.kind === "vehicle" ? inquiry.id : null;
+  const intent = inquiry.kind === "vehicle" ? inquiry.intent : "general";
+  return { vehicleId, intent, key: handoffKey(intent, vehicleId) } as const;
 }
 
-function reportHandoff(inquiry: Inquiry): void {
-  const paid = currentPaidSession();
-  if (paid === null) return;
+/**
+ * The href shown before a tap carries no reference: a reference is created only when the visitor
+ * actually taps (see `refresh`), so browsing pages creates none. Without a Google click (or with
+ * the feature off) every href is exactly the pre-#19 message.
+ */
+function browserHref(inquiry: Inquiry, ref: string | null = null): string {
+  return whatsAppUrl(inquiryMessage(inquiry, window.location.origin, currentAttribution(), ref));
+}
+
+/** At tap time: this action's own reference (issue #19) and its handoff record, if any. */
+function hrefAtTap(inquiry: Inquiry): string {
+  if (currentPaidClick() === null) return browserHref(inquiry);
+  const action = actionOf(inquiry);
+  const handoff = paidHandoff(action.key);
+  if (handoff === null) return browserHref(inquiry);
   sendHandoffBeacon({
-    paid,
-    vehicleId: inquiry.kind === "vehicle" ? inquiry.id : null,
-    intent: inquiry.kind === "vehicle" ? inquiry.intent : "general",
+    key: action.key,
+    handoff,
+    vehicleId: action.vehicleId,
+    intent: action.intent,
     locale: inquiry.locale,
     utm: currentAttribution(),
   });
+  return browserHref(inquiry, handoff.ref);
 }
 
 /** Location and session attribution do not change while a page is shown; no subscription needed. */
@@ -59,8 +72,7 @@ export function WhatsAppLink({
   );
 
   function refresh(event: MouseEvent<HTMLAnchorElement>) {
-    event.currentTarget.href = browserHref(inquiry);
-    reportHandoff(inquiry);
+    event.currentTarget.href = hrefAtTap(inquiry);
   }
 
   return (

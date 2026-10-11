@@ -259,14 +259,19 @@ the owner approves this section and the switch is set. Details: `docs/inquiry-at
 If approved, it changes two rules of "Contact and inquiries" **for Google ad clicks only**:
 - *Click IDs:* `gclid` / `gbraid` / `wbraid` are captured first-touch in the tab session. They are
   **never** shown to the customer or put in the prefill; the customer sees only a short random
-  reference, `Inquiry: G-XXXXXX` (English label in every language, like `Ref:`).
+  reference, `Inquiry: G-XXXXXX` (English label in every language, like `Ref:`), one per WhatsApp
+  action (car + intent).
 - *No server write:* one narrow exception — `POST /api/inquiry-ref` appends one row per WhatsApp
-  handoff (reference, click ID, public vehicle ID, intent, language, UTM; no personal data) to a
+  handoff (reference, click ID, public vehicle ID, intent, language, UTM — the click ID is a
+  pseudonymous identifier treated as personal data; no names, phones or chat text) to a
   **separate** "inquiry log" spreadsheet with a **separate** service account. The inventory Sheet
   and its read-only account are unchanged.
 
-Unchanged: no cookies, no pixels or Google tag, no forms, no CRM. A handoff row is not an
-inquiry and not a lead; Sales records received messages and outcomes (`Outcomes` tab).
+Unchanged: no cookies, no pixels or Google tag, no forms, no CRM. A handoff row is an unverified
+client report — not an inquiry, not a lead, not proof of a paid click; Sales records received
+messages and outcomes (`Outcomes` tab). No upload to Google Ads until the steps in
+`docs/inquiry-attribution.md` are verified. Open with this proposal: retention period of the log
+(proposed 90 days) and who on Sales may access it.
 
 ## CTA wording — Confirmed until a booking system exists
 

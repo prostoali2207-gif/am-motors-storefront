@@ -10,8 +10,10 @@ import { getVehicle } from "@/inventory/queries";
  * configured — see src/inquiry-log/config.ts and docs/inquiry-attribution.md.
  */
 
-// Per instance: 10 handoffs per client and 300 in total per minute.
+// Per server instance (not global — see docs/inquiry-attribution.md for the required firewall rule):
+// 10 handoffs per client and 300 in total per minute; at most 2,000 appends per day.
 const rateLimiter = createRateLimiter({ perKey: 10, total: 300, windowMs: 60_000 });
+const dailyBudget = createRateLimiter({ perKey: 2_000, total: 2_000, windowMs: 24 * 60 * 60_000 });
 
 let cachedWriter: { key: string; writer: HandoffLogWriter } | null = null;
 
@@ -52,6 +54,7 @@ export async function POST(request: Request): Promise<Response> {
     },
     vehicleAvailability,
     rateLimiter,
+    dailyBudget,
     now: () => new Date(),
   });
 }
