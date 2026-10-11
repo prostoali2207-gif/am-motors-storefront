@@ -53,7 +53,8 @@ export async function getVehicleImage(
   vehicleId: string,
   mediaId: string,
   revision: string,
+  maxEdgePx?: number,
 ): Promise<MediaImageResult> {
   const repo = await repository();
-  return safeRead(() => repo.getImage(vehicleId, mediaId, revision), "getImage");
+  return safeRead(() => repo.getImage(vehicleId, mediaId, revision, maxEdgePx), "getImage");
 }

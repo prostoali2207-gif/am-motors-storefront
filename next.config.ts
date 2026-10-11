@@ -11,11 +11,14 @@ const nextConfig: NextConfig = {
     return [{ source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] }];
   },
   images: {
-    // Production Vercel's Next image optimizer intermittently crashes with MODULE_NOT_FOUND
-    // for .next/server/pages/_next/image.js. Serve the already sanitized/resized JPEGs
-    // directly from /media instead. This avoids the failing optimizer and an extra request.
-    // Revisit only after verifying the optimizer is repaired in Vercel.
-    unoptimized: true,
+    // Vercel's /_next/image optimizer failed intermittently with MODULE_NOT_FOUND.
+    // A bounded, first-party custom loader emits native srcset for /media?w=<width>
+    // and the media route sanitizes each responsive variant. This avoids the broken
+    // optimizer without shipping the original 2048px JPEG to every mobile viewport.
+    loader: "custom",
+    loaderFile: "./src/lib/media-image-loader.ts",
+    deviceSizes: [480, 640, 768, 960, 1200, 1600],
+    imageSizes: [80, 160, 320],
     // Vehicle images are served only by the site's own media route (sanitized, same-origin).
     // No remote hosts: raw Drive URLs are never image sources. Exact empty query only.
     localPatterns: [{ pathname: "/media/**", search: "" }],

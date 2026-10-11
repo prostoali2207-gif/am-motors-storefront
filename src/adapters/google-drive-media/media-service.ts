@@ -14,14 +14,14 @@ export interface VehicleMediaService {
    * Sanitized image bytes, only if `mediaId`/`revision` is a current image of THIS vehicle's
    * folder. Anything else is `not-found`: the route can never fetch arbitrary Drive files.
    */
-  imageFor(vehicleId: string, ref: DriveFolderRef, mediaId: string, revision: string): Promise<MediaImageResult>;
+  imageFor(vehicleId: string, ref: DriveFolderRef, mediaId: string, revision: string, maxEdgePx?: number): Promise<MediaImageResult>;
 }
 
 export interface MediaServiceOptions {
   readonly reader: DriveReader;
   /** Folder listing, usually wrapped in a cache. Transient errors must be thrown, not cached. */
   readonly resolveFolder?: (folderId: string) => Promise<FolderMedia>;
-  readonly sanitize: (bytes: Uint8Array) => Promise<SanitizedImage>;
+  readonly sanitize: (bytes: Uint8Array, maxEdgePx?: number) => Promise<SanitizedImage>;
   /** After a transient failure, a folder is not retried for this long (per process). */
   readonly retryAfterMs?: number;
   readonly now?: () => number;
@@ -83,7 +83,7 @@ export function createMediaService(options: MediaServiceOptions): VehicleMediaSe
       return media.state === "ok" ? toVehicleMedia(vehicleId, media.files) : [];
     },
 
-    async imageFor(vehicleId, ref, mediaId, revision) {
+    async imageFor(vehicleId, ref, mediaId, revision, maxEdgePx) {
       const media = await folderMedia(vehicleId, ref);
       if (media.state === "source-error") return { kind: "unavailable", reason: "source-error" };
 
@@ -96,7 +96,7 @@ export function createMediaService(options: MediaServiceOptions): VehicleMediaSe
 
       try {
         const source = await options.reader.download(file.fileId, MAX_IMAGE_SOURCE_BYTES);
-        const image = await options.sanitize(source);
+        const image = maxEdgePx === undefined ? await options.sanitize(source) : await options.sanitize(source, maxEdgePx);
         return { kind: "ok", bytes: image.bytes, contentType: image.contentType };
       } catch (error) {
         log(`${PREFIX} vehicle ${vehicleId}: image delivery failed (${errorCode(error)})`);

@@ -31,7 +31,11 @@ export class ImagePipelineError extends Error {
   }
 }
 
-export async function sanitizeImage(input: Uint8Array): Promise<SanitizedImage> {
+export async function sanitizeImage(input: Uint8Array, maxEdgePx: number = MAX_EDGE_PX): Promise<SanitizedImage> {
+  // Only the trusted route chooses a bounded width. Do not expose arbitrary resize work.
+  if (!Number.isInteger(maxEdgePx) || maxEdgePx < 80 || maxEdgePx > MAX_EDGE_PX) {
+    throw new ImagePipelineError("unsupported-format");
+  }
   const options = { limitInputPixels: MAX_INPUT_PIXELS, failOn: "error", pages: 1 } as const;
 
   let format: string | undefined;
@@ -47,7 +51,7 @@ export async function sanitizeImage(input: Uint8Array): Promise<SanitizedImage> 
   try {
     const output = await sharp(input, options)
       .rotate()
-      .resize({ width: MAX_EDGE_PX, height: MAX_EDGE_PX, fit: "inside", withoutEnlargement: true })
+      .resize({ width: maxEdgePx, height: maxEdgePx, fit: "inside", withoutEnlargement: true })
       .flatten({ background: "#ffffff" })
       .jpeg({ quality: 82, mozjpeg: true })
       .toBuffer();

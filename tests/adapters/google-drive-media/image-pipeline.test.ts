@@ -52,6 +52,15 @@ describe("sanitizeImage", () => {
     expect([small.width, small.height]).toEqual([40, 20]);
   });
 
+  it("produces responsive JPEG dimensions without enlarging or keeping EXIF", async () => {
+    const input = new Uint8Array(
+      await sharp({ create: { width: 1800, height: 900, channels: 3, background: "#123456" } }).jpeg().toBuffer(),
+    );
+    const resized = await sharp((await sanitizeImage(input, 480)).bytes).metadata();
+    expect([resized.width, resized.height, resized.exif]).toEqual([480, 240, undefined]);
+    await expect(sanitizeImage(input, 9999)).rejects.toBeInstanceOf(ImagePipelineError);
+  });
+
   it("accepts PNG and WebP (with alpha flattened) and outputs JPEG", async () => {
     for (const encode of [(s: Sharp) => s.png(), (s: Sharp) => s.webp()]) {
       const input = new Uint8Array(
