@@ -17,9 +17,9 @@ const { GET } = await import("@/app/media/[vehicleId]/[mediaId]/[revision]/route
 const MEDIA_ID = "A".repeat(22);
 const REV = "B".repeat(12);
 
-function call(vehicleId = "TEST-0001", mediaId = MEDIA_ID, revision = REV) {
+function call(vehicleId = "TEST-0001", mediaId = MEDIA_ID, revision = REV, query = "") {
   const ctx = { params: Promise.resolve({ vehicleId, mediaId, revision }) };
-  return GET(new Request(`http://test.invalid/media/${vehicleId}/${mediaId}/${revision}`) as never, ctx as never);
+  return GET(new Request(`http://test.invalid/media/${vehicleId}/${mediaId}/${revision}${query}`) as never, ctx as never);
 }
 
 function directives(header: string | null): Map<string, string> {
@@ -64,6 +64,17 @@ describe("GET /media/[vehicleId]/[mediaId]/[revision]", () => {
     expect(response.headers.get("content-type")).toBe("image/jpeg");
     expect(response.headers.get("x-content-type-options")).toBe("nosniff");
     expect(getVehicleImage).toHaveBeenCalledWith("TEST-0001", MEDIA_ID, REV);
+  });
+
+  it("serves finite width variants and rejects arbitrary resize requests", async () => {
+    getVehicleImage.mockResolvedValue({ kind: "ok", bytes: new Uint8Array([1]), contentType: "image/jpeg" });
+    expect((await call("TEST-0001", MEDIA_ID, REV, "?w=640")).status).toBe(200);
+    expect(getVehicleImage).toHaveBeenCalledWith("TEST-0001", MEDIA_ID, REV, 640);
+    getVehicleImage.mockClear();
+    for (const query of ["?w=1", "?w=6400", "?w=-20", "?w=abc", "?w=640.5"]) {
+      expect((await call("TEST-0001", MEDIA_ID, REV, query)).status).toBe(404);
+    }
+    expect(getVehicleImage).not.toHaveBeenCalled();
   });
 
   it("never caches not-found or unavailable responses", async () => {
