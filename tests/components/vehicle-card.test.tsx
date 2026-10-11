@@ -43,7 +43,9 @@ describe("VehicleCard", () => {
     const { container } = render(<VehicleCard locale="en" vehicle={vehicle} headingLevel={2} />);
     const images = container.querySelectorAll("img");
     expect(images).toHaveLength(1);
-    expect(images[0].getAttribute("src")).toContain(encodeURIComponent(syntheticMedia[0].src));
+    expect(images[0].getAttribute("src")).toContain(syntheticMedia[0].src + "?w=");
+    expect(images[0].getAttribute("srcset")).toContain("?w=");
+    expect(images[0].getAttribute("src")).not.toContain("/_next/image");
     expect(images[0].getAttribute("alt")).toBe("");
     expect(images[0].getAttribute("loading")).toBe("lazy");
     const frame = container.querySelector(".card-media");
