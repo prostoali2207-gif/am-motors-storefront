@@ -54,14 +54,14 @@ export class GoogleSheetsInventoryRepository implements InventoryRepository {
     return { kind: "ok", vehicle: await this.withMedia(snapshot, vehicle) };
   }
 
-  async getImage(vehicleId: string, mediaId: string, revision: string): Promise<MediaImageResult> {
+  async getImage(vehicleId: string, mediaId: string, revision: string, maxEdgePx?: number): Promise<MediaImageResult> {
     if (this.media === null) return { kind: "not-found" };
     const snapshot = await this.readSnapshot();
     if (snapshot.kind !== "ok") return snapshot;
     // Only public vehicles (available or sold) of the current snapshot can serve media.
     const folder = folderOf(snapshot, vehicleId);
     if (!snapshot.vehicles.some((v) => v.id === vehicleId) || folder === undefined) return { kind: "not-found" };
-    return this.media.imageFor(vehicleId, folder, mediaId, revision);
+    return this.media.imageFor(vehicleId, folder, mediaId, revision, maxEdgePx);
   }
 
   /** Attaches each listed vehicle's cover (or nothing), keeping the source order. */
