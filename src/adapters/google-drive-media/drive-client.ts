@@ -83,7 +83,7 @@ export interface DriveReaderOptions {
 export function createDriveReader(options: DriveReaderOptions): DriveReader {
   const fetchImpl = options.fetchImpl ?? fetch;
 
-  async function request(url: string, timeoutMs: number): Promise<Response> {
+  async function requestOnce(url: string, timeoutMs: number): Promise<Response> {
     let token: string;
     try {
       token = await options.getAccessToken();
@@ -112,6 +112,25 @@ export function createDriveReader(options: DriveReaderOptions): DriveReader {
       throw new DriveSourceError(status >= 500 ? "http-5xx" : `http-${status}`, true);
     }
     return response;
+  }
+
+  /**
+   * One bounded retry for short-lived Drive 429/5xx or network failures. A first-page 503
+   * otherwise leaves the entire card photo missing until the visitor manually reloads.
+   * Never retry permanent 404, permission 403, an oversized file, auth or a full timeout.
+   * All retries use the exact same private Drive URL and respect the original access scope.
+   */
+  async function request(url: string, timeoutMs: number): Promise<Response> {
+    try {
+      return await requestOnce(url, timeoutMs);
+    } catch (error) {
+      if (
+        !(error instanceof DriveSourceError) ||
+        !["http-429", "http-5xx", "network"].includes(error.code)
+      ) throw error;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      return requestOnce(url, timeoutMs);
+    }
   }
 
   async function getJson(url: string): Promise<Record<string, unknown>> {
