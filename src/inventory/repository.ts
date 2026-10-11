@@ -16,5 +16,5 @@ export interface InventoryRepository {
    * A sanitized image of a public vehicle, addressed by the opaque media ID and revision from
    * its `VehicleMedia`. Anything that is not a current image of that vehicle → `not-found`.
    */
-  getImage(vehicleId: string, mediaId: string, revision: string): Promise<MediaImageResult>;
+  getImage(vehicleId: string, mediaId: string, revision: string, maxEdgePx?: number): Promise<MediaImageResult>;
 }
