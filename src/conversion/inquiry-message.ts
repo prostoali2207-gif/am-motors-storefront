@@ -1,4 +1,5 @@
 import { formatAttributionBlock, type Attribution } from "@/attribution/attribution";
+import { isInquiryRef } from "@/attribution/paid-click";
 import type { Locale } from "@/i18n/locales";
 
 /**
@@ -89,7 +90,12 @@ function vehicleOpening(locale: Locale, intent: VehicleInquiryIntent, title: str
  * known the URL line is left out rather than guessed. The attribution block is appended only when
  * the session actually received attribution parameters.
  */
-export function inquiryMessage(inquiry: Inquiry, origin: string | null, attribution: Attribution = {}): string {
+export function inquiryMessage(
+  inquiry: Inquiry,
+  origin: string | null,
+  attribution: Attribution = {},
+  inquiryRef: string | null = null,
+): string {
   const lines: string[] = [];
   if (inquiry.kind === "vehicle") {
     lines.push(vehicleOpening(inquiry.locale, inquiry.intent, inquiry.title, inquiry.id));
@@ -98,6 +104,10 @@ export function inquiryMessage(inquiry: Inquiry, origin: string | null, attribut
     lines.push(generalRequestMessage(inquiry.locale));
   }
 
-  const block = formatAttributionBlock(attribution);
+  // The short inquiry reference (issue #19) is the only paid-click trace the customer sees: never
+  // the click ID itself. English label in every language, like `Ref:`, so Sales reads one format.
+  const blockLines = [formatAttributionBlock(attribution)];
+  if (inquiryRef !== null && isInquiryRef(inquiryRef)) blockLines.push(`Inquiry: ${inquiryRef}`);
+  const block = blockLines.filter((line) => line !== "").join("\n");
   return block === "" ? lines.join("\n") : `${lines.join("\n")}\n\n${block}`;
 }

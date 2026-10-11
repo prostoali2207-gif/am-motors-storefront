@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import { geologica } from "@/app/_site/fonts";
 import { layoutMetadata, siteViewport } from "@/app/_site/metadata";
 import { SiteDocument } from "@/components/site-document";
+import { inquiryRefsEnabled } from "@/inquiry-log/config";
 
 /**
  * Arabic companion: Noto Kufi Arabic (SIL OFL 1.1, ../fonts/OFL-NotoKufiArabic.txt), weights
@@ -28,7 +29,7 @@ export const viewport = siteViewport;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <SiteDocument locale="ar" fontClassName={`${geologica.variable} ${notoKufiArabic.variable}`}>
+    <SiteDocument locale="ar" inquiryRefs={inquiryRefsEnabled()} fontClassName={`${geologica.variable} ${notoKufiArabic.variable}`}>
       {children}
     </SiteDocument>
   );

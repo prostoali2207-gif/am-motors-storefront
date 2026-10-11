@@ -18,10 +18,13 @@ import "@/app/night-shift-photo-cards.css";
 export function SiteDocument({
   locale,
   fontClassName,
+  inquiryRefs = false,
   children,
 }: {
   locale: Locale;
   fontClassName: string;
+  /** Server decision (src/inquiry-log/config.ts): show short inquiry references. Default off. */
+  inquiryRefs?: boolean;
   children: ReactNode;
 }) {
   const config = LOCALE_CONFIG[locale];
@@ -29,7 +32,7 @@ export function SiteDocument({
   return (
     <html lang={config.lang} dir={config.dir} className={fontClassName}>
       <body>
-        <AttributionCapture />
+        <AttributionCapture inquiryRefs={inquiryRefs} />
         <a className="skip-link" href="#main">
           {t.skipToContent}
         </a>

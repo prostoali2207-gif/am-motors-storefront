@@ -95,6 +95,12 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   vars and Google Workload Identity (preview + production subjects) set by the user; temporary
   host `am-motors-storefront.vercel.app`. Vercel "Ignored Build Step" and the Production
   deployment remain the user's switches. Status: `docs/production-readiness.md`.
+- Inquiry reference attribution (issue #19; open PR, **OFF by default, pending owner approval**):
+  Google click IDs kept first-touch in the tab session, never in the prefill; the customer sees
+  only `Inquiry: G-XXXXXX`, one per WhatsApp action; `POST /api/inquiry-ref` appends one
+  `handoff_initiated` (unverified client report) row to a
+  separate log spreadsheet via a separate service account (`src/inquiry-log/`). Off unless
+  `INQUIRY_LOG=google-sheets`. Details and setup: `docs/inquiry-attribution.md`.
 - Work proceeds phase by phase per `docs/implementation-plan.md`. Do not start a phase
   unless the user explicitly asks for it.
 - **Production deployment is forbidden** until the user explicitly approves it.
@@ -188,7 +194,8 @@ React / TypeScript / ESLint majors follow the official `create-next-app@16.3.7` 
 Layout: `src/domain` (public types, ID rules), `src/i18n` (locales, paths, interface copy,
 categorical display values), `src/inventory` (repository interface, adapter
 factory, request-time queries), `src/adapters` (data sources), `src/conversion` (WhatsApp
-number, prefill templates), `src/attribution` (first-touch UTM parameters, browser session only),
+number, prefill templates), `src/attribution` (first-touch UTM parameters, browser session only; gated Google click ID +
+inquiry reference), `src/inquiry-log` (server-only, gated handoff log),
 `src/components` (sync views + small client islands), `src/app` (per-language route trees +
 `_site` shared route bodies), `src/proxy.ts` (per-request CSP nonce), `src/lib` (env, origin,
 cache and security-header policies). Tests and synthetic fixtures live only in `tests/`.

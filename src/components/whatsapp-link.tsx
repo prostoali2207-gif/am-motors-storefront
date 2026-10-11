@@ -2,12 +2,41 @@
 
 import { useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
 
-import { currentAttribution } from "@/attribution/session-attribution";
+import { sendHandoffBeacon } from "@/attribution/handoff-beacon";
+import { currentAttribution, currentPaidClick, handoffKey, paidHandoff } from "@/attribution/session-attribution";
 import { inquiryMessage, type Inquiry } from "@/conversion/inquiry-message";
 import { whatsAppUrl } from "@/conversion/whatsapp";
 
-function browserHref(inquiry: Inquiry): string {
-  return whatsAppUrl(inquiryMessage(inquiry, window.location.origin, currentAttribution()));
+function actionOf(inquiry: Inquiry) {
+  const vehicleId = inquiry.kind === "vehicle" ? inquiry.id : null;
+  const intent = inquiry.kind === "vehicle" ? inquiry.intent : "general";
+  return { vehicleId, intent, key: handoffKey(intent, vehicleId) } as const;
+}
+
+/**
+ * The href shown before a tap carries no reference: a reference is created only when the visitor
+ * actually taps (see `refresh`), so browsing pages creates none. Without a Google click (or with
+ * the feature off) every href is exactly the pre-#19 message.
+ */
+function browserHref(inquiry: Inquiry, ref: string | null = null): string {
+  return whatsAppUrl(inquiryMessage(inquiry, window.location.origin, currentAttribution(), ref));
+}
+
+/** At tap time: this action's own reference (issue #19) and its handoff record, if any. */
+function hrefAtTap(inquiry: Inquiry): string {
+  if (currentPaidClick() === null) return browserHref(inquiry);
+  const action = actionOf(inquiry);
+  const handoff = paidHandoff(action.key);
+  if (handoff === null) return browserHref(inquiry);
+  sendHandoffBeacon({
+    key: action.key,
+    handoff,
+    vehicleId: action.vehicleId,
+    intent: action.intent,
+    locale: inquiry.locale,
+    utm: currentAttribution(),
+  });
+  return browserHref(inquiry, handoff.ref);
 }
 
 /** Location and session attribution do not change while a page is shown; no subscription needed. */
@@ -43,7 +72,7 @@ export function WhatsAppLink({
   );
 
   function refresh(event: MouseEvent<HTMLAnchorElement>) {
-    event.currentTarget.href = browserHref(inquiry);
+    event.currentTarget.href = hrefAtTap(inquiry);
   }
 
   return (
