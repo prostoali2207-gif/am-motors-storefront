@@ -107,6 +107,32 @@ describe("createDriveReader: metadata requests", () => {
   });
 });
 
+describe("createDriveReader: transient recovery", () => {
+  it("recovers when folder metadata briefly answers 503", async () => {
+    let attempts = 0;
+    const { fetchImpl, calls } = fakeFetch(() => {
+      attempts++;
+      return attempts === 1
+        ? json({ error: { message: "TRANSIENT" } }, 503)
+        : json({ mimeType: "application/vnd.google-apps.folder", trashed: false });
+    });
+    const reader = createDriveReader({ getAccessToken: token, fetchImpl });
+    expect((await reader.getFolder("TESTFOLDER_0001")).trashed).toBe(false);
+    expect(calls).toHaveLength(2);
+  });
+
+  it("recovers when a photo download briefly answers 429", async () => {
+    let attempts = 0;
+    const { fetchImpl, calls } = fakeFetch(() => {
+      attempts++;
+      return attempts === 1 ? json({}, 429) : new Response(new Uint8Array([1, 2]));
+    });
+    const reader = createDriveReader({ getAccessToken: token, fetchImpl });
+    expect(Array.from(await reader.download("TESTFILE_1", 10))).toEqual([1, 2]);
+    expect(calls).toHaveLength(2);
+  });
+});
+
 describe("createDriveReader: download", () => {
   it("downloads with alt=media", async () => {
     const { calls, fetchImpl } = fakeFetch(() => new Response(new Uint8Array([1, 2, 3])));
