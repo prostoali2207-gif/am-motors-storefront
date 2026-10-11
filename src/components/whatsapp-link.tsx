@@ -2,12 +2,28 @@
 
 import { useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
 
-import { currentAttribution } from "@/attribution/session-attribution";
+import { sendHandoffBeacon } from "@/attribution/handoff-beacon";
+import { currentAttribution, currentPaidSession } from "@/attribution/session-attribution";
 import { inquiryMessage, type Inquiry } from "@/conversion/inquiry-message";
 import { whatsAppUrl } from "@/conversion/whatsapp";
 
 function browserHref(inquiry: Inquiry): string {
-  return whatsAppUrl(inquiryMessage(inquiry, window.location.origin, currentAttribution()));
+  // `currentPaidSession()` is null unless the server enabled inquiry references (issue #19) and
+  // this tab landed from a Google ad click; then only the short reference enters the message.
+  const paid = currentPaidSession();
+  return whatsAppUrl(inquiryMessage(inquiry, window.location.origin, currentAttribution(), paid?.ref ?? null));
+}
+
+function reportHandoff(inquiry: Inquiry): void {
+  const paid = currentPaidSession();
+  if (paid === null) return;
+  sendHandoffBeacon({
+    paid,
+    vehicleId: inquiry.kind === "vehicle" ? inquiry.id : null,
+    intent: inquiry.kind === "vehicle" ? inquiry.intent : "general",
+    locale: inquiry.locale,
+    utm: currentAttribution(),
+  });
 }
 
 /** Location and session attribution do not change while a page is shown; no subscription needed. */
@@ -44,6 +60,7 @@ export function WhatsAppLink({
 
   function refresh(event: MouseEvent<HTMLAnchorElement>) {
     event.currentTarget.href = browserHref(inquiry);
+    reportHandoff(inquiry);
   }
 
   return (

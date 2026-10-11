@@ -89,19 +89,47 @@ describe("conversion and attribution guards", () => {
     expect(offenders.map((f) => f.path)).toEqual([]);
   });
 
-  it("sets no cookies and posts no inquiry data anywhere (no API route, no fetch from the browser)", () => {
+  it("sets no cookies; the only browser POST is the gated inquiry-reference beacon (issue #19)", () => {
     expect(files.filter(({ text }) => /document\.cookie|cookies\(\)/.test(text)).map((f) => f.path)).toEqual([]);
     const client = files.filter(({ text }) => /^["']use client["'];/m.test(text));
     expect(client.length).toBeGreaterThan(0);
-    const clientOffenders = client.filter(({ text }) => /\bfetch\(|sendBeacon|XMLHttpRequest|WebSocket/.test(text));
-    expect(clientOffenders.map((f) => f.path)).toEqual([]);
-    const routes = files.filter(({ path }) => /[\\/]route\.ts$/.test(path)).map((f) => f.path);
-    expect(routes).toEqual([join(SRC, "app", "media", "[vehicleId]", "[mediaId]", "[revision]", "route.ts")]);
+    // Network calls from code that can reach the browser bundle: client components plus everything
+    // they may import that is not server-only. Only the handoff beacon module may send anything.
+    const browserReachable = files.filter(
+      ({ path, text }) => !/^import "server-only";/m.test(text) && !/[\\/]route\.ts$/.test(path),
+    );
+    const senders = browserReachable.filter(({ text }) => /\bfetch\(|sendBeacon|XMLHttpRequest|WebSocket/.test(text));
+    expect(senders.map((f) => f.path)).toEqual([join(SRC, "attribution", "handoff-beacon.ts")]);
+    const beacon = readFileSync(join(SRC, "attribution", "handoff-beacon.ts"), "utf8");
+    expect(beacon).toContain(`INQUIRY_REF_ENDPOINT = "/api/inquiry-ref"`);
+    expect(beacon).not.toMatch(/https?:\/\//);
+    const routes = files.filter(({ path }) => /[\\/]route\.ts$/.test(path)).map((f) => f.path).sort();
+    expect(routes).toEqual(
+      [
+        join(SRC, "app", "api", "inquiry-ref", "route.ts"),
+        join(SRC, "app", "media", "[vehicleId]", "[mediaId]", "[revision]", "route.ts"),
+      ].sort(),
+    );
+  });
+
+  it("never puts an ad click ID into a customer-visible message", () => {
+    const conversion = files.filter(({ path }) => path.includes(join("src", "conversion")));
+    expect(conversion.length).toBeGreaterThan(0);
+    for (const { text } of conversion) expect(text).not.toMatch(/gclid|gbraid|wbraid|click\.value|\.click\b/);
+  });
+
+  it("keeps the inquiry log server-only and separate from the inventory reader", () => {
+    for (const name of ["config.ts", "sheets-writer.ts", "handle-request.ts"]) {
+      expect(readFileSync(join(SRC, "inquiry-log", name), "utf8")).toMatch(/^import "server-only";/);
+    }
+    // The write scope appears only in the inquiry-log writer; the inventory adapters stay read-only.
+    const writeScope = files.filter(({ text }) => /auth\/spreadsheets["']/.test(text)).map((f) => f.path);
+    expect(writeScope).toEqual([join(SRC, "inquiry-log", "sheets-writer.ts")]);
   });
 
   it("keeps attribution storage free of vehicle data", () => {
     const attribution = files.filter(({ path }) => path.includes(join("src", "attribution")));
-    expect(attribution.length).toBe(2);
+    expect(attribution.length).toBe(4);
     for (const { text } of attribution) {
       expect(text).not.toMatch(/@\/domain|@\/inventory|@\/adapters|Vehicle\b/);
     }
