@@ -122,7 +122,9 @@ describe("media guards", () => {
     expect(config).toContain("remotePatterns: []");
     // Vercel currently crashes on /_next/image. The direct /media route checks vehicle
     // ownership and publishes sanitized, resized JPEGs without private Drive identifiers.
-    expect(config).toContain("unoptimized: true");
+    expect(config).toContain('loader: "custom"');
+    expect(config).toContain('loaderFile: "./src/lib/media-image-loader.ts"');
+    expect(config).not.toContain("unoptimized: true");
     expect(config).not.toMatch(/drive\.google|googleusercontent|googleapis|dangerouslyAllow/i);
   });
 
