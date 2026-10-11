@@ -11,7 +11,7 @@ export function isResponsiveMediaWidth(value: number): value is MediaResponsiveW
 }
 
 export default function mediaImageLoader({ src, width }: { src: string; width: number; quality?: number }): string {
-  if (!/^\/media\/[^/?#]+\/[A-Za-z0-9_-]{22}\/[A-Za-z0-9_-]{12}$/.test(src)) {
+  if (!/^\/media\/[^/?#]+\/[^/?#]+\/[^/?#]+$/.test(src)) {
     throw new Error("Only first-party /media image URLs are permitted");
   }
   if (!isResponsiveMediaWidth(width)) throw new Error("Unsupported responsive media width");
