@@ -25,7 +25,9 @@ export async function GET(request: NextRequest, ctx: RouteContext<"/media/[vehic
   // Width variants are finite so no visitor can trigger arbitrary Sharp resizes.
   const rawWidth = new URL(request.url).searchParams.get("w");
   const width = rawWidth === null ? undefined : Number(rawWidth);
-  if (rawWidth !== null && (!/^\d{1,4}$/.test(rawWidth) || !isResponsiveMediaWidth(width))) return notFound();
+  if (rawWidth !== null && (!/^\d{1,4}$/.test(rawWidth) || width === undefined || !isResponsiveMediaWidth(width))) {
+    return notFound();
+  }
   const result = width === undefined
     ? await getVehicleImage(vehicleId, mediaId, revision)
     : await getVehicleImage(vehicleId, mediaId, revision, width);
