@@ -5,6 +5,8 @@ import { LOCALE_CONFIG, localizedPath, type Locale } from "@/i18n/locales";
 import { messages } from "@/i18n/messages";
 import { AttributionCapture } from "./attribution-capture";
 import { LanguageSwitcher } from "./language-switcher";
+import { WhatsAppLink } from "./whatsapp-link";
+import { WHATSAPP_BUSINESS_NUMBER } from "@/conversion/whatsapp";
 
 import "@/app/globals.css";
 import "@/app/night-shift.css";
@@ -52,9 +54,13 @@ export function SiteDocument({
         </main>
         <footer className="site-footer">
           <div className="shell">
-            <span className="wordmark" lang="en" dir="ltr">
-              AM Motors
-            </span>
+            <span className="wordmark" lang="en" dir="ltr">AM Motors</span>
+            <address className="ns-footer-contact">
+              <span>Ajman Auto Market · Showroom 171</span>
+              <WhatsAppLink inquiry={{ kind: "general", locale }} serverOrigin={null}>
+                WhatsApp {WHATSAPP_BUSINESS_NUMBER.display}
+              </WhatsAppLink>
+            </address>
           </div>
         </footer>
       </body>
