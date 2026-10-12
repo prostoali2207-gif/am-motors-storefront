@@ -100,6 +100,29 @@ describe("static security headers", () => {
     expect(nextConfig.poweredByHeader).toBe(false);
   });
 
+  it("opens Tag Assistant popup only on explicit Preview debug URLs, not on production", async () => {
+    const previous = process.env.VERCEL_ENV;
+    try {
+      process.env.VERCEL_ENV = "preview";
+      const previewRules = await nextConfig.headers!();
+      expect(previewRules).toEqual([
+        { source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] },
+        {
+          source: "/:path*",
+          has: [{ type: "query", key: "gtm_debug" }],
+          headers: [{ key: "Cross-Origin-Opener-Policy", value: "unsafe-none" }],
+        },
+      ]);
+      process.env.VERCEL_ENV = "production";
+      expect(await nextConfig.headers!()).toEqual([
+        { source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] },
+      ]);
+    } finally {
+      if (previous === undefined) delete process.env.VERCEL_ENV;
+      else process.env.VERCEL_ENV = previous;
+    }
+  });
+
   it("cover sniffing, referrer, browser features, framing and opener", () => {
     const byKey = Object.fromEntries(STATIC_SECURITY_HEADERS.map(({ key, value }) => [key, value]));
     expect(byKey["X-Content-Type-Options"]).toBe("nosniff");
