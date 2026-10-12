@@ -9,6 +9,7 @@ import {
 } from "@/i18n/locale-preference";
 import { isLocale, switchLocalePath } from "@/i18n/locales";
 import { contentSecurityPolicy, createNonce } from "@/lib/security-headers";
+import { googleAdsConfig } from "@/lib/google-ads-config";
 
 /**
  * Language negotiation is limited to public, unprefixed English routes.
@@ -21,6 +22,7 @@ export function proxy(request: NextRequest) {
   const csp = contentSecurityPolicy({
     nonce: createNonce(),
     development: process.env.NODE_ENV === "development",
+    googleAdsEnabled: googleAdsConfig() !== null,
   });
 
   const { pathname } = request.nextUrl;

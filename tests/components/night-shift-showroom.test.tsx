@@ -20,7 +20,7 @@ describe("Night Shift photo-first catalog", () => {
     const { container } = render(
       <NightShiftShowroom vehicles={[featured, vehicles[1]]} locale="en" serverOrigin="https://site.test" />,
     );
-    expect(screen.getByRole("heading", { level: 1, name: /ON THE LOT/ })).toBeDefined();
+    expect(screen.getByRole("heading", { level: 1, name: /USED CARS IN AJMAN/ })).toBeDefined();
     expect(container.querySelector(".ns-stock-count")?.getAttribute("aria-label")).toBe("2 cars available");
     expect(container.querySelectorAll(".ns-photo-grid > li")).toHaveLength(2);
     expect(container.querySelectorAll(".ns-feature, .ns-select, .ns-arrows")).toHaveLength(0);

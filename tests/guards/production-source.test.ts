@@ -80,13 +80,16 @@ describe("conversion and attribution guards", () => {
     expect(withWaMe.map((f) => f.path)).toEqual([join(SRC, "conversion", "whatsapp.ts")]);
   });
 
-  it("loads no tracking pixels or third-party analytics", () => {
+  it("confines third-party analytics only to the consent-gated Ads module and CSP", () => {
     const offenders = files.filter(({ text }) =>
       /googletagmanager|google-analytics|gtag\(|fbq\(|connect\.facebook\.net|analytics\.tiktok|ttq\.|next\/script|@vercel\/analytics|posthog|segment\.com|hotjar|clarity\.ms/i.test(
         text,
       ),
     );
-    expect(offenders.map((f) => f.path)).toEqual([]);
+    expect(offenders.map((f) => f.path).sort()).toEqual([
+      join(SRC, "analytics", "google-ads-measurement.ts"),
+      join(SRC, "lib", "security-headers.ts"),
+    ].sort());
   });
 
   it("sets no cookies and posts no inquiry data anywhere (no API route, no fetch from the browser)", () => {

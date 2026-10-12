@@ -5,6 +5,10 @@ import { LOCALE_CONFIG, localizedPath, type Locale } from "@/i18n/locales";
 import { messages } from "@/i18n/messages";
 import { AttributionCapture } from "./attribution-capture";
 import { LanguageSwitcher } from "./language-switcher";
+import { WhatsAppLink } from "./whatsapp-link";
+import { WHATSAPP_BUSINESS_NUMBER } from "@/conversion/whatsapp";
+import { googleAdsConfig } from "@/lib/google-ads-config";
+import { GoogleAdsTracking } from "./google-ads-tracking";
 
 import "@/app/globals.css";
 import "@/app/night-shift.css";
@@ -26,6 +30,7 @@ export function SiteDocument({
 }) {
   const config = LOCALE_CONFIG[locale];
   const t = messages(locale);
+  const ads = googleAdsConfig();
   return (
     <html lang={config.lang} dir={config.dir} className={fontClassName}>
       <body>
@@ -52,9 +57,14 @@ export function SiteDocument({
         </main>
         <footer className="site-footer">
           <div className="shell">
-            <span className="wordmark" lang="en" dir="ltr">
-              AM Motors
-            </span>
+            <span className="wordmark" lang="en" dir="ltr">AM Motors</span>
+            <address className="ns-footer-contact">
+              <span>Ajman Auto Market · Showroom 171</span>
+              <WhatsAppLink inquiry={{ kind: "general", locale }} serverOrigin={null}>
+                WhatsApp {WHATSAPP_BUSINESS_NUMBER.display}
+              </WhatsAppLink>
+              {ads !== null ? <GoogleAdsTracking tagId={ads.tagId} label={ads.label} locale={locale} /> : null}
+            </address>
           </div>
         </footer>
       </body>

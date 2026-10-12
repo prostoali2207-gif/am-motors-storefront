@@ -48,6 +48,18 @@ describe("Content-Security-Policy", () => {
     expect(policy.get("connect-src")).toEqual(["'self'"]);
   });
 
+  it("allows only specific Google Ads endpoints when a valid action is configured", () => {
+    const enabled = directives(contentSecurityPolicy({
+      nonce: "N", development: false, googleAdsEnabled: true,
+    }));
+    expect(enabled.get("connect-src")).toContain("https://www.googleadservices.com");
+    expect(enabled.get("script-src")).toContain("https://www.googletagmanager.com");
+    expect(enabled.get("img-src")).toContain("https://googleads.g.doubleclick.net");
+    expect(enabled.get("frame-src")).toEqual(["https://www.googletagmanager.com"]);
+    expect(enabled.get("script-src")).not.toContain("'unsafe-inline'");
+    expect(enabled.get("script-src")).not.toContain("'unsafe-eval'");
+  });
+
   it("creates a fresh 128-bit nonce each time", () => {
     const a = createNonce();
     expect(atob(a)).toHaveLength(16);
@@ -86,6 +98,29 @@ describe("static security headers", () => {
     const rules = await nextConfig.headers!();
     expect(rules).toEqual([{ source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] }]);
     expect(nextConfig.poweredByHeader).toBe(false);
+  });
+
+  it("opens Tag Assistant popup only on explicit Preview debug URLs, not on production", async () => {
+    const previous = process.env.VERCEL_ENV;
+    try {
+      process.env.VERCEL_ENV = "preview";
+      const previewRules = await nextConfig.headers!();
+      expect(previewRules).toEqual([
+        { source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] },
+        {
+          source: "/:path*",
+          has: [{ type: "query", key: "gtm_debug" }],
+          headers: [{ key: "Cross-Origin-Opener-Policy", value: "unsafe-none" }],
+        },
+      ]);
+      process.env.VERCEL_ENV = "production";
+      expect(await nextConfig.headers!()).toEqual([
+        { source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] },
+      ]);
+    } finally {
+      if (previous === undefined) delete process.env.VERCEL_ENV;
+      else process.env.VERCEL_ENV = previous;
+    }
   });
 
   it("cover sniffing, referrer, browser features, framing and opener", () => {

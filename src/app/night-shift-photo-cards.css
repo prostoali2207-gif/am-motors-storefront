@@ -275,3 +275,87 @@ html[dir="rtl"] .ns-card-whatsapp,html[dir="rtl"] .ns-card-view{font-size:12px;}
   .ns-photo-card-media img{transition:none!important;}
   .ns-photo-card-media:hover img{transform:none!important;}
 }
+
+/* Confirmed showroom/location: a compact decision aid, not a marketing hero. */
+.ns-showroom-location {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 20px;
+  margin: 22px 0 0;
+  color: var(--ns-secondary);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.ns-showroom-location a {
+  color: var(--ns-lime);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ns-showroom-location a:focus-visible { outline-offset: 5px; }
+.ns-footer-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  align-items: center;
+  font-style: normal;
+  font-size: 12px;
+  color: var(--ns-secondary);
+}
+.ns-footer-contact a { color: var(--ns-lime); text-decoration: underline; text-underline-offset: 4px; }
+.site-footer .shell { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; }
+@media(max-width:700px) {
+  .ns-showroom-location { margin-top: 18px; font-size: 12px; }
+  .ns-footer-contact { flex-direction: column; align-items: flex-start; }
+}
+
+/* Google Ads conversion measurement is inactive without config and opt-in. */
+.am-privacy-settings {
+  padding: 4px 0;
+  color: inherit;
+  font: inherit;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.am-privacy-banner {
+  position: fixed;
+  inset-inline: max(12px, env(safe-area-inset-left)) max(12px, env(safe-area-inset-right));
+  bottom: calc(var(--sticky-actions-height, 0px) + env(safe-area-inset-bottom) + 12px);
+  z-index: 80;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 18px;
+  background: #f6f5f1;
+  color: #111;
+  border: 1px solid #4a4a4a;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgb(0 0 0 / 0.14);
+  max-width: 760px;
+  margin-inline: auto;
+  line-height: 1.4;
+}
+.am-privacy-banner strong { font-size: 14px; }
+.am-privacy-banner p { font-size: 13px; margin: 4px 0 0; max-width: 430px; }
+.am-privacy-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.am-privacy-actions button {
+  background: #111;
+  border: 1px solid #111;
+  border-radius: 4px;
+  color: white;
+  font: inherit;
+  font-size: 13px;
+  padding: 10px 15px;
+  cursor: pointer;
+  min-height: 44px;
+}
+.am-privacy-actions button + button { background: transparent; color: #111; }
+.am-privacy-actions button:focus-visible,
+.am-privacy-settings:focus-visible { outline: 3px solid #666; outline-offset: 3px; }
+.am-has-consent-prompt { padding-bottom: 110px; }

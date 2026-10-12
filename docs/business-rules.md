@@ -220,6 +220,11 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
    "Didn't find what you need?" → WhatsApp. This path must not promise sourcing, import or
    availability that the business has not confirmed.
 
+## Showroom location — confirmed project operating context (2026-08-16, checked 2026-10-12)
+
+- **Address:** Ajman Auto Market, Showroom 171, Ajman, UAE. Source: `auto-sales-growth-system/context/paid-media/showroom-171/2026-08.md`; repeated by the existing verified showroom ad reference (2026-10-11). Maps link uses a search query, not an unverified exact place pin.
+- **Opening hours:** not confirmed, so not displayed.
+
 ## Contact and inquiries — Confirmed 2026-09-30
 
 - **WhatsApp business number: +971 50 343 2337** (canonical wa.me digits `971503432337`).
@@ -372,3 +377,25 @@ Ask the user; do not assume answers.
     no Dirham symbol in Phase 7; Russian keeps space-grouped thousands.
 21. ~~`Ref:` in Arabic/Russian messages~~ — confirmed 2026-09-30: stays `Ref:` in English in
     every language.
+
+## Google Ads measurement follow-up — 2026-10-12
+
+- Every client-side WhatsApp CTA emits `am_whatsapp_click` into the first-party `dataLayer` on click, with `inquiry_type`, `page_path`, and public `vehicle_id` when applicable. This is **click intent only**; it does not prove WhatsApp opened, a message was sent, a lead qualified or a sale happened. It sends nothing until a consent-compliant tag is separately connected.
+- Google Ads account `2470160660` has no conversion actions returned by the connected resource lookup on 2026-10-12. Do not invent an AW tag ID or conversion label. Connect a tested GTM/Google tag conversion action and the applicable consent flow before counting WhatsApp clicks in Ads; complete the downstream Sales matching separately.
+
+## Google Ads Google-tag opt-in deployment — prepared 2026-10-12
+
+- Business requested measurement of website WhatsApp clicks (not successful WhatsApp sends) as of 2026-10-12.
+- Site-side Google tag integration is **disabled by default** and only renders when the two real values from an approved Google Ads Website conversion action are configured in server environment: `GOOGLE_ADS_CONVERSION_ID` (`AW-...`) and `GOOGLE_ADS_CONVERSION_LABEL`. Neither value is a secret; both must match real Google Ads values, not the Google Ads account ID.
+- Privacy model: **basic consent**. Before positive opt-in, no external Google script is loaded and no Google conversion is sent. Visitor may decline and reopen settings in the footer. Consent is stored in first-party localStorage; revoking a prior opt-in reloads the page to stop the already-loaded tag. Google signals and advertising personalization are disabled.
+- On opt-in, the Google tag is loaded, and each outbound WhatsApp button click sends an event snippet with `send_to: "AW-.../LABEL"`. No values, currency, IDs from private fields, VIN, prices or user contact details are passed. Each click may count even when the user does not send a message; explicitly name the Google Ads action **WhatsApp button click (secondary)**, not Lead or Sale. Create a separate downstream outcome for received/qualified leads when those are verifiable.
+- Google Ads account read on 2026-10-12 returned **zero conversion actions**. Until a conversion action exists with actual ID+label and the config is deployed/tested, no Google Ads conversions are measurable. The production deployment and changing Ads optimization goals remain separately gated.
+- Technical docs used: https://support.google.com/google-ads/answer/12718882 ; https://support.google.com/google-ads/answer/6331304 ; https://developers.google.com/tag-platform/security/guides/csp ; https://developers.google.com/tag-platform/security/concepts/consent-mode .
+
+### Google Ads action verified from connected account — 2026-10-12
+
+- Account: `2470160660`; category `CONTACT`; conversion action **WhatsApp button click**, Google Ads action ID `7840034817`, enabled; count `ONE_PER_CLICK`. These are not completed messages, qualified leads or sales.
+- **The actual tag values must come from `event_snippet`, not the connector's `google_tag_id` summary field:** `GOOGLE_ADS_CONVERSION_ID=AW-18505569971` and `GOOGLE_ADS_CONVERSION_LABEL=1KumCIHgtZodELOtkvhE`. Confirmed by the live Google Ads conversion action `tag.global_site_tag` and `tag.event_snippet`; matches the supplied Ads UI screenshot.
+- When finishing the Google Ads setup, choose **Click**, not **Page load**, for the event trigger. The website records outbound WhatsApp button clicks, not confirmation page views.
+- The browser-facing conversion must be made **Secondary** after the action is created (its Google Ads setup dialog initially preselected Primary and did not allow Secondary).
+- Deployment **not activated**. Vercel project environment variable list/create operations returned HTTP **403 forbidden** on 2026-10-12, and no live or preview variable values were changed. An authorized Vercel project administrator must set both variables for the approved environment and redeploy before validating opt-in and event delivery in the browser. Do not assume the action existing means events are flowing.
