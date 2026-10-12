@@ -68,9 +68,17 @@ describe("WhatsApp click instrumentation", () => {
     expect(scripts).toHaveLength(1);
     expect(scripts[0]?.src).toBe("https://www.googletagmanager.com/gtag/js?id=AW-123456");
     expect(reportGoogleAdsWhatsAppClick()).toBe(true);
-    expect(browser.dataLayer.at(-1)).toEqual([
+    const commands = browser.dataLayer as IArguments[];
+    expect(commands.every((command) => Object.prototype.toString.call(command) === "[object Arguments]")).toBe(true);
+    expect(commands.map((command) => Array.from(command).slice(0, 2))).toEqual([
+      ["consent", "default"], ["consent", "update"], ["js", expect.any(Date)],
+      ["config", "AW-123456"], ["event", "conversion"],
+    ]);
+    expect(Array.from(commands.at(-1) ?? [])).toEqual([
       "event", "conversion", { send_to: "AW-123456/Label_ABC" },
     ]);
+    // Fake array commands were previously accepted by unit tests but not by gtag.js.
+    expect(Array.isArray(commands.at(-1))).toBe(false);
     expect(JSON.stringify(browser.dataLayer)).not.toContain("Testmake");
     expect(ADS_CONSENT_STORAGE_KEY).toBe("am-motors:ads-consent:v1");
   });
