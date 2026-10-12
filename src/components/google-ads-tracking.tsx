@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 
 import { ADS_CONSENT_STORAGE_KEY, activateGoogleAdsMeasurement } from "@/analytics/google-ads-measurement";
 import type { Locale } from "@/i18n/locales";
@@ -36,20 +36,23 @@ function storeConsent(value: "yes" | "no"): void {
 }
 
 /** Render only when a valid Google Ads conversion ID AND action label are configured on server. */
+const subscribeConsent = () => () => {};
+
 export function GoogleAdsTracking({ tagId, label, locale }: {
   tagId: string;
   label: string;
   locale: Locale;
 }) {
-  const [open, setOpen] = useState(false);
-  const [choice, setChoice] = useState<"yes" | "no" | null>(null);
+  // Hydration-safe: browser storage is read as an external store, not setState in an effect.
+  const saved = useSyncExternalStore(subscribeConsent, readConsent, () => undefined);
+  const [chosen, setChosen] = useState<"yes" | "no" | undefined>(undefined);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const choice = chosen ?? saved;
+  const open = settingsOpen || choice === null;
 
   useEffect(() => {
-    const saved = readConsent();
-    setChoice(saved);
-    setOpen(saved === null);
-    if (saved === "yes") activateGoogleAdsMeasurement(tagId, label);
-  }, [tagId, label]);
+    if (choice === "yes") activateGoogleAdsMeasurement(tagId, label);
+  }, [choice, tagId, label]);
 
   useEffect(() => {
     document.body.classList.toggle("am-has-consent-prompt", open);
@@ -59,8 +62,8 @@ export function GoogleAdsTracking({ tagId, label, locale }: {
   function choose(next: "yes" | "no") {
     const prior = choice;
     storeConsent(next);
-    setChoice(next);
-    setOpen(false);
+    setChosen(next);
+    setSettingsOpen(false);
     if (next === "yes") activateGoogleAdsMeasurement(tagId, label);
     // Remove an already loaded tag if consent is withdrawn.
     if (next === "no" && prior === "yes") window.location.reload();
@@ -69,7 +72,7 @@ export function GoogleAdsTracking({ tagId, label, locale }: {
   const t = copy[locale];
   return (
     <>
-      <button type="button" className="am-privacy-settings" onClick={() => setOpen(true)}>
+      <button type="button" className="am-privacy-settings" onClick={() => setSettingsOpen(true)}>
         {t.settings}
       </button>
       {open ? (
