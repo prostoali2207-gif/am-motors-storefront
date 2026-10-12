@@ -5,12 +5,25 @@
  *
  * https://support.google.com/google-ads/answer/6331304
  */
-type DataCommand = readonly unknown[] | Record<string, string>;
+type DataCommand = IArguments | Record<string, string>;
 type MeasurementWindow = Window & { dataLayer?: DataCommand[] };
 
 let conversionTarget: string | null = null;
 
 export const ADS_CONSENT_STORAGE_KEY = "am-motors:ads-consent:v1";
+
+/**
+ * gtag.js reads commands from dataLayer as the real JavaScript `arguments`
+ * object. Plain arrays look similar but are not the supported command format.
+ * Keep first-party event objects unchanged (recordWhatsAppClick).
+ * Official Google snippet: function gtag(){dataLayer.push(arguments);}
+ */
+function pushGoogleCommand(...values: unknown[]): void {
+  if (typeof window === "undefined" || values.length === 0) return;
+  const w = window as MeasurementWindow;
+  w.dataLayer ??= [];
+  w.dataLayer.push(arguments);
+}
 
 export function activateGoogleAdsMeasurement(tagId: string, label: string): boolean {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
@@ -21,16 +34,16 @@ export function activateGoogleAdsMeasurement(tagId: string, label: string): bool
   const w = window as MeasurementWindow;
   w.dataLayer ??= [];
   // Basic consent mode: nothing is loaded until opt-in; never enable personalization.
-  w.dataLayer.push(["consent", "default", {
+  pushGoogleCommand("consent", "default", {
     ad_storage: "denied", analytics_storage: "denied",
     ad_user_data: "denied", ad_personalization: "denied",
-  }]);
-  w.dataLayer.push(["consent", "update", { ad_storage: "granted" }]);
-  w.dataLayer.push(["js", new Date()]);
-  w.dataLayer.push(["config", tagId, {
+  });
+  pushGoogleCommand("consent", "update", { ad_storage: "granted" });
+  pushGoogleCommand("js", new Date());
+  pushGoogleCommand("config", tagId, {
     allow_google_signals: false,
     allow_ad_personalization_signals: false,
-  }]);
+  });
 
   const script = document.createElement("script");
   script.async = true;
@@ -44,9 +57,7 @@ export function activateGoogleAdsMeasurement(tagId: string, label: string): bool
 
 export function reportGoogleAdsWhatsAppClick(): boolean {
   if (typeof window === "undefined" || conversionTarget === null) return false;
-  const w = window as MeasurementWindow;
-  w.dataLayer ??= [];
-  w.dataLayer.push(["event", "conversion", { send_to: conversionTarget }]);
+  pushGoogleCommand("event", "conversion", { send_to: conversionTarget });
   return true;
 }
 
