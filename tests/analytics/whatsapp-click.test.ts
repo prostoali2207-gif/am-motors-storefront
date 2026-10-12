@@ -7,16 +7,16 @@ afterEach(() => vi.unstubAllGlobals());
 describe("WhatsApp click instrumentation", () => {
   it("records a vehicle click without visitor information or VIN", () => {
     const dataLayer: Record<string, string>[] = [];
-    vi.stubGlobal("window", { location: { pathname: "/cars/AM-123" }, dataLayer });
+    vi.stubGlobal("window", { location: { pathname: "/cars/TEST-123" }, dataLayer });
     recordWhatsAppClick({
-      kind: "vehicle", intent: "viewing", id: "AM-123",
-      title: "Testmake Testcar", path: "/cars/AM-123", locale: "en",
+      kind: "vehicle", intent: "viewing", id: "TEST-123",
+      title: "Testmake Testcar", path: "/cars/TEST-123", locale: "en",
     });
     expect(dataLayer).toEqual([{
       event: "am_whatsapp_click",
       inquiry_type: "viewing",
-      page_path: "/cars/AM-123",
-      vehicle_id: "AM-123",
+      page_path: "/cars/TEST-123",
+      vehicle_id: "TEST-123",
     }]);
   });
 
