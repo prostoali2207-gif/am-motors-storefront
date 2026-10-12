@@ -242,7 +242,7 @@ describe("Drive media: per-vehicle resolution", () => {
 
   it("keeps the inventory when the media link column is missing (media unavailable for all)", async () => {
     const header = ["ID", "Марка", "Модель", "Комплектация", "Год", "Цена, AED", "Статус", "Пробег, км",
-      "Региональная спецификация", "Цвет", "Двигатель", "Топливо", "Коробка", "Привод"];
+      "Региональная спецификация", "Цвет", "Двигатель", "Топливо", "Коробка", "Привод", "VIN"];
     const warnings: string[] = [];
     const sheet = new FakeSheet([syntheticRow()], header);
     const snapshot = await loadInventorySnapshot(sheet, {

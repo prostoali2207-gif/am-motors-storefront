@@ -212,7 +212,7 @@ describe("copy and data guards on rendered actions", () => {
   it("puts no price, private field or internal value into any WhatsApp link", () => {
     const leaky = {
       ...syntheticAvailable,
-      vin: "PRIVATE-VIN-MARKER",
+      accidents: "PRIVATE-ACCIDENT-MARKER",
       minPriceAed: 99999,
       notes: "PRIVATE-NOTES-MARKER",
       mediaLink: "PRIVATE-MEDIA-LINK-MARKER",
@@ -223,7 +223,7 @@ describe("copy and data guards on rendered actions", () => {
     );
     expect(hrefs.length).toBe(5); // 3 in-page + 2 sticky
     for (const href of hrefs) {
-      expect(href).not.toMatch(/PRIVATE-|99,?999|11,?111|AED|22,?222|Test gearbox|Test spec/);
+      expect(href).not.toMatch(/PRIVATE-|99,?999|11,?111|AED|22,?222|Test gearbox|Test spec|ABCDEFGHJKLMNPRST/);
     }
     expect(container.innerHTML).not.toMatch(/PRIVATE-|99,?999/);
   });
