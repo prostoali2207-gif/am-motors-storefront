@@ -3,7 +3,8 @@
  * unprefixed URLs (`/`, `/cars`, `/cars/<ID>`) so existing and ad links never break; Arabic and
  * Russian live under `/ar` and `/ru` with the same paths below the prefix.
  *
- * No automatic redirect by browser language: the visitor chooses with the language switcher.
+ * First visit to an unprefixed page negotiates the browser language; an explicit switcher
+ * choice is remembered. Prefixed URLs always remain explicit.
  */
 export const LOCALES = ["en", "ar", "ru"] as const;
 export type Locale = (typeof LOCALES)[number];
