@@ -75,7 +75,8 @@ export function contentSecurityPolicy({ nonce, development, googleAdsEnabled = f
     ];
     directives.find((d) => d[0] === "img-src")?.push(...adsPixels);
     directives.find((d) => d[0] === "connect-src")?.push(...adsPixels, "https://ad.doubleclick.net");
-    directives.find((d) => d[0] === "frame-src")?.push("https://www.googletagmanager.com");
+    const frames = directives.find((d) => d[0] === "frame-src");
+    if (frames) frames.splice(1, frames.length - 1, "https://www.googletagmanager.com");
   }
   if (!development) directives.push(["upgrade-insecure-requests"]);
   return directives.map((parts) => parts.join(" ")).join("; ");
