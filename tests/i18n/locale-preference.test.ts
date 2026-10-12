@@ -41,18 +41,18 @@ describe("browser language selection", () => {
   });
 
   it("limits auto redirects to the three real unprefixed public page shapes", () => {
-    for (const path of ["/", "/cars", "/cars/AM-001", "/cars/AM%201%2F2"]) {
+    for (const path of ["/", "/cars", "/cars/TEST-0001", "/cars/AM%201%2F2"]) {
       expect(isAutoLocalePath(path)).toBe(true);
     }
-    for (const path of ["/ar", "/ru/cars", "/ar/cars/AM-001", "/favicon.ico", "/robots.txt", "/sitemap.xml", "/media/test", "/api/health", "/cars/AM-001/more", "/cars/"]) {
+    for (const path of ["/ar", "/ru/cars", "/ar/cars/TEST-0001", "/favicon.ico", "/robots.txt", "/sitemap.xml", "/media/test", "/api/health", "/cars/TEST-0001/more", "/cars/"]) {
       expect(isAutoLocalePath(path)).toBe(false);
     }
   });
 
   it("keeps the current vehicle ID when manually selecting any language", () => {
-    expect(languageSelectionHref("/cars/AM-001", "ar")).toBe("/ar/cars/AM-001?__am_lang=ar");
+    expect(languageSelectionHref("/cars/TEST-0001", "ar")).toBe("/ar/cars/TEST-0001?__am_lang=ar");
     expect(languageSelectionHref("/ar/cars/AM%201%2F2", "ru")).toBe("/ru/cars/AM%201%2F2?__am_lang=ru");
-    expect(languageSelectionHref("/ru/cars/AM-001", "en")).toBe("/cars/AM-001?__am_lang=en");
+    expect(languageSelectionHref("/ru/cars/TEST-0001", "en")).toBe("/cars/TEST-0001?__am_lang=en");
     expect(languageSelectionHref("/ru", "en")).toBe("/?__am_lang=en");
     expect(LOCALE_SELECTION_PARAM).toBe("__am_lang");
   });
