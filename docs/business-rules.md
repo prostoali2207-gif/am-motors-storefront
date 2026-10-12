@@ -220,6 +220,11 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
    "Didn't find what you need?" → WhatsApp. This path must not promise sourcing, import or
    availability that the business has not confirmed.
 
+## Showroom location — confirmed project operating context (2026-08-16, checked 2026-10-12)
+
+- **Address:** Ajman Auto Market, Showroom 171, Ajman, UAE. Source: `auto-sales-growth-system/context/paid-media/showroom-171/2026-08.md`; repeated by the existing verified showroom ad reference (2026-10-11). Maps link uses a search query, not an unverified exact place pin.
+- **Opening hours:** not confirmed, so not displayed.
+
 ## Contact and inquiries — Confirmed 2026-09-30
 
 - **WhatsApp business number: +971 50 343 2337** (canonical wa.me digits `971503432337`).
@@ -366,3 +371,8 @@ Ask the user; do not assume answers.
     no Dirham symbol in Phase 7; Russian keeps space-grouped thousands.
 21. ~~`Ref:` in Arabic/Russian messages~~ — confirmed 2026-09-30: stays `Ref:` in English in
     every language.
+
+## Google Ads measurement follow-up — 2026-10-12
+
+- Every client-side WhatsApp CTA emits `am_whatsapp_click` into the first-party `dataLayer` on click, with `inquiry_type`, `page_path`, and public `vehicle_id` when applicable. This is **click intent only**; it does not prove WhatsApp opened, a message was sent, a lead qualified or a sale happened. It sends nothing until a consent-compliant tag is separately connected.
+- Google Ads account `2470160660` has no conversion actions returned by the connected resource lookup on 2026-10-12. Do not invent an AW tag ID or conversion label. Connect a tested GTM/Google tag conversion action and the applicable consent flow before counting WhatsApp clicks in Ads; complete the downstream Sales matching separately.
