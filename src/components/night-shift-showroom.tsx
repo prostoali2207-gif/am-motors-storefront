@@ -13,17 +13,17 @@ import { WhatsAppLink } from "./whatsapp-link";
 
 const copy: Record<Locale, {
   eyebrow: string; first: string; second: string; count: string; catalogue: string;
-  all: string; view: string; noPhoto: string; reference: string;
+  all: string; view: string; noPhoto: string; reference: string; directions: string;
 }> = {
-  en: { eyebrow: "UAE / Cars available", first: "ON THE", second: "LOT.",
+  en: { eyebrow: "AJMAN / CARS AVAILABLE", first: "USED CARS", second: "IN AJMAN.",
     count: "in stock", catalogue: "The inventory", all: "All", view: "View car",
-    noPhoto: "Photos unavailable", reference: "Ref" },
-  ru: { eyebrow: "ОАЭ / В наличии", first: "НАШИ", second: "АВТО.",
+    noPhoto: "Photos unavailable", reference: "Ref", directions: "Directions" },
+  ru: { eyebrow: "АДЖМАН / В НАЛИЧИИ", first: "АВТО", second: "В АДЖМАНЕ.",
     count: "в наличии", catalogue: "Каталог автомобилей", all: "Все", view: "Смотреть авто",
-    noPhoto: "Фото недоступны", reference: "Ref" },
-  ar: { eyebrow: "الإمارات / سيارات متوفرة", first: "سيارات", second: "متوفرة",
+    noPhoto: "Фото недоступны", reference: "Ref", directions: "Как проехать" },
+  ar: { eyebrow: "عجمان / سيارات متوفرة", first: "سيارات", second: "مستعملة",
     count: "متوفرة", catalogue: "قائمة السيارات", all: "الكل", view: "تفاصيل السيارة",
-    noPhoto: "الصور غير متوفرة", reference: "Ref" },
+    noPhoto: "الصور غير متوفرة", reference: "Ref", directions: "الاتجاهات" },
 };
 
 /**
@@ -55,6 +55,11 @@ export function NightShiftShowroom({
         <div>
           <p className="ns-eyebrow">{t.eyebrow}</p>
           <h1 className="ns-mast-heading"><span>{t.first}</span> <em>{t.second}</em></h1>
+          <p className="ns-showroom-location">
+            <span>Ajman Auto Market · Showroom 171</span>
+            <a href="https://www.google.com/maps/search/?api=1&amp;query=Ajman%20Auto%20Market%20Showroom%20171"
+              target="_blank" rel="noopener noreferrer">{t.directions} ↗</a>
+          </p>
         </div>
         <div className="ns-stock-count" aria-label={common.availableCount(available.length)}>
           <strong>{available.length}</strong><span>{t.count}</span>
