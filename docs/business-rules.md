@@ -131,12 +131,12 @@ Recorded 2026-09-30. Technical proposals, not business facts; confirm or change 
      cannot judge image content; this check is the reviewer's responsibility.
   7. One approved exterior photo is enough to publish media. No placeholder or duplicated
      padding.
-  7a. **Cover angle — owner instruction, 2026-10-12:** `01.*` must show the actual
+  8. **Cover angle — owner instruction, 2026-10-12:** `01.*` must show the actual
      vehicle from a genuine three-quarter (3/4) exterior angle (front 3/4 preferred), not
      straight-on. Use a reviewed source photo of that exact vehicle, never generated or
      substituted imagery. If no suitable 3/4 photo exists, obtain one before publishing
      a cover. Keep all plate/privacy and content-review restrictions in force.
-  8. **Videos remain off** (not published, not rendered).
+  9. **Videos remain off** (not published, not rendered).
 - Removal: delete or move an image out of `Website/`. Pages stop referencing it within ~5 min
   (folder listing cache); a cached copy can be served for up to ≈ 1 hour (no purge tooling in V1).
 - Live check 2026-10-01 (Vercel Preview, keyless OIDC, read-only): all 20 vehicle folders are
