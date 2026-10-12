@@ -21,9 +21,10 @@ describe("WhatsApp click instrumentation", () => {
   });
 
   it("records general requests separately and does not infer a car", () => {
-    vi.stubGlobal("window", { location: { pathname: "/ru/cars" } });
+    const browser = { location: { pathname: "/ru/cars" }, dataLayer: [] as object[] };
+    vi.stubGlobal("window", browser);
     recordWhatsAppClick({ kind: "general", locale: "ru" });
-    expect((window as Window & { dataLayer: object[] }).dataLayer).toEqual([{
+    expect(browser.dataLayer).toEqual([{
       event: "am_whatsapp_click",
       inquiry_type: "general",
       page_path: "/ru/cars",
