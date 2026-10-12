@@ -9,8 +9,9 @@
  *   URLs and WhatsApp links), so the nonce costs no static optimization.
  *
  * Every allowed source is first-party: pages, fonts, styles and scripts come from the site's
- * origin and vehicle photos only from its own `/media` route through `/_next/image`. WhatsApp
- * actions are plain links (navigation is not governed by CSP). No analytics or third-party hosts.
+ * origin and vehicle photos only from its own `/media` route through `/_next/image` by default.
+ * Valid opt-in Google Ads configuration conditionally allows only its documented conversion hosts.
+ * WhatsApp actions are plain links (navigation is not governed by CSP).
  * Preview deployments get exactly the production policy, so a Preview tests what launches; the
  * Vercel preview toolbar script is therefore not allowed (it is not part of the site).
  */
@@ -37,9 +38,10 @@ export interface CspOptions {
   readonly nonce: string;
   /** `next dev` only: React needs `eval` for dev error overlays. Never in a build. */
   readonly development: boolean;
+  readonly googleAdsEnabled?: boolean;
 }
 
-export function contentSecurityPolicy({ nonce, development }: CspOptions): string {
+export function contentSecurityPolicy({ nonce, development, googleAdsEnabled = false }: CspOptions): string {
   const directives: [string, ...string[]][] = [
     ["default-src", "'self'"],
     // Only scripts carrying this request's nonce, plus the chunks they load ('strict-dynamic').
@@ -62,6 +64,19 @@ export function contentSecurityPolicy({ nonce, development }: CspOptions): strin
     ["form-action", "'none'"],
     ["frame-ancestors", "'none'"],
   ];
+  if (googleAdsEnabled) {
+    // Required Google Ads conversion endpoints only; tag code itself is loaded only after opt-in.
+    const scripts = directives.find((d) => d[0] === "script-src");
+    scripts?.push("https://www.googletagmanager.com", "https://www.googleadservices.com", "https://www.google.com");
+    const adsPixels = [
+      "https://www.googletagmanager.com", "https://www.googleadservices.com",
+      "https://googleads.g.doubleclick.net", "https://pagead2.googlesyndication.com",
+      "https://www.google.com",
+    ];
+    directives.find((d) => d[0] === "img-src")?.push(...adsPixels);
+    directives.find((d) => d[0] === "connect-src")?.push(...adsPixels, "https://ad.doubleclick.net");
+    directives.find((d) => d[0] === "frame-src")?.push("https://www.googletagmanager.com");
+  }
   if (!development) directives.push(["upgrade-insecure-requests"]);
   return directives.map((parts) => parts.join(" ")).join("; ");
 }

@@ -4,6 +4,7 @@ import { useSyncExternalStore, type MouseEvent, type ReactNode } from "react";
 
 import { currentAttribution } from "@/attribution/session-attribution";
 import { recordWhatsAppClick } from "@/analytics/whatsapp-click";
+import { reportGoogleAdsWhatsAppClick } from "@/analytics/google-ads-measurement";
 import { inquiryMessage, type Inquiry } from "@/conversion/inquiry-message";
 import { whatsAppUrl } from "@/conversion/whatsapp";
 
@@ -46,6 +47,7 @@ export function WhatsAppLink({
   function refresh(event: MouseEvent<HTMLAnchorElement>) {
     event.currentTarget.href = browserHref(inquiry);
     recordWhatsAppClick(inquiry);
+    reportGoogleAdsWhatsAppClick();
   }
 
   return (

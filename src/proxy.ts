@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { contentSecurityPolicy, createNonce } from "@/lib/security-headers";
+import { googleAdsConfig } from "@/lib/google-ads-config";
 
 /**
  * Per-request Content-Security-Policy with a fresh nonce (Next.js 16 CSP guide, "Adding a nonce
@@ -12,6 +13,7 @@ export function proxy(request: NextRequest) {
   const csp = contentSecurityPolicy({
     nonce: createNonce(),
     development: process.env.NODE_ENV === "development",
+    googleAdsEnabled: googleAdsConfig() !== null,
   });
 
   const requestHeaders = new Headers(request.headers);

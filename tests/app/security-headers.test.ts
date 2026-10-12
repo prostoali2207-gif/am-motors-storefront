@@ -48,6 +48,18 @@ describe("Content-Security-Policy", () => {
     expect(policy.get("connect-src")).toEqual(["'self'"]);
   });
 
+  it("allows only specific Google Ads endpoints when a valid action is configured", () => {
+    const enabled = directives(contentSecurityPolicy({
+      nonce: "N", development: false, googleAdsEnabled: true,
+    }));
+    expect(enabled.get("connect-src")).toContain("https://www.googleadservices.com");
+    expect(enabled.get("script-src")).toContain("https://www.googletagmanager.com");
+    expect(enabled.get("img-src")).toContain("https://googleads.g.doubleclick.net");
+    expect(enabled.get("frame-src")).toEqual(["'none'", "https://www.googletagmanager.com"]);
+    expect(enabled.get("script-src")).not.toContain("'unsafe-inline'");
+    expect(enabled.get("script-src")).not.toContain("'unsafe-eval'");
+  });
+
   it("creates a fresh 128-bit nonce each time", () => {
     const a = createNonce();
     expect(atob(a)).toHaveLength(16);
