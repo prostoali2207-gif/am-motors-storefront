@@ -268,8 +268,14 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
 - **URLs:** English keeps the original unprefixed URLs (`/`, `/cars`, `/cars/<ID>`) so existing
   and ad links never break. Arabic: `/ar`, `/ar/cars`, `/ar/cars/<ID>`. Russian: `/ru`,
   `/ru/cars`, `/ru/cars/<ID>`. The vehicle ID is the same verbatim Sheet `ID` in every language.
-- **No automatic redirect** by browser language. An explicit switcher (EN · العربية · RU, no
-  flags) keeps the visitor on the same page (homepage, `/cars`, or the same vehicle ID).
+- **Automatic browser language (confirmed 2026-10-12, supersedes the Phase 7 no-redirect rule):**
+  First visits to unprefixed `/`, `/cars` or `/cars/<ID>` use `Accept-Language` to choose English, Arabic
+  or Russian (English fallback). Existing URL paths and ad query parameters remain intact except
+  for the locale prefix. Explicit `/ar` and `/ru` URLs always keep their selected language.
+  A manual switch through EN · العربية · RU (no flags) keeps the same page/vehicle ID and
+  stores a functional `am_site_locale` cookie for one year; manual choice overrides the browser.
+  The switcher's one-time `__am_lang` URL parameter is removed on redirect. No cookie is set
+  from automatic language detection.
 - **SEO:** `<html lang dir>` per language; self-referencing canonical and `hreflang` en / ar /
   ru + `x-default` (English) built from the origin the visitor used (no domain configured,
   q 15). Indexing rules unchanged (sold VDP indexing is still q 9).

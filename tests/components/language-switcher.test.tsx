@@ -24,9 +24,9 @@ function hrefs(locale: Locale, pathname: string) {
 describe("LanguageSwitcher", () => {
   it("keeps the visitor on the same vehicle ID in every language", () => {
     const expected = [
-      ["en", "/cars/TEST-0001"],
-      ["ar", "/ar/cars/TEST-0001"],
-      ["ru", "/ru/cars/TEST-0001"],
+      ["en", "/cars/TEST-0001?__am_lang=en"],
+      ["ar", "/ar/cars/TEST-0001?__am_lang=ar"],
+      ["ru", "/ru/cars/TEST-0001?__am_lang=ru"],
     ];
     expect(hrefs("en", "/cars/TEST-0001")).toEqual(expected);
     expect(hrefs("ar", "/ar/cars/TEST-0001")).toEqual(expected);
@@ -34,8 +34,8 @@ describe("LanguageSwitcher", () => {
   });
 
   it("maps the homepage and /cars to the same page", () => {
-    expect(hrefs("ar", "/ar")).toEqual([["en", "/"], ["ar", "/ar"], ["ru", "/ru"]]);
-    expect(hrefs("en", "/cars")).toEqual([["en", "/cars"], ["ar", "/ar/cars"], ["ru", "/ru/cars"]]);
+    expect(hrefs("ar", "/ar")).toEqual([["en", "/?__am_lang=en"], ["ar", "/ar?__am_lang=ar"], ["ru", "/ru?__am_lang=ru"]]);
+    expect(hrefs("en", "/cars")).toEqual([["en", "/cars?__am_lang=en"], ["ar", "/ar/cars?__am_lang=ar"], ["ru", "/ru/cars?__am_lang=ru"]]);
   });
 
   it("shows EN · العربية · RU without flags and marks the current language", () => {

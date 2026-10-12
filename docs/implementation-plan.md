@@ -92,8 +92,10 @@ Skills: `verifying-storefront`, `building-nextjs-storefront`.
 Skills: `designing-automotive-storefront`, `protecting-commercial-truth`,
 `building-nextjs-storefront`, `verifying-storefront`.
 
-- English (default, original unprefixed URLs), Arabic (full RTL, `/ar…`), Russian (`/ru…`); no
-  automatic language redirect; header switcher EN · العربية · RU keeps the same page / vehicle ID.
+- English (default, original unprefixed URLs), Arabic (full RTL, `/ar…`), Russian (`/ru…`);
+  header switcher EN · العربية · RU keeps the same page / vehicle ID. **2026-10-12 update:**
+  automatic first-visit language detection on unprefixed public pages, with manual choice
+  persisted and explicit localized URLs respected (business-rules.md → Languages).
 - Per-language root layouts (`app/(en)`, `app/ar`, `app/ru`) sharing one document and one set of
   route bodies (`app/_site`); catch-all routes give each language its own 404.
 - Interface dictionaries, approved categorical display values, localized WhatsApp prefills;

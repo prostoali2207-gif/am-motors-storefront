@@ -2,16 +2,15 @@
 
 import { usePathname } from "next/navigation";
 
-import { LOCALE_CONFIG, LOCALES, switchLocalePath, type Locale } from "@/i18n/locales";
+import { languageSelectionHref } from "@/i18n/locale-preference";
+import { LOCALE_CONFIG, LOCALES, type Locale } from "@/i18n/locales";
 import { messages } from "@/i18n/messages";
 
 /**
- * EN · العربية · RU — plain links to the same page in each language (homepage → homepage,
- * /cars → /cars, a VDP → the same vehicle ID). No flags, no automatic redirect. The href is
- * computed from the current path during server rendering too, so it works without JavaScript.
- *
- * Plain <a> (not next/link): each language has its own root layout (<html lang dir>), so the
- * switch is a full document load either way.
+ * EN · العربية · RU — same page and same vehicle ID in every language.
+ * Plain links work without JavaScript. A one-time URL marker tells the proxy
+ * to remember the visitor's manual selection and redirect to the clean URL.
+ * A full navigation is required because locales use separate root layouts.
  */
 export function LanguageSwitcher({ locale }: { locale: Locale }) {
   const pathname = usePathname() ?? "/";
@@ -24,7 +23,7 @@ export function LanguageSwitcher({ locale }: { locale: Locale }) {
           return (
             <li key={target}>
               <a
-                href={switchLocalePath(pathname, target)}
+                href={languageSelectionHref(pathname, target)}
                 hrefLang={config.lang}
                 lang={config.lang}
                 aria-current={current ? "true" : undefined}

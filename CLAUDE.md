@@ -55,8 +55,10 @@ Full context: `docs/product-brief.md`, `docs/business-rules.md`, `docs/ux-benchm
   Restricted (owner, named staff, service account as Viewer). Not run: real iOS Safari and
   Android Chrome devices; live cache propagation after a genuine Sheet status change.
 - Phase 7 (multilingual) **accepted and merged** (PR #8): English (default, original unprefixed
-  URLs), Arabic (RTL, `/ar…`), Russian (`/ru…`); no browser-language redirect; header switcher
-  EN · العربية · RU keeps the same page / vehicle ID. Per-language root layouts `src/app/(en)`,
+  URLs), Arabic (RTL, `/ar…`), Russian (`/ru…`); header switcher
+  EN · العربية · RU keeps the same page / vehicle ID. 2026-10-12 follow-up: first-visit
+  browser language detection on unprefixed public paths; manual choice persists via a
+  functional cookie (src/i18n/locale-preference.ts, src/proxy.ts). Per-language root layouts `src/app/(en)`,
   `src/app/ar`, `src/app/ru` (one-line route files) share `src/app/_site` (route bodies,
   metadata, fonts) and `src/components/site-document.tsx`. Copy in `src/i18n/messages.ts`;
   approved categorical display values incl. current colours in `src/i18n/vehicle-values.ts`
