@@ -55,7 +55,7 @@ describe("Content-Security-Policy", () => {
     expect(enabled.get("connect-src")).toContain("https://www.googleadservices.com");
     expect(enabled.get("script-src")).toContain("https://www.googletagmanager.com");
     expect(enabled.get("img-src")).toContain("https://googleads.g.doubleclick.net");
-    expect(enabled.get("frame-src")).toEqual(["'none'", "https://www.googletagmanager.com"]);
+    expect(enabled.get("frame-src")).toEqual(["https://www.googletagmanager.com"]);
     expect(enabled.get("script-src")).not.toContain("'unsafe-inline'");
     expect(enabled.get("script-src")).not.toContain("'unsafe-eval'");
   });
