@@ -22,6 +22,9 @@ function pushGoogleCommand(...values: unknown[]): void {
   if (typeof window === "undefined" || values.length === 0) return;
   const w = window as MeasurementWindow;
   w.dataLayer ??= [];
+  // Google's official gtag() adapter needs the actual Arguments object; a rest array
+  // silently breaks its command protocol. This single lint exception documents that API.
+  // eslint-disable-next-line prefer-rest-params -- Required by Google's gtag.js protocol.
   w.dataLayer.push(arguments);
 }
 
