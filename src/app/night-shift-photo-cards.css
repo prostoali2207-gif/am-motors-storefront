@@ -275,3 +275,37 @@ html[dir="rtl"] .ns-card-whatsapp,html[dir="rtl"] .ns-card-view{font-size:12px;}
   .ns-photo-card-media img{transition:none!important;}
   .ns-photo-card-media:hover img{transform:none!important;}
 }
+
+/* Confirmed showroom/location: a compact decision aid, not a marketing hero. */
+.ns-showroom-location {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px 20px;
+  margin: 22px 0 0;
+  color: var(--ns-secondary);
+  font-size: 13px;
+  font-weight: 650;
+  line-height: 1.5;
+}
+.ns-showroom-location a {
+  color: var(--ns-lime);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.ns-showroom-location a:focus-visible { outline-offset: 5px; }
+.ns-footer-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 28px;
+  align-items: center;
+  font-style: normal;
+  font-size: 12px;
+  color: var(--ns-secondary);
+}
+.ns-footer-contact a { color: var(--ns-lime); text-decoration: underline; text-underline-offset: 4px; }
+.site-footer .shell { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px; }
+@media(max-width:700px) {
+  .ns-showroom-location { margin-top: 18px; font-size: 12px; }
+  .ns-footer-contact { flex-direction: column; align-items: flex-start; }
+}
