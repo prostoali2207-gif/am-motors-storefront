@@ -32,8 +32,10 @@ describe("VehicleDetail", () => {
       "Drivetrain",
       "Year",
       "Colour",
+      "VIN",
       "Reference",
     ]);
+    expect(within(spec).getAllByRole("definition").at(-2)?.textContent).toBe("ABCDEFGHJKLMNPRST");
     expect(within(spec).getAllByRole("definition").at(-1)?.textContent).toBe("TEST-0001");
   });
 
@@ -112,7 +114,7 @@ describe("VehicleDetail", () => {
   it("never renders fields outside the allowlist, even if an object carries them", () => {
     const leaky = {
       ...syntheticAvailable,
-      vin: "PRIVATE-VIN-MARKER",
+      accidents: "PRIVATE-ACCIDENT-MARKER",
       minPriceAed: 99999,
       notes: "PRIVATE-NOTES-MARKER",
     } as Vehicle;

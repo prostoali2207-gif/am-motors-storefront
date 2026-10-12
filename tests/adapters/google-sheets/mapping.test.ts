@@ -25,6 +25,7 @@ function row(rowNumber: number, overrides: Partial<Record<PublicField, unknown>>
       fuel: "Test fuel",
       transmission: "Test gearbox",
       drivetrain: "Test drive",
+      vin: "ABCDEFGHJKLMNPRST",
       ...overrides,
     },
   };
@@ -50,6 +51,7 @@ describe("mapRows: field-by-field mapping", () => {
         fuel: "Test fuel",
         transmission: "Test gearbox",
         drivetrain: "Test drive",
+        vin: "ABCDEFGHJKLMNPRST",
         media: [],
       },
     ]);
@@ -68,6 +70,23 @@ describe("mapRows: field-by-field mapping", () => {
     const { vehicles } = mapRows([row(2, { make: "  Test\n make ", engine: "2.0  test" })], YEAR);
     expect(vehicles[0].make).toBe("Test make");
     expect(vehicles[0].engine).toBe("2.0 test");
+  });
+});
+
+describe("mapRows: VIN validation", () => {
+  it("maps each verified VIN to the matching vehicle", () => {
+    const { vehicles } = mapRows([row(2), row(3, { vin: "123456789ABCDEFGH" })], YEAR);
+    expect(vehicles.map((v) => v.vin)).toEqual(["ABCDEFGHJKLMNPRST", "123456789ABCDEFGH"]);
+  });
+  it("omits empty VIN without dropping its vehicle", () => {
+    const { vehicles, issues } = mapRows([row(2, { vin: "" })], YEAR);
+    expect(vehicles[0].vin).toBeNull();
+    expect(issues).toEqual([]);
+  });
+  it.each(["SHORT", "I".repeat(17), 123456789, true])("omits invalid VIN and only logs a code: %j", (vin) => {
+    const { vehicles, issues } = mapRows([row(2, { vin })], YEAR);
+    expect(vehicles[0].vin).toBeNull();
+    expect(issues).toEqual([{ rowNumber: 2, code: "invalid-vin" }]);
   });
 });
 
@@ -139,6 +158,7 @@ describe("mapRows: missing fields", () => {
           fuel: "",
           transmission: undefined,
           drivetrain: undefined,
+          vin: undefined,
         }),
       ],
       YEAR,
@@ -154,6 +174,7 @@ describe("mapRows: missing fields", () => {
       fuel: null,
       transmission: null,
       drivetrain: null,
+      vin: null,
     });
   });
 

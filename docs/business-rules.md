@@ -26,6 +26,7 @@ not be implemented as fact. Update this file when the business confirms somethin
 - No marketplace-grade search/filter system for the current small stock.
 - Ads for a specific car link to that car's VDP.
 - Production deployment is forbidden until explicitly approved.
+- **VIN public display — Confirmed 2026-10-12:** the business requested a full VIN for every vehicle in its website description. Show a validated VIN only on individual vehicle detail pages, sourced from the `VIN` Sheet column; missing or invalid values are omitted. Other private fields remain private.
 
 ## Sheet schema — Confirmed snapshot
 
@@ -51,7 +52,7 @@ this snapshot, stop and update both files with the user before changing code.
 | 13 | `Коробка` | Public candidate | `transmission` |
 | 14 | `Привод` | Public candidate | `drivetrain` |
 | 15 | `Состояние` | Pending business decision (private until decided) | — |
-| 16 | `VIN` | Private by default | — |
+| 16 | `VIN` | Public candidate (confirmed 2026-10-12; detail page only) | `vin` |
 | 17 | `Аварии / крашеные детали` | Private by default | — |
 | 18 | `Сервисная история` | Private by default | — |
 | 19 | `Владельцев` | Private by default | — |
@@ -100,7 +101,7 @@ Recorded 2026-09-30. Technical proposals, not business facts; confirm or change 
 - **Live header — Confirmed 2026-09-30:** checked by the business against the live Sheet; it
   matches the 26-column snapshot above exactly, and only the two confirmed status values occur.
 - **Data minimization:** one header read, then one `values.batchGet` (`UNFORMATTED_VALUE`)
-  for exactly the 14 public-candidate columns; private, pending, server-only and unknown
+  for exactly the 15 public-candidate columns; private, pending, server-only and unknown
   columns are never requested. `Ссылка на фото/видео` is not read until Phase 3.
 - **Freshness — Accepted for V1 2026-09-30 (open question 11):** mapped public vehicles cached for 60 s
   (tag `inventory`); a snapshot older than 120 s is never served — the request reads the Sheet
@@ -330,7 +331,7 @@ Ask the user; do not assume answers.
 2. Wording when `Цена, AED` is empty (e.g. "Price on request")? VAT-inclusive? AED formatting?
 3. Should `Состояние` be shown publicly, and with what allowed values/wording?
 4. Is `Пробег, км` always public, or can it be withheld per car?
-5. Is full VIN ever public? (Default: no.)
+5. ~~Is full VIN ever public?~~ — confirmed 2026-10-12 for vehicle detail pages only.
 6. ~~Display labels for Russian source values~~ — resolved 2026-09-30 (Phase 7) for every
    current categorical value, including the current colours: see the dictionary in
    "Languages — Phase 7". A new Sheet value is shown verbatim until it is added there.

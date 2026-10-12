@@ -17,7 +17,7 @@ type Fact = { label: string; value: string | null };
 /**
  * Only public-model fields, fixed order; empty values are omitted, never filled in.
  * Categorical values (regional spec, transmission, fuel, drivetrain, colour) use the approved
- * display dictionary; everything else — engine, year, ID — is shown exactly as in the Sheet.
+ * display dictionary; engine, year, VIN and ID come from public Sheet fields.
  */
 function specification(vehicle: Vehicle, locale: Locale): Fact[] {
   const label = messages(locale).spec;
@@ -30,6 +30,7 @@ function specification(vehicle: Vehicle, locale: Locale): Fact[] {
     { label: label.drivetrain, value: displayVehicleValue("drivetrain", vehicle.drivetrain, locale) },
     { label: label.year, value: String(vehicle.year) },
     { label: label.colour, value: displayVehicleValue("color", vehicle.color, locale) },
+    { label: label.vin, value: vehicle.vin },
     { label: label.reference, value: vehicle.id },
   ];
 }

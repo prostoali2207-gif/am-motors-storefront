@@ -18,12 +18,12 @@ async function load(sheet: FakeSheet, log = recordingLog()) {
 }
 
 describe("loadInventorySnapshot: one batch data read", () => {
-  it("reads all 14 public columns in exactly one batchGet after the header read", async () => {
+  it("reads all 15 public columns in exactly one batchGet after the header read", async () => {
     const sheet = new FakeSheet([syntheticRow()]);
     await load(sheet);
 
     expect(sheet.batchCalls).toHaveLength(1);
-    expect(sheet.batchCalls[0]).toHaveLength(14);
+    expect(sheet.batchCalls[0]).toHaveLength(15);
     expect(sheet.requestedRanges[0]).toBe("'Машины'!1:1");
     expect(sheet.requestedColumnNames().sort()).toEqual(Object.values(PUBLIC_COLUMNS).sort());
   });
@@ -66,6 +66,7 @@ describe("loadInventorySnapshot: values", () => {
         fuel: "Test fuel",
         transmission: "Test gearbox",
         drivetrain: "Test drive",
+        vin: "ABCDEFGHJKLMNPRST",
         media: [],
       },
       expect.objectContaining({ id: "TEST-0002", status: "sold", priceAed: null }),
@@ -80,6 +81,7 @@ describe("loadInventorySnapshot: values", () => {
     expect(vehicle.engine).toBe("2.0 Test");
     expect(vehicle.trim).toBe("Test 007");
     expect(vehicle.id).toBe("TEST-000123");
+    expect(vehicle.vin).toBe("ABCDEFGHJKLMNPRST");
   });
 
   it("keeps year, price and mileage as numbers", async () => {

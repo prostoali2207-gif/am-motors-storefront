@@ -53,6 +53,7 @@ export interface Messages {
     readonly drivetrain: string;
     readonly year: string;
     readonly colour: string;
+    readonly vin: string;
     readonly reference: string;
   };
   /** Unit written after the mileage figure. */
@@ -129,6 +130,7 @@ const en: Messages = {
     drivetrain: "Drivetrain",
     year: "Year",
     colour: "Colour",
+    vin: "VIN",
     reference: "Reference",
   },
   kmUnit: "km",
@@ -204,6 +206,7 @@ const ar: Messages = {
     drivetrain: "نظام الدفع",
     year: "سنة الصنع",
     colour: "اللون",
+    vin: "رقم الهيكل (VIN)",
     reference: "الرقم المرجعي",
   },
   kmUnit: "كم",
@@ -276,6 +279,7 @@ const ru: Messages = {
     drivetrain: "Привод",
     year: "Год",
     colour: "Цвет",
+    vin: "VIN",
     reference: "Номер",
   },
   kmUnit: "км",

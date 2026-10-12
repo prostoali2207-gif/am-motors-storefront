@@ -21,6 +21,7 @@ describe("public Vehicle allowlist", () => {
         "status",
         "transmission",
         "trim",
+        "vin",
         "year",
       ].sort(),
     );
@@ -28,7 +29,6 @@ describe("public Vehicle allowlist", () => {
 
   it("has no private, pending, server-only or non-existent fields", () => {
     const forbidden = [
-      "vin",
       "condition",
       "accidents",
       "serviceHistory",

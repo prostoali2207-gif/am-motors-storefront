@@ -27,6 +27,7 @@ export type RowIssueCode =
   | "invalid-year"
   | "invalid-price"
   | "invalid-mileage"
+  | "invalid-vin"
   | "non-text-value";
 
 export interface RowIssue {
@@ -109,6 +110,8 @@ export function mapRows(rows: readonly SourceRow[], currentYear: number): Mapped
     if (price.invalid) issues.push({ rowNumber, code: "invalid-price" });
     const mileage = readNumber(cells.mileageKm, (n) => n >= 0);
     if (mileage.invalid) issues.push({ rowNumber, code: "invalid-mileage" });
+    const vin = readVin(cells.vin);
+    if (vin.invalid) issues.push({ rowNumber, code: "invalid-vin" });
 
     // Optional text: a non-text cell (e.g. a number typed into `Двигатель`) is omitted and
     // reported, never converted.
@@ -135,6 +138,7 @@ export function mapRows(rows: readonly SourceRow[], currentYear: number): Mapped
       fuel: optionalText(cells.fuel),
       transmission: optionalText(cells.transmission),
       drivetrain: optionalText(cells.drivetrain),
+      vin: vin.value,
       // Resolved from Drive by the repository; the link itself never enters the public model.
       media: [],
     });
@@ -184,4 +188,14 @@ function readNumber(
     return { value, invalid: false };
   }
   return { value: null, invalid: true };
+}
+
+/** An empty or malformed VIN is omitted; do not guess or decode it. */
+function readVin(value: unknown): { value: string | null; invalid: boolean } {
+  if (isEmptyCell(value)) return { value: null, invalid: false };
+  if (typeof value !== "string") return { value: null, invalid: true };
+  const vin = value.trim().toUpperCase();
+  return /^[A-HJ-NPR-Z0-9]{17}$/.test(vin)
+    ? { value: vin, invalid: false }
+    : { value: null, invalid: true };
 }

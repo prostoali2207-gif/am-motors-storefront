@@ -20,6 +20,7 @@ export const syntheticAvailable: Vehicle = {
   fuel: "Test fuel",
   transmission: "Test gearbox",
   drivetrain: "Test drive",
+  vin: "ABCDEFGHJKLMNPRST",
   media: [],
 };
 
@@ -38,6 +39,7 @@ export const syntheticSold: Vehicle = {
   fuel: null,
   transmission: null,
   drivetrain: null,
+  vin: null,
   media: [],
 };
 
@@ -64,5 +66,6 @@ export const syntheticSparse: Vehicle = {
   fuel: null,
   transmission: null,
   drivetrain: null,
+  vin: null,
   media: [],
 };

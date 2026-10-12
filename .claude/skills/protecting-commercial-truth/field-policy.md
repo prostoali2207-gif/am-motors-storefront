@@ -51,11 +51,12 @@ Mapped field-by-field from existing Sheet columns only.
 | `Топливо` | `fuel` | string \| null | As written in Sheet |
 | `Коробка` | `transmission` | string \| null | As written in Sheet |
 | `Привод` | `drivetrain` | string \| null | As written in Sheet |
+| `VIN` | `vin` | string \| null | Public on vehicle detail pages, confirmed 2026-10-12; validate 17 characters excluding I/O/Q |
 
 Display labels and value normalization (e.g. Russian source values → English UI labels) must
 be an explicit, reviewed mapping table; unknown values are shown as written or omitted, never
 guessed. Phase 7 table (en / ar / ru): `docs/business-rules.md` → "Languages — Phase 7", code
-`src/i18n/vehicle-values.ts` (includes the current colour values). Make, model, trim, ID, price,
+`src/i18n/vehicle-values.ts` (includes the current colour values). Make, model, trim, ID, VIN, price,
 mileage, engine and year are never translated.
 
 ## Pending business decision
@@ -70,7 +71,6 @@ Never public, never serialized to the client, never logged with values:
 
 | Sheet column | Reason |
 | - | - |
-| `VIN` | Identifier; public only with explicit business approval |
 | `Аварии / крашеные детали` | History/condition claim; legal and commercial risk |
 | `Сервисная история` | History claim; needs verification policy |
 | `Владельцев` | History claim |

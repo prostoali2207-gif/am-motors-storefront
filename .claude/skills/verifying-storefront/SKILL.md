@@ -51,8 +51,9 @@ With the app running locally, check each route returns the expected status and c
 
 - Search the build output and rendered HTML/RSC payloads for private field names and sample
   private values used in tests: private/pending/server-only columns from `field-policy.md`
-  (`VIN`, `Мин. цена, AED`, `Заметки`, `Банковский залог`, `Мулькия до`, `Состояние`,
+  (`Мин. цена, AED`, `Заметки`, `Банковский залог`, `Мулькия до`, `Состояние`,
   `Ссылка на фото/видео`, `Дата обновления`, etc.) and their mapped keys.
+- VIN is approved 2026-10-12 for detail-page specifications only. Confirm valid VIN visible, missing/invalid VIN omitted, and no VIN in listing cards or WhatsApp messages.
 - Confirm no fixture IDs/makes (e.g. `test-`, `Testmake`) appear in production build output.
 - Confirm no secrets or `NEXT_PUBLIC_` credentials in client bundles:
   search `.next/static` for key-like strings and env var names.

@@ -4,8 +4,8 @@
  * Mirrors the V1 public candidates in
  * `.claude/skills/protecting-commercial-truth/field-policy.md`. Every field maps to one
  * existing column of the Google Sheet "AM Motors — Справочник машин". Private, pending and
- * server-only columns (VIN, Мин. цена, Заметки, Состояние, links, dates, …) are deliberately
- * absent and must never be added here without a recorded business decision.
+ * server-only columns (Мин. цена, Заметки, Состояние, links, dates, …) are deliberately
+ * absent. VIN is approved for public VDP display on 2026-10-12; other fields require approval.
  *
  * `media` is resolved server-side from the Drive folder in `Ссылка на фото/видео` and carries
  * only sanitized `VehicleMedia` (no link, folder ID or Drive file ID).
@@ -49,6 +49,8 @@ export interface Vehicle {
   readonly transmission: string | null;
   /** `Привод` */
   readonly drivetrain: string | null;
+  /** `VIN`, public VDP specification approved on 2026-10-12. */
+  readonly vin: string | null;
   /** Sanitized media from the linked Drive folder; empty = media unavailable. */
   readonly media: readonly VehicleMedia[];
 }
@@ -69,6 +71,7 @@ export const PUBLIC_VEHICLE_FIELDS = [
   "fuel",
   "transmission",
   "drivetrain",
+  "vin",
   "media",
 ] as const satisfies readonly (keyof Vehicle)[];
 

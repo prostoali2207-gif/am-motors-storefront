@@ -15,7 +15,6 @@ export type FakeRow = Partial<Record<string, FakeCell>>;
 /** Values placed in every private column so tests can prove they never leak. */
 export const PRIVATE_MARKERS: Readonly<Record<string, string>> = {
   Состояние: "PRIVATE-CONDITION-MARKER",
-  VIN: "PRIVATE-VIN-MARKER",
   "Аварии / крашеные детали": "PRIVATE-ACCIDENT-MARKER",
   "Сервисная история": "PRIVATE-SERVICE-MARKER",
   Владельцев: "PRIVATE-OWNERS-MARKER",
@@ -92,6 +91,7 @@ export function syntheticRow(overrides: FakeRow = {}): FakeRow {
     Топливо: "Test fuel",
     Коробка: "Test gearbox",
     Привод: "Test drive",
+    VIN: "ABCDEFGHJKLMNPRST",
     ...PRIVATE_MARKERS,
     ...overrides,
   };

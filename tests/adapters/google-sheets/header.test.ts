@@ -11,6 +11,7 @@ describe("checkHeader", () => {
     expect(result.positions.id).toBe(0);
     expect(result.positions.priceAed).toBe(5);
     expect(result.positions.drivetrain).toBe(13);
+    expect(result.positions.vin).toBe(15);
   });
 
   it("finds columns by name regardless of order and ignores unknown columns", () => {

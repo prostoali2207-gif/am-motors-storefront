@@ -63,6 +63,7 @@ export const PUBLIC_COLUMNS = {
   fuel: "Топливо",
   transmission: "Коробка",
   drivetrain: "Привод",
+  vin: "VIN",
 } as const satisfies Record<SheetBackedField, (typeof EXPECTED_HEADER)[number]>;
 
 /** Public fields that come straight from one Sheet column (`media` is resolved from Drive). */

@@ -61,12 +61,13 @@ describe.each(LOCALES)("available VDP in %s", (locale) => {
       t.spec.drivetrain,
       t.spec.year,
       t.spec.colour,
+      t.spec.vin,
       t.spec.reference,
     ]);
     const values = within(spec).getAllByRole("definition").map((dd) => dd.textContent);
     // Engine, year and ID are never translated; colour uses the approved dictionary.
     const silver: Record<Locale, string> = { en: "Silver", ar: "فضي", ru: "Серебристый" };
-    expect(values.slice(4)).toEqual(["Test engine", expect.any(String), "2001", silver[locale], "TEST-0001"]);
+    expect(values.slice(4)).toEqual(["Test engine", expect.any(String), "2001", silver[locale], "ABCDEFGHJKLMNPRST", "TEST-0001"]);
     expect(screen.getByText(t.photosUnavailable)).toBeDefined();
     expect(screen.getByRole("link", { name: t.allCars }).getAttribute("href")).toBe(`${PREFIX[locale]}/cars`);
   });
@@ -129,7 +130,7 @@ describe.each(LOCALES)("available VDP in %s", (locale) => {
   it("publishes no private or internal field", () => {
     const withPrivate = {
       ...mapped,
-      vin: "PRIVATE-VIN-MARKER",
+      accidents: "PRIVATE-ACCIDENT-MARKER",
       minPriceAed: 99999,
       notes: "PRIVATE-NOTE-MARKER",
       condition: "PRIVATE-CONDITION-MARKER",

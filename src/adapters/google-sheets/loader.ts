@@ -39,7 +39,7 @@ const PREFIX = "[inventory:sheets]";
 /**
  * Reads the "Машины" tab and returns public vehicles.
  *
- * 1. Read the header row; locate the 14 allowlisted columns by exact name.
+ * 1. Read the header row; locate the 15 allowlisted columns by exact name.
  * 2. Read exactly those columns in ONE `values.batchGet` with `UNFORMATTED_VALUE`: text cells
  *    arrive as strings, numeric effective values (year, price, mileage) as numbers. The only
  *    other column ever requested is the server/source-only `Ссылка на фото/видео`, and only
