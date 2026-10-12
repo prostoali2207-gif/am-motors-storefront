@@ -8,7 +8,20 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // Same security headers on every response; the nonce CSP for pages is set in src/proxy.ts.
   async headers() {
-    return [{ source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] }];
+    const standard = [{ source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] }];
+    if (process.env.VERCEL_ENV !== "preview") return standard;
+    // Tag Assistant opens Preview in a cross-origin popup with ?gtm_debug=...
+    // COOP same-origin severs its window.opener channel and breaks the debug handshake.
+    // Relax COOP only for explicitly tagged Preview debug requests, never production
+    // or normal visits, while retaining CSP, X-Frame-Options and all other headers.
+    return [
+      ...standard,
+      {
+        source: "/:path*",
+        has: [{ type: "query" as const, key: "gtm_debug" }],
+        headers: [{ key: "Cross-Origin-Opener-Policy", value: "unsafe-none" }],
+      },
+    ];
   },
   images: {
     // Vercel's /_next/image optimizer failed intermittently with MODULE_NOT_FOUND.
