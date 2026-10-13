@@ -10,22 +10,22 @@ const copy: Record<Locale, {
   accept: string; decline: string; settings: string;
 }> = {
   en: {
-    title: "Help us improve our car advertising",
-    details: "Allow Google to count WhatsApp button clicks so we can understand which car ads are useful. Your messages are not shared with Google.",
+    title: "Help us improve car ads",
+    details: "Allow Google to count WhatsApp button clicks using cookies, so we can learn which car ads are useful. Google does not receive your WhatsApp messages. Cookies are optional.",
     advancedNotice: "If you decline, Google still receives limited measurement signals without advertising cookies.",
-    accept: "Allow measurement", decline: "Decline", settings: "Privacy settings",
+    accept: "Allow measurement", decline: "Don't allow", settings: "Privacy settings",
   },
   ru: {
-    title: "Помогите улучшать рекламу автомобилей",
-    details: "Разрешите Google учитывать нажатия WhatsApp, чтобы мы понимали, какие объявления полезны. Ваши сообщения Google не передаются.",
+    title: "Помогите улучшить рекламу автомобилей",
+    details: "Разрешите Google учитывать нажатия WhatsApp с помощью файлов cookie — так мы поймём, какие объявления полезны. Google не получает вашу переписку. Использование cookie необязательно.",
     advancedNotice: "При отказе Google всё равно получает ограниченные сигналы без рекламных cookies.",
-    accept: "Разрешить учёт", decline: "Отказаться", settings: "Настройки приватности",
+    accept: "Разрешить учёт", decline: "Не разрешать", settings: "Настройки приватности",
   },
   ar: {
-    title: "ساعدنا على تحسين إعلانات السيارات",
-    details: "اسمح لـ Google بقياس نقرات واتساب لنعرف الإعلانات المفيدة. لن تتم مشاركة رسائلك مع Google.",
+    title: "ساعدنا في تحسين إعلانات السيارات",
+    details: "اسمح لـ Google بقياس النقرات على زر واتساب باستخدام ملفات تعريف الارتباط، لنعرف الإعلانات المفيدة. لا يحصل Google على رسائلك في واتساب. ملفات تعريف الارتباط اختيارية.",
     advancedNotice: "إذا رفضت، ستظل Google تتلقى إشارات قياس محدودة دون ملفات تعريف ارتباط إعلانية.",
-    accept: "السماح بالقياس", decline: "رفض", settings: "إعدادات الخصوصية",
+    accept: "السماح بالقياس", decline: "عدم السماح", settings: "إعدادات الخصوصية",
   },
 };
 
