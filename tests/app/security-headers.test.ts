@@ -96,27 +96,31 @@ describe("proxy", () => {
 describe("static security headers", () => {
   it("are applied to every path by next.config", async () => {
     const rules = await nextConfig.headers!();
-    expect(rules).toEqual([{ source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] }]);
+    expect(rules).toEqual([
+      { source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] },
+      {
+        source: "/:path*",
+        has: [{ type: "query", key: "gtm_debug" }],
+        headers: [{ key: "Cross-Origin-Opener-Policy", value: "unsafe-none" }],
+      },
+    ]);
     expect(nextConfig.poweredByHeader).toBe(false);
   });
 
-  it("opens Tag Assistant popup only on explicit Preview debug URLs, not on production", async () => {
+  it("allows Tag Assistant opener only for explicit debug URLs on both Preview and Production", async () => {
     const previous = process.env.VERCEL_ENV;
     try {
-      process.env.VERCEL_ENV = "preview";
-      const previewRules = await nextConfig.headers!();
-      expect(previewRules).toEqual([
-        { source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] },
-        {
-          source: "/:path*",
-          has: [{ type: "query", key: "gtm_debug" }],
-          headers: [{ key: "Cross-Origin-Opener-Policy", value: "unsafe-none" }],
-        },
-      ]);
-      process.env.VERCEL_ENV = "production";
-      expect(await nextConfig.headers!()).toEqual([
-        { source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] },
-      ]);
+      for (const environment of ["preview", "production"]) {
+        process.env.VERCEL_ENV = environment;
+        expect(await nextConfig.headers!()).toEqual([
+          { source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] },
+          {
+            source: "/:path*",
+            has: [{ type: "query", key: "gtm_debug" }],
+            headers: [{ key: "Cross-Origin-Opener-Policy", value: "unsafe-none" }],
+          },
+        ]);
+      }
     } finally {
       if (previous === undefined) delete process.env.VERCEL_ENV;
       else process.env.VERCEL_ENV = previous;
