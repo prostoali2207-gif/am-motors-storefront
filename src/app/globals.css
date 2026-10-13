@@ -873,28 +873,22 @@ body:has(.sticky-actions) {
 }
 
 .general-request {
-  margin-top: var(--space-8);
-  padding-top: var(--space-5);
-  border-top: 1px solid var(--ink);
-  max-width: 40rem;
+  margin-top: var(--space-6);
 }
 
-.general-request-title {
-  font-size: 1.25rem;
-  line-height: 1.5rem;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-
-.general-request-text {
-  margin-top: var(--space-2);
-  color: var(--muted);
-}
-
-.general-request-action {
+.general-request-link {
   display: inline-flex;
-  margin-top: var(--space-4);
-  padding-inline: var(--space-6);
+  align-items: center;
+  flex-wrap: wrap;
+  column-gap: 0.35em;
+  min-height: 44px;
+  padding: 7px 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
 }
 
 .vehicle-spec {
@@ -1091,7 +1085,7 @@ html[lang="ar"] .label:not(.card-eyebrow):not(.vehicle-eyebrow) {
   text-transform: none;
 }
 
-html[lang="ar"] :is(.page-title, .vehicle-title, .card-title, .notice-title, .general-request-title) {
+html[lang="ar"] :is(.page-title, .vehicle-title, .card-title, .notice-title) {
   letter-spacing: 0;
   line-height: 1.35;
 }

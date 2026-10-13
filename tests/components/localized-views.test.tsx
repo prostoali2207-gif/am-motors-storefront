@@ -221,12 +221,14 @@ describe.each(LOCALES)("inventory in %s", (locale) => {
 
   it("offers the localized general request with the localized message", () => {
     render(<GeneralRequest locale={locale} />);
-    expect(screen.getByRole("heading", { name: t.generalRequestTitle })).toBeDefined();
+    const link = screen.getByRole("link", { name: `${t.generalRequestTitle} ${t.generalRequestText}` });
+    expect(link.getAttribute("data-inquiry")).toBe("general");
+    expect(screen.queryByRole("heading", { name: t.generalRequestTitle })).toBeNull();
     const expected: Record<Locale, string> = {
       en: "Hi, I couldn't find the car I'm looking for on the website. Can you help me with current availability?",
       ar: "مرحباً، لم أجد السيارة التي أبحث عنها على الموقع. هل يمكنكم مساعدتي بمعرفة السيارات المتوفرة حالياً؟",
       ru: "Здравствуйте, мне не удалось найти на сайте нужный автомобиль. Подскажите, пожалуйста, что сейчас есть в наличии?",
     };
-    expect(prefill(screen.getByRole("link", { name: t.chatOnWhatsApp }))).toBe(expected[locale]);
+    expect(prefill(link)).toBe(expected[locale]);
   });
 });

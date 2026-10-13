@@ -114,10 +114,9 @@ main.ns-main.shell { max-width: none; width: 100%; padding: 0 0 52px; }
 .ns-main > .page-header, .ns-main > .notice, .ns-main > .status-page { margin-inline: var(--ns-gutter); }
 .ns-main > .page-header { padding-block: 40px; }
 .ns-main > .page-header .page-title { color: var(--ns-type); }
-.ns-main .general-request { margin: 50px var(--ns-gutter) 0; padding: clamp(25px, 4vw, 45px); background: #1a2226; border: 1px solid var(--ns-rule); }
-.ns-main .general-request-title { font-size: clamp(24px, 3vw, 40px); font-weight: 850; letter-spacing: -.055em; }
-.ns-main .general-request-text { color: var(--ns-secondary); }
-.ns-main .general-request-action { display: inline-flex; min-width: min(100%, 260px); color: var(--ns-bg); background: var(--ns-lime); border-color: var(--ns-lime); font-weight: 750; text-transform: uppercase; }
+.ns-main .general-request { margin: 18px var(--ns-gutter) 0; padding: 0; background: transparent; border: 0; max-width: none; }
+.ns-main .general-request-link { color: var(--ns-secondary); font-size: 14px; font-weight: 550; }
+.ns-main .general-request-link:hover { color: var(--ns-lime); }
 
 /* Keep original VDP gallery, semantics, WhatsApp and sticky bar */
 .ns-main .vehicle { max-width: 1700px; margin: 0 auto; padding: 0 var(--ns-gutter) 40px; }
@@ -225,7 +224,7 @@ main.ns-main.shell { max-width: none; width: 100%; padding: 0 0 52px; }
   .ns-main .vehicle-spec { padding: 21px 17px; }
   .ns-main .vehicle .back-link { min-height: 49px; }
   .ns-main .photo-slide { aspect-ratio: 4 / 3; }
-  .ns-main .general-request { margin-block-start: 35px; padding: 24px 20px; }
+  .ns-main .general-request { margin-block-start: 14px; padding: 0; }
 }
 @media (max-width: 365px) {
   .site-header .wordmark { font-size: 18px; }

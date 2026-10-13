@@ -175,8 +175,8 @@ const en: Messages = {
   requestTestDrive: "Request a test drive",
   actionsHint: "Opens WhatsApp with a message about this car.",
 
-  generalRequestTitle: "Didn't find what you need?",
-  generalRequestText: "Ask us about current availability on WhatsApp.",
+  generalRequestTitle: "Didn't find the car you need?",
+  generalRequestText: "Message us on WhatsApp",
 };
 
 const ar: Messages = {
@@ -263,8 +263,8 @@ const ar: Messages = {
   requestTestDrive: "طلب تجربة قيادة",
   actionsHint: "يفتح واتساب برسالة عن هذه السيارة.",
 
-  generalRequestTitle: "لم تجد ما تبحث عنه؟",
-  generalRequestText: "اسألنا عبر واتساب عن السيارات المتوفرة حالياً.",
+  generalRequestTitle: "لم تجد السيارة التي تبحث عنها؟",
+  generalRequestText: "راسلنا عبر واتساب",
 };
 
 const ru: Messages = {
@@ -348,8 +348,8 @@ const ru: Messages = {
   requestTestDrive: "Запросить тест-драйв",
   actionsHint: "Откроется WhatsApp с сообщением об этом автомобиле.",
 
-  generalRequestTitle: "Не нашли то, что искали?",
-  generalRequestText: "Спросите нас в WhatsApp о текущем наличии.",
+  generalRequestTitle: "Не нашли нужный автомобиль?",
+  generalRequestText: "Напишите нам в WhatsApp",
 };
 
 export const MESSAGES: Readonly<Record<Locale, Messages>> = { en, ar, ru };

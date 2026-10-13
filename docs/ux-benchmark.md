@@ -728,3 +728,7 @@ of Noto Kufi Arabic next to Geologica.
 - CARS24 UAE seller page: https://www.cars24.ae/sell-used-car/ . Observed public DOM text on 2026-10-13: dedicated seller landing and car make selection. No verified mobile screenshot in this session.
 - CarSwitch direct dealer vs private sale research: https://carswitch.com/newsroom/how-to-sell-your-car-fast-in-the-uae-2026-online-vs-dealer-vs-private-sale-fees-timeline-best-strategy/ . Editorial, dated 2026-07-23, not live conversion evidence.
 - Hypothesis transferred to AM Motors: a compact navigation link and secondary bottom-of-catalog seller prompt create an additional source of seller enquiries without obscuring buyer inventory. Seller CTA routes to WhatsApp rather than introducing unsupported valuation or a competitor-scale form. No conversion lift claimed.
+
+## Compact general enquiry — 2026-10-13
+- Observed: user-provided Android screenshot of AM Motors mobile catalog footer shows two adjacent large calls to action, general inventory question followed by the 'sell car' block. The general enquiry occupies most of a mobile viewport and visually competes with selling intent.
+- Approved change: replace the large general-enquiry card with a single understated WhatsApp text link immediately after inventory, before the seller block. Preserve the conversion path and prefilled text. No measured lift asserted. This adjusts visual weight of an existing CTA rather than introducing a new funnel.
