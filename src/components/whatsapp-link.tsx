@@ -49,7 +49,8 @@ export function WhatsAppLink({
     event.currentTarget.href = nextHref;
     event.currentTarget.target = nextHref.startsWith("intent://") ? "_self" : "_blank";
     recordWhatsAppClick(inquiry);
-    reportGoogleAdsWhatsAppClick();
+    // Seller enquiries are distinct from buyer-side Google Ads conversions.
+    if (inquiry.kind !== "sell") reportGoogleAdsWhatsAppClick();
   }
 
   return (
@@ -60,7 +61,7 @@ export function WhatsAppLink({
       rel="noopener noreferrer"
       aria-describedby={describedBy}
       onClick={refresh}
-      data-inquiry={inquiry.kind === "vehicle" ? inquiry.intent : "general"}
+      data-inquiry={inquiry.kind === "vehicle" ? inquiry.intent : inquiry.kind}
     >
       {children}
     </a>

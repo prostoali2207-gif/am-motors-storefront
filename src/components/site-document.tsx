@@ -48,6 +48,9 @@ export function SiteDocument({
               <Link className="nav-link" href={localizedPath(locale, { kind: "cars" })}>
                 {t.navCars}
               </Link>
+              <Link className="nav-link nav-sell-link" href={localizedPath(locale, { kind: "sell" })}>
+                {t.navSell}
+              </Link>
             </nav>
             <LanguageSwitcher locale={locale} />
           </div>

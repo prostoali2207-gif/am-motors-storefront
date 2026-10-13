@@ -7,7 +7,7 @@ export const LOCALE_PREFERENCE_MAX_AGE = 60 * 60 * 24 * 365;
 
 /** Only the public English pages need first-visit language negotiation. */
 export function isAutoLocalePath(pathname: string): boolean {
-  return pathname === "/" || pathname === "/cars" || /^\/cars\/[^/]+$/.test(pathname);
+  return pathname === "/" || pathname === "/cars" || pathname === "/sell-your-car" || /^\/cars\/[^/]+$/.test(pathname);
 }
 
 /**

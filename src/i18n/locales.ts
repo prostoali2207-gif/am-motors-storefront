@@ -34,7 +34,7 @@ export function isLocale(value: unknown): value is Locale {
 }
 
 /** The pages that exist in every language. */
-export type SiteRoute = { readonly kind: "home" } | { readonly kind: "cars" } | { readonly kind: "vehicle"; readonly id: string };
+export type SiteRoute = { readonly kind: "home" } | { readonly kind: "cars" } | { readonly kind: "sell" } | { readonly kind: "vehicle"; readonly id: string };
 
 /** Path of a page in a language. The vehicle ID is used verbatim (URL-encoded only). */
 export function localizedPath(locale: Locale, route: SiteRoute): string {
@@ -44,6 +44,8 @@ export function localizedPath(locale: Locale, route: SiteRoute): string {
       return prefix === "" ? "/" : prefix;
     case "cars":
       return `${prefix}/cars`;
+    case "sell":
+      return `${prefix}/sell-your-car`;
     case "vehicle":
       return `${prefix}/cars/${encodeURIComponent(route.id)}`;
     default: {

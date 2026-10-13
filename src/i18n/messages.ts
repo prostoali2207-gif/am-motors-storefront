@@ -14,6 +14,18 @@ export interface Messages {
   readonly mainNavLabel: string;
   readonly languageNavLabel: string;
   readonly navCars: string;
+  readonly navSell: string;
+  readonly sellPromptTitle: string;
+  readonly sellPromptText: string;
+  readonly sellPromptLink: string;
+  readonly sellMetaTitle: string;
+  readonly sellEyebrow: string;
+  readonly sellTitle: string;
+  readonly sellDescription: string;
+  readonly sellDetailsTitle: string;
+  readonly sellDetailsText: string;
+  readonly sellCta: string;
+  readonly sellHint: string;
 
   readonly homeTitle: string;
   readonly carsTitle: string;
@@ -92,6 +104,18 @@ const en: Messages = {
   mainNavLabel: "Main",
   languageNavLabel: "Language",
   navCars: "Cars",
+  navSell: "Sell your car",
+  sellPromptTitle: "Want to sell your car?",
+  sellPromptText: "AM Motors also buys cars. Send us your car details on WhatsApp.",
+  sellPromptLink: "Sell your car",
+  sellMetaTitle: "Sell your car in Ajman",
+  sellEyebrow: "AM MOTORS / AJMAN",
+  sellTitle: "WE BUY CARS.",
+  sellDescription: "Selling your car? Share the details with AM Motors on WhatsApp. We’ll review your car and get back to you.",
+  sellDetailsTitle: "What to send",
+  sellDetailsText: "Make, model, year, mileage (km) and clear photos. You can also share your asking price.",
+  sellCta: "Send car details on WhatsApp",
+  sellHint: "Opens WhatsApp. Sending a message does not guarantee an offer.",
 
   homeTitle: "Cars in stock",
   carsTitle: "All cars",
@@ -160,6 +184,18 @@ const ar: Messages = {
   mainNavLabel: "القائمة الرئيسية",
   languageNavLabel: "اللغة",
   navCars: "السيارات",
+  navSell: "بيع سيارتك",
+  sellPromptTitle: "هل ترغب في بيع سيارتك؟",
+  sellPromptText: "تشتري AM Motors السيارات أيضاً. أرسل تفاصيل سيارتك عبر واتساب.",
+  sellPromptLink: "بيع سيارتك",
+  sellMetaTitle: "بيع سيارتك في عجمان",
+  sellEyebrow: "AM MOTORS / عجمان",
+  sellTitle: "نشتري السيارات.",
+  sellDescription: "هل ترغب في بيع سيارتك؟ أرسل تفاصيلها إلى AM Motors عبر واتساب لنراجعها ونتواصل معك.",
+  sellDetailsTitle: "المعلومات المطلوبة",
+  sellDetailsText: "الماركة والموديل وسنة الصنع والمسافة المقطوعة (كم) وصور واضحة. يمكنك أيضاً ذكر السعر المطلوب.",
+  sellCta: "إرسال تفاصيل السيارة عبر واتساب",
+  sellHint: "يفتح واتساب. إرسال الرسالة لا يضمن تقديم عرض شراء.",
 
   homeTitle: "السيارات المتوفرة",
   carsTitle: "جميع السيارات",
@@ -236,6 +272,18 @@ const ru: Messages = {
   mainNavLabel: "Основное меню",
   languageNavLabel: "Язык",
   navCars: "Автомобили",
+  navSell: "Продать авто",
+  sellPromptTitle: "Хотите продать автомобиль?",
+  sellPromptText: "AM Motors также покупает автомобили. Отправьте информацию о машине в WhatsApp.",
+  sellPromptLink: "Продать автомобиль",
+  sellMetaTitle: "Продать автомобиль в Аджмане",
+  sellEyebrow: "AM MOTORS / АДЖМАН",
+  sellTitle: "МЫ ПОКУПАЕМ АВТО.",
+  sellDescription: "Хотите продать автомобиль? Отправьте данные в WhatsApp AM Motors. Мы рассмотрим предложение и свяжемся с вами.",
+  sellDetailsTitle: "Что прислать",
+  sellDetailsText: "Марку, модель, год, пробег (км) и чёткие фотографии. Можно указать желаемую цену.",
+  sellCta: "Отправить авто в WhatsApp",
+  sellHint: "Откроется WhatsApp. Отправка сообщения не гарантирует предложение о покупке.",
 
   homeTitle: "Автомобили в наличии",
   carsTitle: "Все автомобили",
