@@ -9,11 +9,12 @@ const nextConfig: NextConfig = {
   // Same security headers on every response; the nonce CSP for pages is set in src/proxy.ts.
   async headers() {
     const standard = [{ source: "/:path*", headers: [...STATIC_SECURITY_HEADERS] }];
-    if (process.env.VERCEL_ENV !== "preview") return standard;
-    // Tag Assistant opens Preview in a cross-origin popup with ?gtm_debug=...
-    // COOP same-origin severs its window.opener channel and breaks the debug handshake.
-    // Relax COOP only for explicitly tagged Preview debug requests, never production
-    // or normal visits, while retaining CSP, X-Frame-Options and all other headers.
+    // Google Tag Assistant launches an instrumented window with ?gtm_debug=...
+    // COOP same-origin severs its window.opener channel and can stop the live
+    // event stream even when the tag is initially detected. Preview already
+    // supports this debug-only exception; keep that behavior on Production too.
+    // Ordinary browsing on every environment keeps COOP same-origin. CSP,
+    // X-Frame-Options and the other security headers remain unchanged.
     return [
       ...standard,
       {
