@@ -426,3 +426,7 @@ Ask the user; do not assume answers.
 - Seller enquiries are separately tagged `sell`, do not trigger the buyer-side Google Ads WhatsApp conversion, and are not confirmed purchases.
 - No unsupported valuation, instant cash, guarantees, trade-in policy, web form, or unverified business claims.
 - Production release still requires approval and verification.
+
+## General inventory enquiry display — Confirmed 2026-10-13
+- On the homepage and `/cars`, the general WhatsApp inquiry remains available as one quiet text link after inventory; do not render it as a large promotional card or bright button alongside the seller entry.
+- Keep existing general WhatsApp message, lead type and attribution unchanged. Apply equivalent EN / AR / RU wording. Also keep the general entry in inventory-unavailable and empty states.

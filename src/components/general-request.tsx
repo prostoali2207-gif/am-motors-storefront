@@ -3,25 +3,20 @@ import { messages } from "@/i18n/messages";
 import { WhatsAppLink } from "./whatsapp-link";
 
 /**
- * General-request inquiry: "Didn't find what you need?" → WhatsApp with the confirmed neutral
- * message (in the page's language). Placed where browsing ends. Promises nothing — no sourcing,
- * import or availability.
+ * A single low-emphasis link after inventory, including empty and unavailable states.
+ * Retains the same neutral general-request WhatsApp inquiry and first-touch attribution.
  */
 export function GeneralRequest({ locale }: { locale: Locale }) {
   const t = messages(locale);
   return (
-    <section className="general-request" aria-labelledby="general-request-heading">
-      <h2 id="general-request-heading" className="general-request-title">
-        {t.generalRequestTitle}
-      </h2>
-      <p className="general-request-text">{t.generalRequestText}</p>
+    <div className="general-request">
       <WhatsAppLink
-        className="action action-secondary general-request-action"
+        className="general-request-link"
         inquiry={{ kind: "general", locale }}
         serverOrigin={null}
       >
-        {t.chatOnWhatsApp}
+        {t.generalRequestTitle} {t.generalRequestText} <span aria-hidden="true">↗</span>
       </WhatsAppLink>
-    </section>
+    </div>
   );
 }

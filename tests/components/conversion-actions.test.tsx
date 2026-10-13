@@ -184,14 +184,17 @@ describe("sell-car WhatsApp path", () => {
 });
 
 describe("general request", () => {
-  it("uses the confirmed heading and neutral message", () => {
-    render(<GeneralRequest locale="en" />);
-    const section = screen.getByRole("region", { name: "Didn't find what you need?" });
-    const link = within(section).getByRole("link", { name: "Chat on WhatsApp" });
+  it("is a single secondary text link with the same neutral WhatsApp prefill", () => {
+    const { container } = render(<GeneralRequest locale="en" />);
+    const link = screen.getByRole("link", { name: "Didn't find the car you need? Message us on WhatsApp" });
     expect(text(link)).toBe(
       "Hi, I couldn't find the car I'm looking for on the website. Can you help me with current availability?",
     );
-    expect(section.textContent).not.toMatch(/source|import|we('ll| will) find|guarantee|order/i);
+    expect(link.className).toBe("general-request-link");
+    expect(link.getAttribute("data-inquiry")).toBe("general");
+    expect(container.querySelector(".general-request")).not.toBeNull();
+    expect(container.querySelector(".general-request h2, .general-request p, .general-request button")).toBeNull();
+    expect(container.textContent).not.toMatch(/source|import|we('ll| will) find|guarantee|order/i);
   });
 
   it("is a separate inquiry from the list and never offers vehicle actions", () => {
