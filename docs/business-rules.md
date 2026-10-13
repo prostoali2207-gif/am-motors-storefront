@@ -6,7 +6,7 @@ not be implemented as fact. Update this file when the business confirms somethin
 ## Showroom maps location — Confirmed link 2026-10-13
 
 - Owner-provided exact Google Maps location for the Ajman Auto Market showroom: https://maps.app.goo.gl/pQLwiVNf2Qmqxve8A?g_st=ac .
-- The Google Maps entry currently displays **White Motors**, Al Jerf Industrial 1, **Showroom 171**. This matches the number already displayed on AM Motors' website, but does **not** establish that AM Motors and White Motors are the same legal entity or that the Google listing belongs to AM Motors. Do not substitute White Motors as public site branding without business confirmation.
+- **Confirmed by owner 2026-10-13:** the White Motors business owns/operates one part of the showroom parking area and rents the other half to AM Motors for displaying/selling AM Motors vehicles. The Google Maps pin labelled **White Motors**, Al Jerf Industrial 1, **Showroom 171**, therefore correctly identifies the shared physical location. White Motors is a separate business; do not use White Motors as AM Motors branding, contact number, or claimed Google Business Profile.
 - The public `Directions / Как проехать / الاتجاهات` link opens the owner-provided exact map pin. No showroom display name, location-extension advertising setup, or WhatsApp number changed.
 
 ## Sources of truth — Confirmed
