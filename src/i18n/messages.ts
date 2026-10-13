@@ -115,7 +115,7 @@ const en: Messages = {
   sellDetailsTitle: "What to send",
   sellDetailsText: "Make, model, year, mileage (km) and clear photos. You can also share your asking price.",
   sellCta: "Send car details on WhatsApp",
-  sellHint: "Opens WhatsApp. Sending a message does not guarantee an offer.",
+  sellHint: "Opens WhatsApp. Any offer is subject to review.",
 
   homeTitle: "Cars in stock",
   carsTitle: "All cars",
@@ -283,7 +283,7 @@ const ru: Messages = {
   sellDetailsTitle: "Что прислать",
   sellDetailsText: "Марку, модель, год, пробег (км) и чёткие фотографии. Можно указать желаемую цену.",
   sellCta: "Отправить авто в WhatsApp",
-  sellHint: "Откроется WhatsApp. Отправка сообщения не гарантирует предложение о покупке.",
+  sellHint: "Откроется WhatsApp. Предложение зависит от рассмотрения заявки.",
 
   homeTitle: "Автомобили в наличии",
   carsTitle: "Все автомобили",

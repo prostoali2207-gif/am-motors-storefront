@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { resetAttributionMemoryForTests } from "@/attribution/session-attribution";
 import { GeneralRequest } from "@/components/general-request";
+import { SellCarPage } from "@/components/sell-car-page";
 import { InventoryList } from "@/components/inventory-list";
 import { VehicleDetail } from "@/components/vehicle-detail";
 import type { Vehicle } from "@/domain/vehicle";
@@ -168,6 +169,17 @@ describe("sold VDP", () => {
     expect(container.querySelectorAll("a[href*='wa.me'], [data-inquiry]")).toHaveLength(0);
     expect(container.querySelector("[data-sticky-actions]")).toBeNull();
     expect(screen.queryByRole("region", { name: "Ask about this car" })).toBeNull();
+  });
+});
+
+describe("sell-car WhatsApp path", () => {
+  it("renders independent seller intent without a vehicle ID or valuation", () => {
+    render(<SellCarPage locale="en" />);
+    const link = screen.getByRole("link", { name: /Send car details on WhatsApp/ });
+    expect(link.getAttribute("data-inquiry")).toBe("sell");
+    expect(text(link)).toContain("sell my car");
+    expect(text(link)).not.toContain("/cars/");
+    expect(text(link)).not.toMatch(/AED|valuation/i);
   });
 });
 

@@ -33,12 +33,15 @@ describe("localizedPath", () => {
   it("keeps the original English URLs unprefixed", () => {
     expect(localizedPath("en", { kind: "home" })).toBe("/");
     expect(localizedPath("en", { kind: "cars" })).toBe("/cars");
+    expect(localizedPath("en", { kind: "sell" })).toBe("/sell-your-car");
     expect(localizedPath("en", { kind: "vehicle", id: "TEST-0001" })).toBe("/cars/TEST-0001");
   });
 
   it("prefixes Arabic and Russian", () => {
     expect(localizedPath("ar", { kind: "home" })).toBe("/ar");
     expect(localizedPath("ar", { kind: "cars" })).toBe("/ar/cars");
+    expect(localizedPath("ar", { kind: "sell" })).toBe("/ar/sell-your-car");
+    expect(localizedPath("ru", { kind: "sell" })).toBe("/ru/sell-your-car");
     expect(localizedPath("ar", { kind: "vehicle", id: "TEST-0001" })).toBe("/ar/cars/TEST-0001");
     expect(localizedPath("ru", { kind: "home" })).toBe("/ru");
     expect(localizedPath("ru", { kind: "cars" })).toBe("/ru/cars");
@@ -55,6 +58,7 @@ describe("switchLocalePath", () => {
     // path, → en, → ar, → ru
     ["/", "/", "/ar", "/ru"],
     ["/cars", "/cars", "/ar/cars", "/ru/cars"],
+    ["/sell-your-car", "/sell-your-car", "/ar/sell-your-car", "/ru/sell-your-car"],
     ["/cars/TEST-0001", "/cars/TEST-0001", "/ar/cars/TEST-0001", "/ru/cars/TEST-0001"],
     ["/ar", "/", "/ar", "/ru"],
     ["/ar/cars", "/cars", "/ar/cars", "/ru/cars"],

@@ -21,7 +21,7 @@ vi.mock("next/headers", () => ({
 }));
 
 import { alternates } from "@/app/_site/metadata";
-import { carsMetadata, homeMetadata, vehicleMetadata, vehiclePage } from "@/app/_site/pages";
+import { carsMetadata, homeMetadata, sellMetadata, sellPage, vehicleMetadata, vehiclePage } from "@/app/_site/pages";
 
 const APP = join(process.cwd(), "src/app");
 const TREES = { en: "(en)", ar: "ar", ru: "ru" } as const;
@@ -32,6 +32,7 @@ const ROUTE_FILES = [
   "not-found.tsx",
   "[...rest]/page.tsx",
   "cars/page.tsx",
+  "sell-your-car/page.tsx",
   "cars/[id]/page.tsx",
   "cars/[id]/not-found.tsx",
 ];
@@ -82,6 +83,22 @@ describe("VDP route", () => {
       const html = renderToStaticMarkup(await vehiclePage(locale)(params("TEST-0002")));
       expect(html).not.toContain("wa.me");
     }
+  });
+});
+
+describe("seller landing route", () => {
+  it.each(["en", "ar", "ru"] as const)("renders the seller WhatsApp CTA in %s", (locale) => {
+    const html = renderToStaticMarkup(sellPage(locale)());
+    expect(html).toContain('data-inquiry="sell"');
+    expect(html).toContain("wa.me/971503432337");
+    expect(html).toContain("<h1");
+    expect(html).not.toContain("test-drive");
+  });
+  it("sets a localized canonical and language alternates", async () => {
+    const meta = await sellMetadata("ru")();
+    expect(meta.title).toBe("Продать автомобиль в Аджмане");
+    expect(meta.alternates?.canonical).toBe("https://site.test/ru/sell-your-car");
+    expect(meta.alternates?.languages).toMatchObject({ en: "https://site.test/sell-your-car", ar: "https://site.test/ar/sell-your-car" });
   });
 });
 

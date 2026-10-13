@@ -419,3 +419,10 @@ Ask the user; do not assume answers.
 - Production launch of Advanced requires explicit privacy/legal sign-off for users in the UAE and relevant other regions, with a public privacy notice describing the Google recipient, purpose, and cookie-free signals; Google Consent Mode configuration is not itself a legal permission.
 - Google Ads states modeling eligibility includes approximately **700 ad clicks per day over seven days per country/domain**; our current 350 AED/14-day campaign should **not** expect modeled conversions. UTM labels in voluntarily sent WhatsApp inquiry text remain a separate, existing source of campaign attribution.
 - Sources: https://developers.google.com/tag-platform/security/concepts/consent-mode ; https://developers.google.com/tag-platform/security/guides/consent ; https://support.google.com/google-ads/answer/10548233 ; https://uaelegislation.gov.ae/en/legislations/1972/download .
+
+## Direct vehicle purchase from customers — Confirmed 2026-10-13
+- Owner approved a secondary seller journey: AM Motors buys vehicles from customers; keep inventory-first buyer flow primary.
+- `/sell-your-car` with `/ar/sell-your-car` and `/ru/sell-your-car` supports a WhatsApp inquiry for the seller. Invite make, model, year, mileage and photos; asking price optional.
+- Seller enquiries are separately tagged `sell`, do not trigger the buyer-side Google Ads WhatsApp conversion, and are not confirmed purchases.
+- No unsupported valuation, instant cash, guarantees, trade-in policy, web form, or unverified business claims.
+- Production release still requires approval and verification.
