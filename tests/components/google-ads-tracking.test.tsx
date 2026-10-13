@@ -55,7 +55,7 @@ describe("Google Ads consent choice", () => {
     renderConsent("ru");
     fireEvent.click(screen.getByRole("button", { name: "Разрешить учёт" }));
     expect(window.localStorage.getItem(consentKey)).toBe("yes");
-    expect(activateGoogleAdsMeasurement).toHaveBeenCalledWith(tagId, label);
+    expect(activateGoogleAdsMeasurement).toHaveBeenCalledWith(tagId, label, true);
     expect(screen.queryByText(/Помогите улучшить рекламу автомобилей/)).toBeNull();
   });
 
@@ -67,6 +67,6 @@ describe("Google Ads consent choice", () => {
     fireEvent.click(screen.getByRole("button", { name: "Privacy settings" }));
     fireEvent.click(screen.getByRole("button", { name: "Allow measurement" }));
     expect(window.localStorage.getItem(consentKey)).toBe("yes");
-    expect(activateGoogleAdsMeasurement).toHaveBeenCalledWith(tagId, label);
+    expect(activateGoogleAdsMeasurement).toHaveBeenCalledWith(tagId, label, true);
   });
 });
