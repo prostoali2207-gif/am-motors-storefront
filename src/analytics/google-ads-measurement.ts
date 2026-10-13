@@ -1,14 +1,17 @@
 /**
- * Consent-gated Google Ads website-click conversion adapter (not a message receipt).
- * Never load third-party code before explicit opt-in. No enhanced-conversion user data,
- * purchase values, VIN, customer details or raw WhatsApp messages are transmitted.
+ * Consent Mode v2 Google Ads website-click adapter, not a message receipt.
+ * Basic mode: tag does not load before opt-in (as on current Production).
+ * Advanced mode (staged on Preview): tag loads with four consent types denied
+ * and may transmit Google's limited cookieless pings; no ad storage or chat
+ * contents are shared without consent. Requires privacy/legal review for Production.
  *
- * https://support.google.com/google-ads/answer/6331304
+ * https://developers.google.com/tag-platform/security/concepts/consent-mode
  */
 type DataCommand = IArguments | Record<string, string>;
 type MeasurementWindow = Window & { dataLayer?: DataCommand[] };
 
 let conversionTarget: string | null = null;
+let adStorageConsent: "denied" | "granted" | null = null;
 
 export const ADS_CONSENT_STORAGE_KEY = "am-motors:ads-consent:v1";
 
@@ -28,20 +31,52 @@ function pushGoogleCommand(...values: unknown[]): void {
   w.dataLayer.push(arguments);
 }
 
-export function activateGoogleAdsMeasurement(tagId: string, label: string): boolean {
+/** Google tags are configured once; only `ad_storage` changes after a visitor's choice. */
+export function updateGoogleAdsConsent(granted: boolean): boolean {
+  if (typeof window === "undefined" || conversionTarget === null) return false;
+  const next = granted ? "granted" : "denied";
+  if (adStorageConsent === next) return true;
+  pushGoogleCommand("consent", "update", {
+    ad_storage: next, analytics_storage: "denied",
+    ad_user_data: "denied", ad_personalization: "denied",
+  });
+  adStorageConsent = next;
+  return true;
+}
+
+/**
+ * `allowStorage=false` is ONLY for Advanced mode; its tag deliberately loads
+ * with consent denied and sends limited cookieless measurement to Google.
+ * Never treat such events as confirmed WhatsApp conversations.
+ */
+export function activateGoogleAdsMeasurement(
+  tagId: string, label: string, allowStorage = true,
+): boolean {
   if (typeof window === "undefined" || typeof document === "undefined") return false;
   if (!/^AW-[0-9]{6,15}$/.test(tagId) || !/^[a-zA-Z0-9_-]{3,128}$/.test(label)) return false;
   const target = tagId + "/" + label;
-  if (conversionTarget === target) return true;
+  if (conversionTarget !== null) {
+    if (conversionTarget !== target) return false;
+    return updateGoogleAdsConsent(allowStorage);
+  }
 
   const w = window as MeasurementWindow;
   w.dataLayer ??= [];
-  // Basic consent mode: nothing is loaded until opt-in; never enable personalization.
+  // All consent defaults MUST precede config, the script and every event.
   pushGoogleCommand("consent", "default", {
     ad_storage: "denied", analytics_storage: "denied",
     ad_user_data: "denied", ad_personalization: "denied",
   });
-  pushGoogleCommand("consent", "update", { ad_storage: "granted" });
+  adStorageConsent = "denied";
+  // Redact ad click IDs from cookieless pings where Google supports it.
+  pushGoogleCommand("set", "ads_data_redaction", true);
+  if (allowStorage) {
+    pushGoogleCommand("consent", "update", {
+      ad_storage: "granted", analytics_storage: "denied",
+      ad_user_data: "denied", ad_personalization: "denied",
+    });
+    adStorageConsent = "granted";
+  }
   pushGoogleCommand("js", new Date());
   pushGoogleCommand("config", tagId, {
     allow_google_signals: false,
@@ -67,4 +102,5 @@ export function reportGoogleAdsWhatsAppClick(): boolean {
 /** Tests only: never invokes network operations. */
 export function resetGoogleAdsMeasurementForTests() {
   conversionTarget = null;
+  adStorageConsent = null;
 }

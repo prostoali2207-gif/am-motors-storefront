@@ -5,21 +5,27 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { ADS_CONSENT_STORAGE_KEY, activateGoogleAdsMeasurement } from "@/analytics/google-ads-measurement";
 import type { Locale } from "@/i18n/locales";
 
-const copy: Record<Locale, { title: string; details: string; accept: string; decline: string; settings: string }> = {
+const copy: Record<Locale, {
+  title: string; details: string; advancedNotice: string;
+  accept: string; decline: string; settings: string;
+}> = {
   en: {
-    title: "Optional ads measurement",
-    details: "Allow Google cookies to measure WhatsApp button clicks? A click does not confirm a message or sale.",
-    accept: "Allow", decline: "No thanks", settings: "Privacy settings",
+    title: "Help us improve our car advertising",
+    details: "Allow Google to count WhatsApp button clicks so we can understand which car ads are useful. Your messages are not shared with Google.",
+    advancedNotice: "If you decline, Google still receives limited measurement signals without advertising cookies.",
+    accept: "Allow measurement", decline: "Decline", settings: "Privacy settings",
   },
   ru: {
-    title: "Необязательная аналитика рекламы",
-    details: "Разрешить Google cookie для учёта нажатий WhatsApp? Нажатие не означает отправку сообщения.",
-    accept: "Разрешить", decline: "Отказаться", settings: "Настройки приватности",
+    title: "Помогите улучшать рекламу автомобилей",
+    details: "Разрешите Google учитывать нажатия WhatsApp, чтобы мы понимали, какие объявления полезны. Ваши сообщения Google не передаются.",
+    advancedNotice: "При отказе Google всё равно получает ограниченные сигналы без рекламных cookies.",
+    accept: "Разрешить учёт", decline: "Отказаться", settings: "Настройки приватности",
   },
   ar: {
-    title: "قياس إعلاني اختياري",
-    details: "هل تسمح بملفات تعريف ارتباط Google لقياس نقرات واتساب؟ النقرة لا تعني إرسال رسالة.",
-    accept: "السماح", decline: "لا، شكراً", settings: "إعدادات الخصوصية",
+    title: "ساعدنا على تحسين إعلانات السيارات",
+    details: "اسمح لـ Google بقياس نقرات واتساب لنعرف الإعلانات المفيدة. لن تتم مشاركة رسائلك مع Google.",
+    advancedNotice: "إذا رفضت، ستظل Google تتلقى إشارات قياس محدودة دون ملفات تعريف ارتباط إعلانية.",
+    accept: "السماح بالقياس", decline: "رفض", settings: "إعدادات الخصوصية",
   },
 };
 
@@ -38,10 +44,12 @@ function storeConsent(value: "yes" | "no"): void {
 /** Render only when a valid Google Ads conversion ID AND action label are configured on server. */
 const subscribeConsent = () => () => {};
 
-export function GoogleAdsTracking({ tagId, label, locale }: {
+export function GoogleAdsTracking({ tagId, label, locale, advanced = false }: {
   tagId: string;
   label: string;
   locale: Locale;
+  /** Staged on Preview only until explicit privacy review and Production approval. */
+  advanced?: boolean;
 }) {
   // Hydration-safe: browser storage is read as an external store, not setState in an effect.
   const saved = useSyncExternalStore(subscribeConsent, readConsent, () => undefined);
@@ -51,8 +59,13 @@ export function GoogleAdsTracking({ tagId, label, locale }: {
   const open = settingsOpen || choice === null;
 
   useEffect(() => {
-    if (choice === "yes") activateGoogleAdsMeasurement(tagId, label);
-  }, [choice, tagId, label]);
+    // Advanced mode loads the Google tag even on "Decline"; denied consent
+    // forbids ad cookies but still permits Google's limited cookieless pings.
+    // Basic mode (Production) never loads Google without explicit opt-in.
+    if (advanced || choice === "yes") {
+      activateGoogleAdsMeasurement(tagId, label, choice === "yes");
+    }
+  }, [advanced, choice, tagId, label]);
 
   useEffect(() => {
     document.body.classList.toggle("am-has-consent-prompt", open);
@@ -64,9 +77,11 @@ export function GoogleAdsTracking({ tagId, label, locale }: {
     storeConsent(next);
     setChosen(next);
     setSettingsOpen(false);
-    if (next === "yes") activateGoogleAdsMeasurement(tagId, label);
-    // Remove an already loaded tag if consent is withdrawn.
-    if (next === "no" && prior === "yes") window.location.reload();
+    if (advanced || next === "yes") {
+      activateGoogleAdsMeasurement(tagId, label, next === "yes");
+    }
+    // Only Basic mode removes an already-loaded tag on withdrawal.
+    if (!advanced && next === "no" && prior === "yes") window.location.reload();
   }
 
   const t = copy[locale];
@@ -79,7 +94,7 @@ export function GoogleAdsTracking({ tagId, label, locale }: {
         <aside className="am-privacy-banner" aria-labelledby="am-consent-title">
           <div>
             <strong id="am-consent-title">{t.title}</strong>
-            <p>{t.details}</p>
+            <p>{t.details}{advanced ? <> {t.advancedNotice}</> : null}</p>
           </div>
           <div className="am-privacy-actions">
             <button type="button" onClick={() => choose("yes")}>{t.accept}</button>

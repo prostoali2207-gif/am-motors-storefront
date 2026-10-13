@@ -10,7 +10,7 @@
  *
  * Every allowed source is first-party: pages, fonts, styles and scripts come from the site's
  * origin and vehicle photos only from its own `/media` route through `/_next/image` by default.
- * Valid opt-in Google Ads configuration conditionally allows only its documented conversion hosts.
+ * A valid Google Ads configuration conditionally permits Google conversion hosts; the tag only loads after consent in Basic mode, or with denied consent for cookieless pings in Preview's Advanced mode.
  * WhatsApp actions are plain links (navigation is not governed by CSP).
  * Preview deployments get exactly the production policy, so a Preview tests what launches; the
  * Vercel preview toolbar script is therefore not allowed (it is not part of the site).
@@ -65,7 +65,7 @@ export function contentSecurityPolicy({ nonce, development, googleAdsEnabled = f
     ["frame-ancestors", "'none'"],
   ];
   if (googleAdsEnabled) {
-    // Required Google Ads conversion endpoints only; tag code itself is loaded only after opt-in.
+    // Required Google Ads conversion endpoints only; Basic mode gates tag loading, Advanced mode defaults to denied consent.
     const scripts = directives.find((d) => d[0] === "script-src");
     scripts?.push("https://www.googletagmanager.com", "https://www.googleadservices.com", "https://www.google.com");
     const adsPixels = [
