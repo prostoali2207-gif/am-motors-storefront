@@ -10,9 +10,8 @@ import type { Locale } from "@/i18n/locales";
  * condition or any other fact (a price can change between page view and message).
  *
  * Phase 7: the message follows the language of the page. English is the confirmed wording;
- * Arabic and Russian translate it with the same content and restrictions. The title and the
- * VDP URL identifies the exact car in every language, without duplicating its ID in the
- * opening sentence. The attribution block is unchanged (English labels).
+ * Arabic and Russian translate it with the same content and restrictions. The VDP URL
+ * identifies the exact car in every language, without duplicating its ID in the opening sentence. The attribution block is unchanged (English labels).
  */
 
 /** The three vehicle-specific intents on an available VDP. */
