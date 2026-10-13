@@ -107,7 +107,7 @@ describe("attribution block in messages", () => {
       utm_content: "reel_a",
     });
     expect(text).toBe(
-      "Hi, I'd like to request a test drive for 2001 Testmake Fixture Alpha Synthetic Trim.\n" +
+      "Hi, I'd like to request a test drive for 2001 Testmake Fixture Alpha Synthetic Trim.\n\n" +
         "https://site.test/cars/TEST-0001\n\nSource: instagram\nCampaign: yaris_reel\nContent: reel_a",
     );
     expect(text).not.toMatch(/Medium|Term|fbclid/);
