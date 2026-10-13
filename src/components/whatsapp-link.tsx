@@ -19,7 +19,7 @@ function browserHref(inquiry: Inquiry): string {
 const subscribe = () => () => {};
 
 /**
- * A prefilled inquiry link. Server rendering and non-Chrome browsers use standard wa.me;
+ * A prefilled inquiry link. Server rendering and non-Chrome browsers use standard HTTPS;
  * Chrome on Android opens regular WhatsApp Messenger directly via its package-specific intent.
  * The href is rebuilt at click time to retain first-touch attribution. The click remains a
  * native user gesture, required by Chrome to launch an Android app. No message is sent
