@@ -41,15 +41,15 @@ describe("WhatsApp business number", () => {
 });
 
 describe("vehicle inquiry messages", () => {
-  it("uses the confirmed templates with the public title, public ID and the VDP URL", () => {
+  it("uses concise templates with the public title and VDP URL containing the ID", () => {
     expect(inquiryMessage(vehicleInquiry("question"), ORIGIN)).toBe(
-      "Hi, I'm interested in 2001 Testmake Fixture Alpha Synthetic Trim (Ref: TEST-0001).\nhttps://site.test/cars/TEST-0001",
+      "Hi! I'm interested in the 2001 Testmake Fixture Alpha Synthetic Trim.\n\nhttps://site.test/cars/TEST-0001",
     );
     expect(inquiryMessage(vehicleInquiry("viewing"), ORIGIN)).toBe(
-      "Hi, I'd like to request a viewing for 2001 Testmake Fixture Alpha Synthetic Trim (Ref: TEST-0001).\nhttps://site.test/cars/TEST-0001",
+      "Hi, I'd like to request a viewing for 2001 Testmake Fixture Alpha Synthetic Trim.\n\nhttps://site.test/cars/TEST-0001",
     );
     expect(inquiryMessage(vehicleInquiry("test-drive"), ORIGIN)).toBe(
-      "Hi, I'd like to request a test drive for 2001 Testmake Fixture Alpha Synthetic Trim (Ref: TEST-0001).\nhttps://site.test/cars/TEST-0001",
+      "Hi, I'd like to request a test drive for 2001 Testmake Fixture Alpha Synthetic Trim.\n\nhttps://site.test/cars/TEST-0001",
     );
   });
 
@@ -60,17 +60,17 @@ describe("vehicle inquiry messages", () => {
     expect(new Set(messages).size).toBe(3);
   });
 
-  it("uses the ID verbatim in the text and URL-encodes it in the link", () => {
+  it("omits redundant ID in the text and URL-encodes it in the link", () => {
     const odd = { ...syntheticLongId, id: "TEST 7/Б" };
     const text = inquiryMessage(vehicleInquiry("question", odd), ORIGIN);
-    expect(text).toContain("(Ref: TEST 7/Б)");
+    expect(text.split("\n")[0]).not.toMatch(/Ref:|TEST 7\/Б/);
     expect(text).toContain(`https://site.test/cars/${encodeURIComponent("TEST 7/Б")}`);
     expect(decodedText(whatsAppUrl(text))).toBe(text);
   });
 
   it("leaves the URL line out when the origin is unknown instead of guessing one", () => {
     expect(inquiryMessage(vehicleInquiry("question"), null)).toBe(
-      "Hi, I'm interested in 2001 Testmake Fixture Alpha Synthetic Trim (Ref: TEST-0001).",
+      "Hi! I'm interested in the 2001 Testmake Fixture Alpha Synthetic Trim.",
     );
   });
 
@@ -97,7 +97,7 @@ describe("attribution block in messages", () => {
   it("is absent when no attribution was received", () => {
     const text = inquiryMessage(vehicleInquiry("viewing"), ORIGIN, {});
     expect(text).not.toMatch(/Source|Campaign|Medium|Content|Term|fbclid/);
-    expect(text.split("\n")).toHaveLength(2);
+    expect(text.split("\n")).toHaveLength(3);
   });
 
   it("lists only the values actually received, after a blank line", () => {
@@ -107,7 +107,7 @@ describe("attribution block in messages", () => {
       utm_content: "reel_a",
     });
     expect(text).toBe(
-      "Hi, I'd like to request a test drive for 2001 Testmake Fixture Alpha Synthetic Trim (Ref: TEST-0001).\n" +
+      "Hi, I'd like to request a test drive for 2001 Testmake Fixture Alpha Synthetic Trim.\n\n" +
         "https://site.test/cars/TEST-0001\n\nSource: instagram\nCampaign: yaris_reel\nContent: reel_a",
     );
     expect(text).not.toMatch(/Medium|Term|fbclid/);

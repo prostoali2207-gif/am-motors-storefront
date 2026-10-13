@@ -48,14 +48,14 @@ describe("available VDP actions", () => {
     expect(links[2]?.className).toContain("action-secondary");
   });
 
-  it("prefills each action with its own message, the public title, ID and the current VDP URL", () => {
+  it("prefills each action with its own message, the public title and the exact VDP URL", () => {
     render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const [question, viewing, testDrive] = within(zone()).getAllByRole("link").map(text);
     // After hydration the page's actual origin (jsdom: http://localhost:3000) replaces the server one.
     const url = `${window.location.origin}/cars/TEST-0001`;
-    expect(question).toBe(`Hi, I'm interested in ${TITLE} (Ref: TEST-0001).\n${url}`);
-    expect(viewing).toBe(`Hi, I'd like to request a viewing for ${TITLE} (Ref: TEST-0001).\n${url}`);
-    expect(testDrive).toBe(`Hi, I'd like to request a test drive for ${TITLE} (Ref: TEST-0001).\n${url}`);
+    expect(question).toBe(`Hi! I'm interested in the ${TITLE}.\n\n${url}`);
+    expect(viewing).toBe(`Hi, I'd like to request a viewing for ${TITLE}.\n\n${url}`);
+    expect(testDrive).toBe(`Hi, I'd like to request a test drive for ${TITLE}.\n\n${url}`);
   });
 
   it("opens WhatsApp safely in a new context and describes what happens", () => {
@@ -73,11 +73,11 @@ describe("available VDP actions", () => {
     render(<VehicleDetail locale="en" vehicle={syntheticAvailable} serverOrigin="https://site.test" />);
     const viewing = text(within(zone()).getByRole("link", { name: "Request a viewing" }));
     expect(viewing).toBe(
-      `Hi, I'd like to request a viewing for ${TITLE} (Ref: TEST-0001).\n` +
+      `Hi, I'd like to request a viewing for ${TITLE}.\n\n` +
         `${window.location.origin}/cars/TEST-0001\n\nSource: instagram\nCampaign: yaris_reel\nContent: reel_a`,
     );
     // The URL line is the clean VDP URL — the ad parameters are not repeated in it.
-    expect(viewing.split("\n")[1]).not.toContain("?");
+    expect(viewing.split("\n")[2]).not.toContain("?");
   });
 
   it("keeps the attribution after internal navigation and refreshes the link at click time", () => {
