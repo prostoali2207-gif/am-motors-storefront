@@ -7,19 +7,19 @@ import type { Locale } from "@/i18n/locales";
 
 const copy: Record<Locale, { title: string; details: string; accept: string; decline: string; settings: string }> = {
   en: {
-    title: "Optional ads measurement",
-    details: "Allow Google cookies to measure WhatsApp button clicks? A click does not confirm a message or sale.",
-    accept: "Allow", decline: "No thanks", settings: "Privacy settings",
+    title: "Help us improve car ads",
+    details: "Allow Google to count WhatsApp button clicks using cookies, so we can learn which car ads are useful. Google does not receive your WhatsApp messages. Optional.",
+    accept: "Allow measurement", decline: "Don't allow", settings: "Privacy settings",
   },
   ru: {
-    title: "Необязательная аналитика рекламы",
-    details: "Разрешить Google cookie для учёта нажатий WhatsApp? Нажатие не означает отправку сообщения.",
-    accept: "Разрешить", decline: "Отказаться", settings: "Настройки приватности",
+    title: "Помогите улучшить рекламу автомобилей",
+    details: "Разрешите Google учитывать нажатия WhatsApp с помощью cookies — так мы поймём, какие объявления полезны. Google не получает вашу переписку. Это необязательно.",
+    accept: "Разрешить учёт", decline: "Не разрешать", settings: "Настройки приватности",
   },
   ar: {
-    title: "قياس إعلاني اختياري",
-    details: "هل تسمح بملفات تعريف ارتباط Google لقياس نقرات واتساب؟ النقرة لا تعني إرسال رسالة.",
-    accept: "السماح", decline: "لا، شكراً", settings: "إعدادات الخصوصية",
+    title: "ساعدنا في تحسين إعلانات السيارات",
+    details: "اسمح لـ Google بقياس النقرات على زر واتساب باستخدام ملفات تعريف الارتباط، لنعرف الإعلانات المفيدة. لا يحصل Google على رسائلك في واتساب. هذا اختياري.",
+    accept: "السماح بالقياس", decline: "عدم السماح", settings: "إعدادات الخصوصية",
   },
 };
 
