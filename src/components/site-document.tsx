@@ -63,7 +63,10 @@ export function SiteDocument({
               <WhatsAppLink inquiry={{ kind: "general", locale }} serverOrigin={null}>
                 WhatsApp {WHATSAPP_BUSINESS_NUMBER.display}
               </WhatsAppLink>
-              {ads !== null ? <GoogleAdsTracking tagId={ads.tagId} label={ads.label} locale={locale} /> : null}
+              {ads !== null ? (
+                <GoogleAdsTracking tagId={ads.tagId} label={ads.label} locale={locale}
+                  advanced={process.env.VERCEL_ENV === "preview"} />
+              ) : null}
             </address>
           </div>
         </footer>
