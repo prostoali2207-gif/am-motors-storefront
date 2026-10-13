@@ -722,3 +722,9 @@ of Noto Kufi Arabic next to Geologica.
 | 2026-09-30 | Phase 5 conversion actions, sticky bar and general request (see "Phase 5") | Synthesis 3–5, confirmed business decisions | PR for review; no deployment |
 | 2026-09-30 | Phase 7 multilingual: EN (unprefixed) / AR (RTL, `/ar`) / RU (`/ru`), header text switcher, Noto Kufi Arabic companion | Phase 7 benchmark (DubiCars, Automall, Alba) | PR #8 draft; no production deployment |
 | 2026-10-04 | VDP photo gallery: one viewport, swipe, Previous / Next, counter, thumbnail rail, full-screen dialog; lead/rest photo split removed | DubiCars, CARS24, Kavak, CarSwitch (see "VDP photo gallery") | PR for review; no production deployment |
+
+## Seller entry decision — 2026-10-13
+- DubiCars seller page: https://www.dubicars.com/sell-your-car . Observed public DOM text on 2026-10-13: dedicated 'Sell my car' navigation and seller workflow requesting vehicle details/photos. No verified mobile screenshot in this session.
+- CARS24 UAE seller page: https://www.cars24.ae/sell-used-car/ . Observed public DOM text on 2026-10-13: dedicated seller landing and car make selection. No verified mobile screenshot in this session.
+- CarSwitch direct dealer vs private sale research: https://carswitch.com/newsroom/how-to-sell-your-car-fast-in-the-uae-2026-online-vs-dealer-vs-private-sale-fees-timeline-best-strategy/ . Editorial, dated 2026-07-23, not live conversion evidence.
+- Hypothesis transferred to AM Motors: a compact navigation link and secondary bottom-of-catalog seller prompt create an additional source of seller enquiries without obscuring buyer inventory. Seller CTA routes to WhatsApp rather than introducing unsupported valuation or a competitor-scale form. No conversion lift claimed.

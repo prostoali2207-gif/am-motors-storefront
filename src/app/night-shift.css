@@ -243,3 +243,25 @@ html[dir="rtl"] .ns-row-model, html[dir="rtl"] .ns-feature-info h2 { letter-spac
 html[dir="rtl"] .ns-eyebrow, html[dir="rtl"] .ns-index-top h2, html[dir="rtl"] .ns-feature-top { letter-spacing: 0; }
 html[dir="rtl"] .ns-arrows button { transform: scaleX(-1); }
 @media(max-width:640px) { html[dir="rtl"] .ns-mast-heading { font-size: 37px; } }
+
+/* Seller funnel: compact prompt behind the buyer inventory; neutral automotive treatment. */
+.site-nav-main .wordmark { margin-inline-end: auto; }
+.ns-main .sell-car-prompt { margin: 16px var(--ns-gutter) 0; padding: clamp(22px, 3vw, 38px); border: 1px solid var(--ns-rule); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px 30px; }
+.ns-main .sell-car-prompt h2 { font-size: clamp(21px, 2.6vw, 31px); font-weight: 850; line-height: 1.12; letter-spacing: -.035em; }
+.ns-main .sell-car-prompt p { color: var(--ns-secondary); margin-top: 8px; font-size: 14px; }
+.ns-main .sell-car-prompt a, .ns-main .sell-car-cta { min-height: 50px; display: inline-flex; align-items: center; justify-content: center; padding: 12px 21px; border: 1px solid var(--ns-lime); background: var(--ns-lime); color: var(--ns-bg); font-size: 12px; font-weight: 800; text-transform: uppercase; text-decoration: none; }
+.ns-main .sell-car-prompt a:hover, .ns-main .sell-car-cta:hover { background: #f2ff81; }
+.ns-main .sell-car-page { max-width: 1220px; margin: 0 auto; padding: clamp(36px, 6vw, 85px) var(--ns-gutter) 75px; }
+.ns-main .sell-car-eyebrow { color: var(--ns-lime); font-size: 12px; letter-spacing: .12em; font-weight: 760; }
+.ns-main .sell-car-page h1 { max-width: 940px; margin-top: 20px; font-size: clamp(45px, 9vw, 112px); line-height: .98; font-weight: 900; letter-spacing: -.065em; }
+.ns-main .sell-car-page .sell-car-description { max-width: 670px; margin-top: 25px; font-size: clamp(17px, 2vw, 22px); line-height: 1.6; color: var(--ns-secondary); }
+.ns-main .sell-car-info { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 22px; margin-top: 46px; }
+.ns-main .sell-car-detail, .ns-main .sell-car-contact { border: 1px solid var(--ns-rule); background: var(--ns-pane); padding: clamp(24px, 3vw, 38px); }
+.ns-main .sell-car-detail h2 { font-size: clamp(22px, 3vw, 33px); line-height: 1.2; }
+.ns-main .sell-car-detail p { margin-top: 15px; color: var(--ns-secondary); line-height: 1.7; }
+.ns-main .sell-car-contact { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 14px; }
+.ns-main .sell-car-contact p { color: var(--ns-secondary); font-size: 13px; line-height: 1.6; }
+.ns-main .sell-car-back { display: inline-flex; margin-top: 33px; min-height: 44px; align-items: center; font-weight: 700; text-decoration: underline; }
+html[dir="rtl"] .ns-main .sell-car-page h1, html[dir="rtl"] .ns-main .sell-car-prompt h2 { letter-spacing: 0; line-height: 1.2; }
+@media (max-width: 700px) { .ns-main .sell-car-info { grid-template-columns: 1fr; } .ns-main .sell-car-prompt a { width: 100%; } }
+@media (max-width: 550px) { .site-header .site-nav.shell { flex-wrap: wrap; row-gap: 0; padding-block: 4px; } .site-header .site-nav-main { width: 100%; flex-basis: 100%; gap: 12px; } .site-header .site-nav .language-switcher { margin-inline-start: auto; } .site-header .nav-sell-link { letter-spacing: 0; } }

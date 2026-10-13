@@ -30,13 +30,15 @@ export type Inquiry =
       /** Language of the page the inquiry starts on; the message is written in it. */
       readonly locale: Locale;
     }
-  | { readonly kind: "general"; readonly locale: Locale };
+  | { readonly kind: "general"; readonly locale: Locale }
+  | { readonly kind: "sell"; readonly locale: Locale };
 
 interface Templates {
   readonly question: (title: string) => string;
   readonly viewing: (title: string) => string;
   readonly testDrive: (title: string) => string;
   readonly general: string;
+  readonly sell: string;
 }
 
 const TEMPLATES: Readonly<Record<Locale, Templates>> = {
@@ -45,18 +47,21 @@ const TEMPLATES: Readonly<Record<Locale, Templates>> = {
     viewing: (title) => `Hi, I'd like to request a viewing for ${title}.`,
     testDrive: (title) => `Hi, I'd like to request a test drive for ${title}.`,
     general: "Hi, I couldn't find the car I'm looking for on the website. Can you help me with current availability?",
+    sell: "Hi! I'd like to sell my car. I can share its make, model, year, mileage and photos.",
   },
   ar: {
     question: (title) => `مرحباً، أود الاستفسار عن ${title}.`,
     viewing: (title) => `مرحباً، أود طلب معاينة ${title}.`,
     testDrive: (title) => `مرحباً، أود طلب تجربة قيادة ${title}.`,
     general: "مرحباً، لم أجد السيارة التي أبحث عنها على الموقع. هل يمكنكم مساعدتي بمعرفة السيارات المتوفرة حالياً؟",
+    sell: "مرحباً، أود بيع سيارتي. يمكنني إرسال الماركة والموديل وسنة الصنع والمسافة المقطوعة والصور.",
   },
   ru: {
     question: (title) => `Здравствуйте, меня интересует ${title}.`,
     viewing: (title) => `Здравствуйте, хочу запросить осмотр автомобиля ${title}.`,
     testDrive: (title) => `Здравствуйте, хочу запросить тест-драйв автомобиля ${title}.`,
     general: "Здравствуйте, мне не удалось найти на сайте нужный автомобиль. Подскажите, пожалуйста, что сейчас есть в наличии?",
+    sell: "Здравствуйте! Хочу продать автомобиль. Могу отправить марку, модель, год, пробег и фотографии.",
   },
 };
 
@@ -93,6 +98,8 @@ export function inquiryMessage(inquiry: Inquiry, origin: string | null, attribut
   if (inquiry.kind === "vehicle") {
     lines.push(vehicleOpening(inquiry.locale, inquiry.intent, inquiry.title));
     if (origin !== null) lines.push("", `${origin}${inquiry.path}`);
+  } else if (inquiry.kind === "sell") {
+    lines.push(TEMPLATES[inquiry.locale].sell);
   } else {
     lines.push(generalRequestMessage(inquiry.locale));
   }

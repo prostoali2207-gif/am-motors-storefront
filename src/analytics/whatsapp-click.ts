@@ -11,7 +11,7 @@ export function recordWhatsAppClick(inquiry: Inquiry): void {
   const dataWindow = window as Window & { dataLayer?: Record<string, string>[] };
   const event: Record<string, string> = {
     event: "am_whatsapp_click",
-    inquiry_type: inquiry.kind === "general" ? "general" : inquiry.intent,
+    inquiry_type: inquiry.kind === "vehicle" ? inquiry.intent : inquiry.kind,
     page_path: window.location.pathname,
   };
   if (inquiry.kind === "vehicle") event.vehicle_id = inquiry.id;

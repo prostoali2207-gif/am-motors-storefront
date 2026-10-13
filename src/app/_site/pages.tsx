@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { GeneralRequest } from "@/components/general-request";
+import { SellCarPrompt } from "@/components/sell-car-prompt";
+import { SellCarPage } from "@/components/sell-car-page";
 import { InventoryList } from "@/components/inventory-list";
 import { InventoryPageHeader } from "@/components/inventory-page-header";
 import { InventoryUnavailable } from "@/components/inventory-unavailable";
@@ -42,6 +44,7 @@ export function homePage(locale: Locale) {
         )}
         {/* General-request inquiry where browsing ends: after the list, the empty or the unavailable state. */}
         <GeneralRequest locale={locale} />
+        <SellCarPrompt locale={locale} />
       </>
     );
   };
@@ -72,6 +75,7 @@ export function carsPage(locale: Locale) {
         )}
         {/* General-request inquiry where browsing ends: after the list, the empty or the unavailable state. */}
         <GeneralRequest locale={locale} />
+        <SellCarPrompt locale={locale} />
       </>
     );
   };
@@ -80,6 +84,18 @@ export function carsPage(locale: Locale) {
 export function carsMetadata(locale: Locale) {
   return async function generateMetadata(): Promise<Metadata> {
     return { title: messages(locale).carsMetaTitle, alternates: await alternates(locale, { kind: "cars" }) };
+  };
+}
+
+export function sellPage(locale: Locale) {
+  return function SellPage() {
+    return <SellCarPage locale={locale} />;
+  };
+}
+
+export function sellMetadata(locale: Locale) {
+  return async function generateMetadata(): Promise<Metadata> {
+    return { title: messages(locale).sellMetaTitle, alternates: await alternates(locale, { kind: "sell" }) };
   };
 }
 

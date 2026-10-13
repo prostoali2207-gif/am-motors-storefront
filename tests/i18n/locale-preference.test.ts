@@ -40,8 +40,8 @@ describe("browser language selection", () => {
     expect(LOCALE_PREFERENCE_COOKIE).toBe("am_site_locale");
   });
 
-  it("limits auto redirects to the three real unprefixed public page shapes", () => {
-    for (const path of ["/", "/cars", "/cars/TEST-0001", "/cars/AM%201%2F2"]) {
+  it("limits auto redirects to known unprefixed public page shapes", () => {
+    for (const path of ["/", "/cars", "/sell-your-car", "/cars/TEST-0001", "/cars/AM%201%2F2"]) {
       expect(isAutoLocalePath(path)).toBe(true);
     }
     for (const path of ["/ar", "/ru/cars", "/ar/cars/TEST-0001", "/favicon.ico", "/robots.txt", "/sitemap.xml", "/media/test", "/api/health", "/cars/TEST-0001/more", "/cars/"]) {
@@ -54,6 +54,7 @@ describe("browser language selection", () => {
     expect(languageSelectionHref("/ar/cars/AM%201%2F2", "ru")).toBe("/ru/cars/AM%201%2F2?__am_lang=ru");
     expect(languageSelectionHref("/ru/cars/TEST-0001", "en")).toBe("/cars/TEST-0001?__am_lang=en");
     expect(languageSelectionHref("/ru", "en")).toBe("/?__am_lang=en");
+    expect(languageSelectionHref("/ar/sell-your-car", "ru")).toBe("/ru/sell-your-car?__am_lang=ru");
     expect(LOCALE_SELECTION_PARAM).toBe("__am_lang");
   });
 });

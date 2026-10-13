@@ -93,6 +93,24 @@ describe("general-request message", () => {
   });
 });
 
+describe("seller WhatsApp inquiries", () => {
+  it("has a separate message in all three languages, no fabricated offer", () => {
+    const english = inquiryMessage({ kind: "sell", locale: "en" }, ORIGIN);
+    expect(english).toContain("sell my car");
+    for (const locale of ["en", "ar", "ru"] as const) {
+      const msg = inquiryMessage({ kind: "sell", locale }, ORIGIN);
+      expect(msg.length).toBeGreaterThan(20);
+      expect(msg).not.toMatch(/AED|valuation|\bprice\b|https:\/\/site\.test\/cars\//i);
+      expect(decodedText(whatsAppUrl(msg))).toBe(msg);
+    }
+  });
+  it("preserves only supplied UTM in seller message", () => {
+    const msg = inquiryMessage({ kind: "sell", locale: "en" }, ORIGIN, { utm_source: "google" });
+    expect(msg).toContain("Source: google");
+    expect(msg).not.toContain("Campaign:");
+  });
+});
+
 describe("attribution block in messages", () => {
   it("is absent when no attribution was received", () => {
     const text = inquiryMessage(vehicleInquiry("viewing"), ORIGIN, {});
