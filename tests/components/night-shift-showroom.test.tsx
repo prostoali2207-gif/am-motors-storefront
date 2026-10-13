@@ -34,6 +34,19 @@ describe("Night Shift photo-first catalog", () => {
     expect(screen.getAllByText("AED 11,111")).toHaveLength(2);
   });
 
+  it("opens the owner-confirmed Google Maps pin rather than a generic showroom search", () => {
+    const { container } = render(
+      <NightShiftShowroom vehicles={vehicles} locale="ru" serverOrigin="https://site.test" />,
+    );
+    const directions = container.querySelector<HTMLAnchorElement>(".ns-showroom-location a");
+    expect(directions?.getAttribute("href")).toBe(
+      "https://maps.app.goo.gl/pQLwiVNf2Qmqxve8A?g_st=ac",
+    );
+    expect(directions?.getAttribute("target")).toBe("_blank");
+    expect(directions?.getAttribute("rel")).toBe("noopener noreferrer");
+    expect(directions?.textContent).toContain("Как проехать");
+  });
+
   it("does not invent images for cars without Website/ media", () => {
     const { container } = render(
       <NightShiftShowroom vehicles={vehicles} locale="ru" serverOrigin="https://site.test" />,
