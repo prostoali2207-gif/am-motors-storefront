@@ -243,14 +243,16 @@ Two types of inbound inquiry (neither is automatically a qualified lead):
   the site. Nothing is sent anywhere except by the visitor's own click and send in WhatsApp.
 - **Vehicle actions (available VDPs only):** WhatsApp (primary), Request a viewing, Request a
   test drive (secondary). Sold VDPs have no inquiry, viewing or test-drive actions.
-- **Prefill templates** (title = public `year make model trim`, ID = public `ID`, URL = the
-  current VDP URL; nothing else — no price, status, condition, finance or promises):
+- **Prefill templates — revised and confirmed 2026-10-13:** title = public
+  `year make model trim`; the exact vehicle URL already carries the public ID. Do not duplicate
+  the ID in the greeting. Keep a blank line before the clickable vehicle URL. No price, status,
+  condition, finance or promises in the prefill.
 
   | Intent | Message |
   | - | - |
-  | General vehicle question | `Hi, I'm interested in [vehicle title] (Ref: [public ID]).`<br>`[vehicle URL]` |
-  | Viewing | `Hi, I'd like to request a viewing for [vehicle title] (Ref: [public ID]).`<br>`[vehicle URL]` |
-  | Test drive | `Hi, I'd like to request a test drive for [vehicle title] (Ref: [public ID]).`<br>`[vehicle URL]` |
+  | General vehicle question | `Hi! I'm interested in the [vehicle title].`<br><br>`[vehicle URL]` |
+  | Viewing | `Hi, I'd like to request a viewing for [vehicle title].`<br><br>`[vehicle URL]` |
+  | Test drive | `Hi, I'd like to request a test drive for [vehicle title].`<br><br>`[vehicle URL]` |
   | General request | `Hi, I couldn't find the car I'm looking for on the website. Can you help me with current availability?` |
 
 - **General request:** heading "Didn't find what you need?" on the homepage and `/cars` after the
