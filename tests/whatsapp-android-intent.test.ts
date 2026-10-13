@@ -11,7 +11,7 @@ const androidChrome =
 
 describe("WhatsApp Messenger Android handoff", () => {
   it("targets regular WhatsApp and retains number and prefilled text", () => {
-    const message = "Здравствуйте, интересует Toyota Yaris (Ref: AM-024).\nhttps://example.com/cars/AM-024?utm_source=google&x=1";
+    const message = "Здравствуйте, интересует Toyota Yaris (Ref: test-vehicle-24).\nhttps://example.com/cars/test-vehicle-24?utm_source=google&x=1";
     const href = whatsAppMessengerIntentUrl(message);
     const encodedMessage = encodeURIComponent(message);
 
