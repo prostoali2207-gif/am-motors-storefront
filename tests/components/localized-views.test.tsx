@@ -83,29 +83,29 @@ describe.each(LOCALES)("available VDP in %s", (locale) => {
     expect(within(zone).getByText(t.actionsHint)).toBeDefined();
   });
 
-  it("prefills WhatsApp in the page language with the unchanged title, Ref ID and localized VDP URL — no price, no mileage", () => {
+  it("prefills WhatsApp in the page language with the unchanged title and localized VDP URL containing its ID — no price, no mileage", () => {
     render(<VehicleDetail locale={locale} vehicle={mapped} serverOrigin="https://site.test" />);
     const zone = screen.getByRole("region", { name: t.actionsHeading });
     const url = `${window.location.origin}${PREFIX[locale]}/cars/TEST-0001`;
     const messages = within(zone).getAllByRole("link").map(prefill);
     const expected: Record<Locale, string[]> = {
       en: [
-        `Hi, I'm interested in ${TITLE} (Ref: TEST-0001).`,
-        `Hi, I'd like to request a viewing for ${TITLE} (Ref: TEST-0001).`,
-        `Hi, I'd like to request a test drive for ${TITLE} (Ref: TEST-0001).`,
+        `Hi! I'm interested in the ${TITLE}.`,
+        `Hi, I'd like to request a viewing for ${TITLE}.`,
+        `Hi, I'd like to request a test drive for ${TITLE}.`,
       ],
       ar: [
-        `مرحباً، أود الاستفسار عن ${TITLE} (Ref: TEST-0001).`,
-        `مرحباً، أود طلب معاينة ${TITLE} (Ref: TEST-0001).`,
-        `مرحباً، أود طلب تجربة قيادة ${TITLE} (Ref: TEST-0001).`,
+        `مرحباً، أود الاستفسار عن ${TITLE}.`,
+        `مرحباً، أود طلب معاينة ${TITLE}.`,
+        `مرحباً، أود طلب تجربة قيادة ${TITLE}.`,
       ],
       ru: [
-        `Здравствуйте, меня интересует ${TITLE} (Ref: TEST-0001).`,
-        `Здравствуйте, хочу запросить осмотр автомобиля ${TITLE} (Ref: TEST-0001).`,
-        `Здравствуйте, хочу запросить тест-драйв автомобиля ${TITLE} (Ref: TEST-0001).`,
+        `Здравствуйте, меня интересует ${TITLE}.`,
+        `Здравствуйте, хочу запросить осмотр автомобиля ${TITLE}.`,
+        `Здравствуйте, хочу запросить тест-драйв автомобиля ${TITLE}.`,
       ],
     };
-    expect(messages).toEqual(expected[locale].map((line) => `${line}\n${url}`));
+    expect(messages).toEqual(expected[locale].map((line) => `${line}\n\n${url}`));
     for (const message of messages) {
       expect(message).not.toMatch(/11[,  ]?111|AED|درهم|22[,  ]?222|km|كم|км/);
     }
@@ -124,7 +124,7 @@ describe.each(LOCALES)("available VDP in %s", (locale) => {
     expect(message).toMatch(/\n\nSource: instagram\nCampaign: reel_a$/);
     expect(message).not.toMatch(/later_touch|gclid|synthetic/);
     // The URL line is the clean localized VDP URL.
-    expect(message.split("\n")[1]).toBe(`${window.location.origin}${PREFIX[locale]}/cars/TEST-0001`);
+    expect(message.split("\n")[2]).toBe(`${window.location.origin}${PREFIX[locale]}/cars/TEST-0001`);
   });
 
   it("publishes no private or internal field", () => {
