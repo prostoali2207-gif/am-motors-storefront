@@ -399,3 +399,14 @@ Ask the user; do not assume answers.
 - When finishing the Google Ads setup, choose **Click**, not **Page load**, for the event trigger. The website records outbound WhatsApp button clicks, not confirmation page views.
 - The browser-facing conversion must be made **Secondary** after the action is created (its Google Ads setup dialog initially preselected Primary and did not allow Secondary).
 - Deployment **not activated**. Vercel project environment variable list/create operations returned HTTP **403 forbidden** on 2026-10-12, and no live or preview variable values were changed. An authorized Vercel project administrator must set both variables for the approved environment and redeploy before validating opt-in and event delivery in the browser. Do not assume the action existing means events are flowing.
+
+
+## Google Ads consent measurement — candidate, 2026-10-13
+
+- The user requested clearer, genuinely persuasive consent copy and a technical trial of Google's **Advanced Consent Mode v2**, because buyers may choose "Decline".
+- **Basic mode remains on Production** until a separate approval: Google tag loads only when a visitor opts in, and sends no requests after a refusal.
+- **Advanced mode is staged only on Vercel Preview** (`VERCEL_ENV=preview`) when the tag IDs are configured. It loads with `ad_storage`, `analytics_storage`, `ad_user_data`, and `ad_personalization` all denied. Google can still receive limited cookieless page and click measurement. `ads_data_redaction=true`; no conversion values, message contents, VIN, customer records or enhanced conversion data sent.
+- The banner **must disclose** cookieless transmission on Advanced deployments. It uses honest "help us understand useful car ads" wording, not pressure, fake benefits or unequal consent rights. Reject, accept and changing a previous decision all remain available.
+- Production launch of Advanced requires explicit privacy/legal sign-off for users in the UAE and relevant other regions, with a public privacy notice describing the Google recipient, purpose, and cookie-free signals; Google Consent Mode configuration is not itself a legal permission.
+- Google Ads states modeling eligibility includes approximately **700 ad clicks per day over seven days per country/domain**; our current 350 AED/14-day campaign should **not** expect modeled conversions. UTM labels in voluntarily sent WhatsApp inquiry text remain a separate, existing source of campaign attribution.
+- Sources: https://developers.google.com/tag-platform/security/concepts/consent-mode ; https://developers.google.com/tag-platform/security/guides/consent ; https://support.google.com/google-ads/answer/10548233 ; https://uaelegislation.gov.ae/en/legislations/1972/download .
