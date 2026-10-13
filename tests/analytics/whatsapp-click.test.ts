@@ -52,6 +52,53 @@ describe("WhatsApp click instrumentation", () => {
     });
   });
 
+  it("in Advanced mode loads with consent denied and keeps limited click measurement after rejection", () => {
+    const browser = { dataLayer: [] as unknown[] };
+    const scripts: { src?: string }[] = [];
+    vi.stubGlobal("window", browser);
+    vi.stubGlobal("document", {
+      head: { appendChild: (script: object) => scripts.push(script) },
+      createElement: () => ({}),
+      querySelector: () => null,
+    });
+
+    // Do not imply that rejected consent prevents all Google network traffic.
+    expect(activateGoogleAdsMeasurement("AW-123456", "Label_ABC", false)).toBe(true);
+    expect(scripts).toHaveLength(1);
+    const commands = () => (browser.dataLayer as IArguments[]).map((cmd) => Array.from(cmd));
+    expect(commands().map((c) => c.slice(0, 2))).toEqual([
+      ["consent", "default"], ["set", "ads_data_redaction"],
+      ["js", expect.any(Date)], ["config", "AW-123456"],
+    ]);
+    expect(commands()[0]?.[2]).toEqual({
+      ad_storage: "denied", analytics_storage: "denied",
+      ad_user_data: "denied", ad_personalization: "denied",
+    });
+    expect(reportGoogleAdsWhatsAppClick()).toBe(true);
+    expect(commands().at(-1)).toEqual([
+      "event", "conversion", { send_to: "AW-123456/Label_ABC" },
+    ]);
+
+    // Opt-in and withdrawal change only storage consent; same tag stays loaded.
+    expect(activateGoogleAdsMeasurement("AW-123456", "Label_ABC", true)).toBe(true);
+    expect(commands().at(-1)?.[0]).toBe("consent");
+    expect(commands().at(-1)?.[2]).toEqual({
+      ad_storage: "granted", analytics_storage: "denied",
+      ad_user_data: "denied", ad_personalization: "denied",
+    });
+    expect(activateGoogleAdsMeasurement("AW-123456", "Label_ABC", false)).toBe(true);
+    expect(commands().at(-1)?.[2]).toEqual({
+      ad_storage: "denied", analytics_storage: "denied",
+      ad_user_data: "denied", ad_personalization: "denied",
+    });
+    const count = commands().length;
+    expect(activateGoogleAdsMeasurement("AW-123456", "Label_ABC", false)).toBe(true);
+    expect(commands()).toHaveLength(count);
+    expect(scripts).toHaveLength(1);
+    expect(activateGoogleAdsMeasurement("AW-222222", "Label_ABC", false)).toBe(false);
+    expect(scripts).toHaveLength(1);
+  });
+
   it("buffers one conversion event only after opt-in and loads the tag once", () => {
     const browser = { dataLayer: [] as unknown[] };
     const scripts: { async?: boolean; src?: string; nonce?: string }[] = [];
@@ -71,9 +118,19 @@ describe("WhatsApp click instrumentation", () => {
     const commands = browser.dataLayer as IArguments[];
     expect(commands.every((command) => Object.prototype.toString.call(command) === "[object Arguments]")).toBe(true);
     expect(commands.map((command) => Array.from(command).slice(0, 2))).toEqual([
-      ["consent", "default"], ["consent", "update"], ["js", expect.any(Date)],
+      ["consent", "default"], ["set", "ads_data_redaction"],
+      ["consent", "update"], ["js", expect.any(Date)],
       ["config", "AW-123456"], ["event", "conversion"],
     ]);
+    expect(Array.from(commands[0] ?? [])[2]).toEqual({
+      ad_storage: "denied", analytics_storage: "denied",
+      ad_user_data: "denied", ad_personalization: "denied",
+    });
+    expect(Array.from(commands[1] ?? [])).toEqual(["set", "ads_data_redaction", true]);
+    expect(Array.from(commands[2] ?? [])[2]).toEqual({
+      ad_storage: "granted", analytics_storage: "denied",
+      ad_user_data: "denied", ad_personalization: "denied",
+    });
     expect(Array.from(commands.at(-1) ?? [])).toEqual([
       "event", "conversion", { send_to: "AW-123456/Label_ABC" },
     ]);
