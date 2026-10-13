@@ -57,7 +57,7 @@ export function NightShiftShowroom({
           <h1 className="ns-mast-heading"><span>{t.first}</span> <em>{t.second}</em></h1>
           <p className="ns-showroom-location">
             <span>Ajman Auto Market · Showroom 171</span>
-            <a href="https://www.google.com/maps/search/?api=1&amp;query=Ajman%20Auto%20Market%20Showroom%20171"
+            <a href="https://maps.app.goo.gl/pQLwiVNf2Qmqxve8A?g_st=ac"
               target="_blank" rel="noopener noreferrer">{t.directions} ↗</a>
           </p>
         </div>
