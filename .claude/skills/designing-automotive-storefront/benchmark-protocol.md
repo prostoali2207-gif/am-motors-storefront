@@ -9,6 +9,10 @@ How to gather evidence before a material design decision.
 - Evidence record format
 - What not to do
 
+## Excellence-discovery route
+
+Before accepting a top/best-in-class reference, use [elite-reference-discovery.md](elite-reference-discovery.md). Search independent channels and actual credited projects, not just the static reference table below. Award, SEO position or brand familiarity only discovers candidates. Task fit and directly observed original artifacts determine whether the mechanism is suitable for a small-stock showroom. Separate observed craft/usability from audited conversion results.
+
 ## Principles
 
 - Study **mechanics** (information order, interaction, trust, conversion), never copy visuals,
@@ -35,7 +39,7 @@ How to gather evidence before a material design decision.
 ## Procedure
 
 1. Write the question precisely ("Where should the primary CTA sit on a mobile VDP?").
-2. Pick 3–5 references most relevant to that question (include ≥1 UAE and ≥1 single-dealer site
+2. Pick a small set of directly inspected references most relevant to that question (normally 3–5; fewer if evidence is weak; include ≥1 UAE and ≥1 single-dealer site
    when applicable).
 3. Observe live pages (browser/Playwright screenshots when available). If a site blocks access,
    say so and mark conclusions as hypothesis.
