@@ -39,12 +39,12 @@ Does not need it: spacing tweaks, copy typo fixes, bug fixes that keep the appro
 
 ### Evidence standard
 
-Follow [benchmark-protocol.md](benchmark-protocol.md). In short: cite the reference site, page type,
+Follow [benchmark-protocol.md](benchmark-protocol.md) together with [elite-reference-discovery.md](elite-reference-discovery.md). Search independent origins beyond the fixed known competitors, inspect original mobile customer journeys, and separate observed visual/UX craft from proven business outcomes. In short: cite the reference site, page type,
 viewport, date observed, and what mechanic it demonstrates. Mark anything you could not observe
 directly as **hypothesis**. Never claim a competitor does something you did not verify. Record
 durable findings in `docs/ux-benchmark.md`.
 
-Benchmark set (study mechanics, never copy visuals): DubiCars, Dubizzle Motors, CARS24 UAE,
+Starter candidate set, **not a preapproved list of elite winners** (study original mechanics, never copy visuals): DubiCars, Dubizzle Motors, CARS24 UAE,
 CarSwitch UAE, CarMax, Carvana, Auto Trader UK, The Elite Cars, Canepa.
 
 ## Page principles
